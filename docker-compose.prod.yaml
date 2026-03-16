@@ -1,0 +1,17 @@
+services:
+    backend:
+        command: npm run start:prod
+        env_file: .env.prod
+
+    admin-back:
+        command: npm run start:prod
+        env_file: .env.prod
+
+    frontend:
+        env_file: .env.prod
+
+    admin-front:
+        env_file: .env.prod
+
+    postgres:
+        env_file: .env.prod

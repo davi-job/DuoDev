@@ -1,0 +1,40 @@
+services:
+    backend:
+        command: npm run start:dev
+        volumes:
+            - ./apps/backend:/app/apps/backend
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/backend/node_modules
+
+    admin-back:
+        command: npm run start:dev
+        volumes:
+            - ./apps/admin/admin-back:/app/apps/admin/admin-back
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/admin/admin-back/node_modules
+
+    frontend:
+        command: npm run dev -- --host
+        stdin_open: true
+        tty: true
+        volumes:
+            - ./apps/frontend:/app/apps/frontend
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/frontend/node_modules
+
+    admin-front:
+        command: npm run dev -- --host
+        stdin_open: true
+        tty: true
+        volumes:
+            - ./apps/admin/admin-front:/app/apps/admin/admin-front
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/admin/admin-front/node_modules
+
+    postgres:
+        ports:
+            - 8030:5432
