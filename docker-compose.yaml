@@ -1,0 +1,106 @@
+networks:
+    db_network:
+        driver: bridge
+    apps_network:
+        driver: bridge
+
+volumes:
+    postgres_data:
+
+services:
+    # =============================
+    #  Backend - (Portas 8010+)
+    # =============================
+    backend:
+        build:
+            context: .
+            dockerfile: apps/backend/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8010:3000
+        env_file: .env
+        volumes:
+            - ./apps/backend:/app/apps/backend
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/backend/node_modules
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - db_network
+            - apps_network
+
+    admin-back:
+        build:
+            context: .
+            dockerfile: apps/admin/admin-back/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8011:3000
+        env_file: .env
+        volumes:
+            - ./apps/admin/admin-back:/app/apps/admin/admin-back
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/admin/admin-back/node_modules
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - db_network
+            - apps_network
+
+    # =============================
+    #  Frontend - (Portas 8020+)
+    # =============================
+    frontend:
+        build:
+            context: .
+            dockerfile: apps/frontend/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8020:3000
+        env_file: .env
+        volumes:
+            - ./apps/frontend:/app/apps/frontend
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/frontend/node_modules
+        networks:
+            - apps_network
+
+    admin-front:
+        build:
+            context: .
+            dockerfile: apps/admin/admin-front/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8021:3000
+        env_file: .env
+        volumes:
+            - ./apps/admin/admin-front:/app/apps/admin/admin-front
+            - ./packages:/app/packages
+            - /app/node_modules
+            - /app/apps/admin/admin-front/node_modules
+        networks:
+            - apps_network
+
+    # =============================
+    #  Utilidades - (Portas 8030+)
+    # =============================
+    postgres:
+        image: postgres:latest
+        restart: always
+        ports:
+            - 8030:5432
+        env_file: .env
+        volumes:
+            - postgres_data:/var/lib/postgresql/
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+            internal: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - db_network
