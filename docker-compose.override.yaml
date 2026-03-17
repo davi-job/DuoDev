@@ -1,5 +1,7 @@
 services:
     backend:
+        build:
+            target: dev
         command: npm run start:dev
         volumes:
             - ./apps/backend:/app/apps/backend
@@ -8,6 +10,8 @@ services:
             - /app/apps/backend/node_modules
 
     admin-back:
+        build:
+            target: dev
         command: npm run start:dev
         volumes:
             - ./apps/admin/admin-back:/app/apps/admin/admin-back
@@ -16,6 +20,8 @@ services:
             - /app/apps/admin/admin-back/node_modules
 
     frontend:
+        build:
+            target: dev
         command: npm run dev -- --host
         stdin_open: true
         tty: true
@@ -26,6 +32,8 @@ services:
             - /app/apps/frontend/node_modules
 
     admin-front:
+        build:
+            target: dev
         command: npm run dev -- --host
         stdin_open: true
         tty: true
