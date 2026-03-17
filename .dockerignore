@@ -5,6 +5,7 @@ node_modules
 .gitignore
 *.md
 .env
+.env.prod
 .env.local
 dist
 build
