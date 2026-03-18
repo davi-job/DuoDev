@@ -1,11 +1,14 @@
+volumes:
+    duodev_dev_data:
+
 services:
     backend:
         build:
             target: dev
         command: npm run start:dev
         volumes:
-            - ./apps/backend:/app/apps/backend
-            - ./packages:/app/packages
+            - ./apps/backend:/app/apps/backend:z
+            - ./packages:/app/packages:z
             - /app/node_modules
             - /app/apps/backend/node_modules
 
@@ -14,8 +17,8 @@ services:
             target: dev
         command: npm run start:dev
         volumes:
-            - ./apps/admin/admin-back:/app/apps/admin/admin-back
-            - ./packages:/app/packages
+            - ./apps/admin/admin-back:/app/apps/admin/admin-back:z
+            - ./packages:/app/packages:z
             - /app/node_modules
             - /app/apps/admin/admin-back/node_modules
 
@@ -26,8 +29,8 @@ services:
         stdin_open: true
         tty: true
         volumes:
-            - ./apps/frontend:/app/apps/frontend
-            - ./packages:/app/packages
+            - ./apps/frontend:/app/apps/frontend:z
+            - ./packages:/app/packages:z
             - /app/node_modules
             - /app/apps/frontend/node_modules
 
@@ -38,11 +41,13 @@ services:
         stdin_open: true
         tty: true
         volumes:
-            - ./apps/admin/admin-front:/app/apps/admin/admin-front
-            - ./packages:/app/packages
+            - ./apps/admin/admin-front:/app/apps/admin/admin-front:z
+            - ./packages:/app/packages:z
             - /app/node_modules
             - /app/apps/admin/admin-front/node_modules
 
     postgres:
         ports:
             - 8030:5432
+        volumes:
+            - duodev_dev_data:/var/lib/postgresql/

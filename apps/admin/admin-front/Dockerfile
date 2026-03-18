@@ -11,7 +11,7 @@ RUN npm install
 FROM base AS dev
 WORKDIR /app/apps/admin/admin-front
 
-EXPOSE 3000
+EXPOSE 5173
 CMD ["npm", "run", "dev", "--", "--host"]
 
 # Stage 3: Builder
