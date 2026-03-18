@@ -1,32 +1,52 @@
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function AuthLayout() {
+    const location = useLocation();
+    const isLoginPage = location.pathname === '/login';
+
     return (
-        <div className="grid min-h-screen grid-cols-2 antialiased">
-            <div className="border-foreground/5 bg-muted text-muted-foreground flex h-full flex-col justify-between border-r p-10">
-                <div className="flex items-center gap-3 text-lg font-medium">
-                    
-                </div>
+        <div className="relative min-h-screen overflow-hidden">
+            {/* Painel verde */}
+            <motion.div
+                className="absolute top-0 left-0 w-1/2 h-full bg-[#9EEA6C] flex items-center justify-center z-20"
+                animate={{
+                    x: isLoginPage ? '0%' : '100%',
+                }}
+                transition={{
+                    type: 'spring',
+                    stiffness: 80,
+                    damping: 18,
+                }}
+            >
+                <h2 className="text-4xl font-bold text-white">duodev</h2>
+            </motion.div>
 
-                <div>
-                    <h2 className="text-center text-xl mb-3">
-                        Os melhores temas para <span className="font-bold text-rose-400">presentear</span> alguém
-                    </h2>
-
-                    <div className="max-w-lg mx-auto">
-                        
-                    </div>
-                </div>
-
-                <footer className="text-sm">
-                    A melhor forma de presentear alguém &copy; <span className="font-bold text-rose-400">lovezao</span>{' '}
-                    - {new Date().getFullYear()}
-                </footer>
-            </div>
-
-            <div className="relative flex flex-col items-center justify-center">
-                <Outlet />
-            </div>
+            {/* Formulário */}
+            <motion.div
+                className="absolute top-0 left-1/2 w-1/2 h-full flex items-center justify-center z-10"
+                animate={{
+                    x: isLoginPage ? '0%' : '-100%',
+                }}
+                transition={{
+                    type: 'spring',
+                    stiffness: 80,
+                    damping: 18,
+                }}
+            >
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full max-w-md"
+                    >
+                        <Outlet />
+                    </motion.div>
+                </AnimatePresence>
+            </motion.div>
         </div>
     );
 }
