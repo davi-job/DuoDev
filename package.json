@@ -1,26 +1,32 @@
 {
-	"name": "duodev",
-	"private": "true",
-	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/davi-job/DuoDev.git"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"type": "commonjs",
-	"bugs": {
-		"url": "https://github.com/davi-job/DuoDev/issues"
-	},
-	"homepage": "https://github.com/davi-job/DuoDev#readme",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	]
+    "name": "duodev",
+    "private": "true",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "docker compose up",
+        "dev:build": "docker compose up --build",
+        "dev:down": "docker compose down",
+        "prod": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d",
+        "prod:build": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build",
+        "prod:down": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/davi-job/DuoDev.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/davi-job/DuoDev/issues"
+    },
+    "homepage": "https://github.com/davi-job/DuoDev#readme",
+    "workspaces": [
+        "apps/*",
+        "apps/admin/*",
+        "packages/*"
+    ]
 }
