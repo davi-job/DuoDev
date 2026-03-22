@@ -1,0 +1,79 @@
+networks:
+    db_network:
+        driver: bridge
+    apps_network:
+        driver: bridge
+
+services:
+    # =============================
+    #  Backend - (Portas 8010+)
+    # =============================
+    backend:
+        build:
+            context: .
+            dockerfile: apps/backend/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8010:3000
+        env_file: .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - db_network
+            - apps_network
+
+    admin-back:
+        build:
+            context: .
+            dockerfile: apps/admin/admin-back/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8011:3000
+        env_file: .env
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - db_network
+            - apps_network
+
+    # =============================
+    #  Frontend - (Portas 8020+)
+    # =============================
+    frontend:
+        build:
+            context: .
+            dockerfile: apps/frontend/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8020:5173
+        env_file: .env
+        networks:
+            - apps_network
+
+    admin-front:
+        build:
+            context: .
+            dockerfile: apps/admin/admin-front/Dockerfile
+        restart: unless-stopped
+        ports:
+            - 8021:5173
+        env_file: .env
+        networks:
+            - apps_network
+
+    # =============================
+    #  Utilidades - (Portas 8030+)
+    # =============================
+    postgres:
+        image: postgres:18
+        restart: always
+        env_file: .env
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - db_network
