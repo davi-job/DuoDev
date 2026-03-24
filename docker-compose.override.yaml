@@ -1,5 +1,13 @@
 volumes:
     duodev_dev_data:
+    backend_node_modules:
+    backend_app_node_modules:
+    admin_back_node_modules:
+    admin_back_app_node_modules:
+    frontend_node_modules:
+    frontend_app_node_modules:
+    admin_front_node_modules:
+    admin_front_app_node_modules:
 
 services:
     backend:
@@ -9,8 +17,8 @@ services:
         volumes:
             - ./apps/backend:/app/apps/backend:z
             - ./packages:/app/packages:z
-            - /app/node_modules
-            - /app/apps/backend/node_modules
+            - backend_node_modules:/app/node_modules
+            - backend_app_node_modules:/app/apps/backend/node_modules
 
     admin-back:
         build:
@@ -19,8 +27,8 @@ services:
         volumes:
             - ./apps/admin/admin-back:/app/apps/admin/admin-back:z
             - ./packages:/app/packages:z
-            - /app/node_modules
-            - /app/apps/admin/admin-back/node_modules
+            - admin_back_node_modules:/app/node_modules
+            - admin_back_app_node_modules:/app/apps/admin/admin-back/node_modules
 
     frontend:
         build:
@@ -31,8 +39,8 @@ services:
         volumes:
             - ./apps/frontend:/app/apps/frontend:z
             - ./packages:/app/packages:z
-            - /app/node_modules
-            - /app/apps/frontend/node_modules
+            - frontend_node_modules:/app/node_modules
+            - frontend_app_node_modules:/app/apps/frontend/node_modules
 
     admin-front:
         build:
@@ -43,8 +51,8 @@ services:
         volumes:
             - ./apps/admin/admin-front:/app/apps/admin/admin-front:z
             - ./packages:/app/packages:z
-            - /app/node_modules
-            - /app/apps/admin/admin-front/node_modules
+            - admin_front_node_modules:/app/node_modules
+            - admin_front_app_node_modules:/app/apps/admin/admin-front/node_modules
 
     postgres:
         ports:
