@@ -1,0 +1,40 @@
+header {
+    width: 100%;
+    border-bottom: 2px solid var(--border-primary);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 1.5rem 2rem;
+}
+
+header .title h4 {
+    display: flex;
+    gap: 0.5rem;
+
+    margin-bottom: 0.5rem;
+}
+
+header button {
+    display: flex;
+    gap: 0.5rem;
+
+    padding: 0.75rem 2rem;
+
+    color: var(--bg-primary);
+    background-color: var(--accent);
+
+    font-weight: 900;
+
+    border: none;
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+header button:hover {
+    color: var(--text-primary);
+    background-color: var(--accent-mid);
+}

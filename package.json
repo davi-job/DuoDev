@@ -8,6 +8,7 @@
         "dev": "docker compose up",
         "dev:build": "docker compose up --build",
         "dev:down": "docker compose down",
+        "dev:down:v": "docker compose down -v",
         "prod": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d",
         "prod:build": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build",
         "prod:down": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down"

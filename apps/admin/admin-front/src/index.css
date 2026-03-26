@@ -1,33 +1,45 @@
 :root {
-    --text: #6b6375;
-    --text-h: #08060d;
-    --bg: #fff;
-    --border: #e5e4e7;
-    --code-bg: #f4f3ec;
-    --accent: #aa3bff;
-    --accent-bg: rgba(170, 59, 255, 0.1);
-    --accent-border: rgba(170, 59, 255, 0.5);
-    --social-bg: rgba(244, 243, 236, 0.5);
-    --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-}
+    /* ─── Backgrounds ─── */
+    --bg-primary: #0a0c10;
+    --bg-secondary: #111318;
+    --bg-tertiary: #181b22;
+    --bg-card: #14161c;
+    --bg-hover: #1c1f28;
+    --bg-sidebar: #0d0f14;
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text: #9ca3af;
-        --text-h: #f3f4f6;
-        --bg: #16171d;
-        --border: #2e303a;
-        --code-bg: #1f2028;
-        --accent: #c084fc;
-        --accent-bg: rgba(192, 132, 252, 0.15);
-        --accent-border: rgba(192, 132, 252, 0.5);
-        --social-bg: rgba(47, 48, 58, 0.5);
-        --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-    }
+    /* ─── Borders ─── */
+    --border-primary: #1e222b;
+    --border-subtle: #161920;
 
-    #social .button-icon {
-        filter: invert(1) brightness(2);
-    }
+    /* ─── Text ─── */
+    --text-primary: #e8ecf4;
+    --text-secondary: #8b92a5;
+    --text-tertiary: #555c6e;
+
+    /* ─── Accent ─── */
+    --accent: #9eea6c;
+    --accent-dim: rgba(158, 234, 108, 0.08);
+    --accent-mid: rgba(158, 234, 108, 0.15);
+
+    /* ─── Semantic ─── */
+    --danger: #ef4444;
+    --danger-dim: rgba(239, 68, 68, 0.1);
+    --warning: #f59e0b;
+    --warning-dim: rgba(245, 158, 11, 0.1);
+
+    /* ─── Category Accent Colors ─── */
+    /*
+    #3CEFB0  — Mint Green
+    #F7DF1E  — JavaScript Yellow
+    #5B9BD5  — Soft Blue
+    #C792EA  — Lavender Purple
+    #61DAFB  — React Cyan
+    #FF8A65  — Warm Orange
+    #3178C6  — TypeScript Blue
+    #FF6B9D  — Hot Pink
+    #A3E635  — Lime Green
+    #FB923C  — Tangerine
+  */
 }
 
 * {
@@ -43,8 +55,8 @@ html {
 }
 
 body {
-    color: var(--text);
-    background: var(--bg);
+    color: var(--text-primary);
+    background: var(--bg-primary);
 
     font-size: 1.6rem;
     font-weight: 400;
@@ -54,4 +66,31 @@ body {
 
 #root {
     display: flex;
+}
+
+h2 {
+    font-size: 1.75rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+h4 {
+    font-size: 0.75rem;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color: var(--text-tertiary);
+}
+
+.title_divider {
+    color: var(--accent);
+}
+
+main {
+    width: 100%;
+    height: 100dvh;
 }
