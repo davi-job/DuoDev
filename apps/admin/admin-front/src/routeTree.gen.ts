@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as modulesTrilhasRouteImport } from './routes/(modules)/Trilhas'
 import { Route as modulesCategoriasRouteImport } from './routes/(modules)/Categorias'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const modulesTrilhasRoute = modulesTrilhasRouteImport.update({
+  id: '/(modules)/Trilhas',
+  path: '/Trilhas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const modulesCategoriasRoute = modulesCategoriasRouteImport.update({
@@ -26,27 +32,31 @@ const modulesCategoriasRoute = modulesCategoriasRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Categorias': typeof modulesCategoriasRoute
+  '/Trilhas': typeof modulesTrilhasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Categorias': typeof modulesCategoriasRoute
+  '/Trilhas': typeof modulesTrilhasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(modules)/Categorias': typeof modulesCategoriasRoute
+  '/(modules)/Trilhas': typeof modulesTrilhasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Categorias'
+  fullPaths: '/' | '/Categorias' | '/Trilhas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Categorias'
-  id: '__root__' | '/' | '/(modules)/Categorias'
+  to: '/' | '/Categorias' | '/Trilhas'
+  id: '__root__' | '/' | '/(modules)/Categorias' | '/(modules)/Trilhas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   modulesCategoriasRoute: typeof modulesCategoriasRoute
+  modulesTrilhasRoute: typeof modulesTrilhasRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(modules)/Trilhas': {
+      id: '/(modules)/Trilhas'
+      path: '/Trilhas'
+      fullPath: '/Trilhas'
+      preLoaderRoute: typeof modulesTrilhasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(modules)/Categorias': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   modulesCategoriasRoute: modulesCategoriasRoute,
+  modulesTrilhasRoute: modulesTrilhasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
