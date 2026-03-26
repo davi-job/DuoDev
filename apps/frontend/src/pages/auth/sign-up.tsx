@@ -6,12 +6,14 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router';
 import { Lock, Eye, AtSign, EyeOff, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
 
 const signUpForm = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-    email: z.string().email('Email inválido'),
+    email: z.email('Email inválido'),
     password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
@@ -26,6 +28,7 @@ export function SignUp() {
         handleSubmit,
         formState: { isSubmitting, errors },
     } = useForm<SignUpForm>({
+        resolver: zodResolver(signUpForm),
         defaultValues: {
             email: '',
             password: '',
@@ -38,11 +41,11 @@ export function SignUp() {
             // const response = await register({ email: data.email, password: data.password, name: data.name });
             console.log(data);
             toast.success('Cadastro realizado com sucesso!');
-            navigate('/login');
+            // navigate('/login');
         } catch {
             toast.error('Erro ao fazer cadastro');
         }
-    }
+    }    
 
     return (
         <div className="p-8">
@@ -75,13 +78,12 @@ export function SignUp() {
                                 id="name"
                                 type="text"
                                 placeholder="Digite seu nome completo"
-                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-4 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('name')}
                             />
                         </div>
                         {errors.name && <span className="text-xs text-red-500">{errors.name.message}</span>}
                     </motion.div>
-
                     <motion.div
                         className="space-y-2"
                         initial={{ opacity: 0, y: 20 }}
@@ -95,13 +97,12 @@ export function SignUp() {
                                 id="email"
                                 type="email"
                                 placeholder="email@aluno.unifapce.edu.br"
-                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-4 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('email')}
                             />
                         </div>
                         {errors.email && <span className="text-xs text-red-500">{errors.email.message}</span>}
                     </motion.div>
-
                     <motion.div
                         className="space-y-2"
                         initial={{ opacity: 0, y: 20 }}
@@ -115,7 +116,7 @@ export function SignUp() {
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Digite sua senha (mínimo 6 caracteres)"
-                                className="pl-10 pr-10 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-10 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('password')}
                             />
                             {showPassword ? (
@@ -147,11 +148,10 @@ export function SignUp() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <Button className="w-full" variant={'green'} disabled={isSubmitting}>
+                        <Button className="w-full" disabled={isSubmitting}>
                             Criar conta agora
                         </Button>
                     </motion.div>
-
                     <motion.div
                         className="flex justify-center flex-col gap-2 items-center"
                         initial={{ opacity: 0 }}
@@ -166,6 +166,8 @@ export function SignUp() {
                         </Link>
                         <span className="text-xs text-[#244C4E]">Suas informações estão protegidas</span>
                     </motion.div>
+
+                    <CloudflareCheck />
                 </form>
             </div>
         </div>

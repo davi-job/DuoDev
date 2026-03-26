@@ -7,11 +7,16 @@ export function AuthLayout() {
 
     return (
         <div className="relative min-h-screen overflow-hidden">
-            {/* Painel verde */}
+            
             <motion.div
-                className="absolute top-0 left-0 w-1/2 h-full bg-[#9EEA6C] flex items-center justify-center z-20"
-                animate={{
-                    x: isLoginPage ? '0%' : '100%',
+                className={[
+                    
+                    'relative w-full h-48 bg-[#9EEA6C] flex items-center justify-center z-20',
+                    
+                    'md:absolute md:top-0 md:left-0 md:w-1/2 md:h-full',
+                ].join(' ')}
+                animate={{                    
+                    x: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : isLoginPage ? '0%' : '100%',
                 }}
                 transition={{
                     type: 'spring',
@@ -21,12 +26,14 @@ export function AuthLayout() {
             >
                 <h2 className="text-4xl font-bold text-white">duodev</h2>
             </motion.div>
-
-            {/* Formulário */}
+            
             <motion.div
-                className="absolute top-0 left-1/2 w-1/2 h-full flex items-center justify-center z-10"
+                className={[                    
+                    'relative w-full max-w-full flex-1 flex items-center justify-center z-10  px-0',                    
+                    'md:absolute md:top-0 md:left-1/2 md:w-1/2 md:h-full md:py-0 md:px-0',
+                ].join(' ')}
                 animate={{
-                    x: isLoginPage ? '0%' : '-100%',
+                    x: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : isLoginPage ? '0%' : '-100%',
                 }}
                 transition={{
                     type: 'spring',

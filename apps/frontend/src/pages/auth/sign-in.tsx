@@ -8,9 +8,11 @@ import { Link, useNavigate } from 'react-router';
 import { Lock, Eye, AtSign, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const signInForm = z.object({
-    email: z.string().email(),
+    email: z.email('E-mail inválido'),
     password: z.string(),
 });
 
@@ -25,6 +27,7 @@ export function SignIn() {
         handleSubmit,
         formState: { isSubmitting },
     } = useForm<SignInForm>({
+        resolver: zodResolver(signInForm),
         defaultValues: {
             email: '',
             password: '',
@@ -40,11 +43,11 @@ export function SignIn() {
         } catch {
             toast.error('Erro ao fazer login');
         }
-    }
+    }    
 
     return (
         <div className="p-8">
-            <div className="flex w-[350px] flex-col justify-center gap-6">
+            <div className="flex w-87.5 flex-col justify-center gap-6">
                 <motion.div
                     className="flex flex-col"
                     initial={{ opacity: 0, x: -20 }}
@@ -73,7 +76,7 @@ export function SignIn() {
                                 id="email"
                                 type="email"
                                 placeholder="email@aluno.unifapce.edu.br"
-                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('email')}
                             />
                         </div>
@@ -92,7 +95,7 @@ export function SignIn() {
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Digite sua senha"
-                                className="pl-10 pr-10 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-10 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('password')}
                             />
                             {showPassword ? (
@@ -114,7 +117,7 @@ export function SignIn() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                     >
-                        <Button className="w-full" variant={'green'} disabled={isSubmitting}>
+                        <Button className="w-full" disabled={isSubmitting}>
                             Entrar agora
                         </Button>
                     </motion.div>
@@ -132,6 +135,7 @@ export function SignIn() {
                             Criar conta agora
                         </Link>
                     </motion.div>
+                    <CloudflareCheck />
                 </form>
             </div>
         </div>
