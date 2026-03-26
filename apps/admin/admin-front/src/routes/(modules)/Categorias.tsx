@@ -3,6 +3,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import MesaDeDados from '../../components/MesaDeDados';
 import ModuleHeader from '../../components/ModuleHeader';
 
+import './Categorias.css';
+
 export const Route = createFileRoute('/(modules)/Categorias')({
     component: Categorias,
 });
@@ -17,7 +19,9 @@ function Categorias() {
                 btnOnClick={() => console.log('Clicked')}
             />
 
-            <MesaDeDados />
+            <section className="data">
+                <MesaDeDados />
+            </section>
         </>
     );
 }

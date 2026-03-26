@@ -1,43 +1,43 @@
+import BotaoAcoes from './BotaoAcoes';
 import './MesaDeDados.css';
+import StatusPill from './StatusPill';
+
+const dadosTeste = {
+    headers: ['CATEGORIA', 'STATUS', 'TRILHAS', 'CLASSES', 'QUESTÕES', 'AÇÕES'],
+    data: [
+        ['FrontEnd', <StatusPill cor="verde" texto="Publicado" />, 3, 34, 59],
+        ['BackEnd', <StatusPill cor="amarelo" texto="Rascunho" />, 1, 12, 23],
+        ['Segurança', <StatusPill cor="vermelho" texto="Revisão" />, 5, 82, 123],
+        ['Segurança', <StatusPill cor="verde" texto="Publicado" />, 2, 90, 46],
+        ['Segurança', <StatusPill cor="azul" texto="Arquivado" />, 4, 67, 82],
+    ],
+};
 
 function MesaDeDados() {
     return (
         <table>
             <thead>
                 <tr>
-                    <th>Categoria</th>
-                    <th>Status</th>
-                    <th>Trilhas</th>
-                    <th>Classes</th>
-                    <th>Questões</th>
-                    <th>Ações</th>
+                    {dadosTeste.headers.map((header, i) => (
+                        <th key={i}>
+                            <h4>{header}</h4>
+                        </th>
+                    ))}
                 </tr>
             </thead>
 
             <tbody>
-                <tr>
-                    <th>Frontend</th>
-                    <th>Publicado</th>
-                    <th>3</th>
-                    <th>34</th>
-                    <th>59</th>
-                </tr>
+                {dadosTeste.data.map((row, i) => (
+                    <tr key={i}>
+                        {row.map((cell, j) => (
+                            <td key={j}>{cell}</td>
+                        ))}
 
-                <tr>
-                    <th>Backend</th>
-                    <th>Rascunho</th>
-                    <th>1</th>
-                    <th>12</th>
-                    <th>23</th>
-                </tr>
-
-                <tr>
-                    <th>Segurança</th>
-                    <th>Publicado</th>
-                    <th>5</th>
-                    <th>82</th>
-                    <th>123</th>
-                </tr>
+                        <td>
+                            <BotaoAcoes />
+                        </td>
+                    </tr>
+                ))}
             </tbody>
         </table>
     );
