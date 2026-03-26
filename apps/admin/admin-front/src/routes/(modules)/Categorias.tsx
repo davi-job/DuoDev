@@ -5,6 +5,7 @@ import ModuleHeader from '../../components/ModuleHeader';
 import StatusPill from '../../components/StatusPill';
 
 import './Categorias.css';
+import DataBox from '../../components/DataBox';
 
 export const Route = createFileRoute('/(modules)/Categorias')({
     component: Categorias,
@@ -21,6 +22,12 @@ function Categorias() {
             />
 
             <section className="data">
+                <div className="boxList">
+                    <DataBox titulo="TOTAL DE CATEGORIAS" valor="5" texto="2 Publicadas" />
+                    <DataBox titulo="TOTAL DE TRILHAS" valor="15" texto="Em todas as categorias" />
+                    <DataBox titulo="TOTAL DE AULAS" valor="285" texto="Média de 57 por categoria" />
+                    <DataBox titulo="TOTAL DE QUESTÕES" valor="333" texto="Média de 67 por categoria" />
+                </div>
                 <MesaDeDados
                     headers={['CATEGORIA', 'STATUS', 'TRILHAS', 'CLASSES', 'QUESTÕES', 'AÇÕES']}
                     data={[
