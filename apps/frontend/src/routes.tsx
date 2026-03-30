@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router';
 import { AuthLayout } from './pages/_layouts/auth';
 import { SignIn } from './pages/auth/sign-in';
 import { SignUp } from './pages/auth/sign-up';
+import { LanguageSelect } from './pages/apps/LanguageSelect';
 
 
 
@@ -21,4 +22,9 @@ export const router = createBrowserRouter([
             },
         ],
     },   
+    {
+        path: '/selecionar-linguagem',
+        element: <LanguageSelect />,
+       
+    },  
 ]);
