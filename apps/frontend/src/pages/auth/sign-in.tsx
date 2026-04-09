@@ -10,9 +10,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
 import { zodResolver } from '@hookform/resolvers/zod'
+import axios from 'axios';
 
 const signInForm = z.object({
-    email: z.email('E-mail inválido'),
+    email: z.string().email('E-mail inválido'),
     password: z.string(),
 });
 
@@ -36,12 +37,19 @@ export function SignIn() {
 
     async function handleSignIn(data: SignInForm) {
         try {
-            // const response = await login({ email: data.email, password: data.password });
-            console.log(data);
+            const response = await axios.post('http://localhost:3000/auth/login', {
+                email: data.email,
+                password: data.password,
+            });
+            localStorage.setItem('access_token', response.data.access_token);
             toast.success('Login feito com sucesso');
             navigate('/');
-        } catch {
-            toast.error('Erro ao fazer login');
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data.message || 'Erro ao fazer login');
+            } else {
+                toast.error('Erro ao fazer login');
+            }
         }
     }    
 

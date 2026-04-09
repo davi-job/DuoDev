@@ -6,15 +6,22 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router';
 import { Lock, Eye, AtSign, EyeOff, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
+import axios from 'axios';
 
 const signUpForm = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-    email: z.email('Email inválido'),
-    password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+    email: z.string().email('Email inválido'),
+    password: z
+        .string()
+        .min(8, 'Senha deve ter pelo menos 8 caracteres')
+        .regex(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            'Senha deve conter maiúscula, minúscula, número e caractere especial',
+        ),
 });
 
 type SignUpForm = z.infer<typeof signUpForm>;
@@ -38,12 +45,19 @@ export function SignUp() {
 
     async function handleSignUp(data: SignUpForm) {
         try {
-            // const response = await register({ email: data.email, password: data.password, name: data.name });
-            console.log(data);
+            await axios.post('http://localhost:3000/auth/register', {
+                name: data.name,
+                email: data.email,
+                password: data.password,
+            });
             toast.success('Cadastro realizado com sucesso!');
-            // navigate('/login');
-        } catch {
-            toast.error('Erro ao fazer cadastro');
+            navigate('/login');
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data.message || 'Erro ao fazer cadastro');
+            } else {
+                toast.error('Erro ao fazer cadastro');
+            }
         }
     }    
 
