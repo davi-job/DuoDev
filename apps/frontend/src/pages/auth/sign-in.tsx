@@ -22,6 +22,7 @@ type SignInForm = z.infer<typeof signInForm>;
 export function SignIn() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
@@ -36,7 +37,16 @@ export function SignIn() {
     });
 
     async function handleSignIn(data: SignInForm) {
+
+        const token = (window as any).turnstileToken;
+
+        if (!token) {
+            toast.error('Por favor, complete a verificação de segurança');
+            return;
+        }
+
         try {
+            
             const response = await axios.post('http://localhost:3000/auth/login', {
                 email: data.email,
                 password: data.password,
@@ -125,7 +135,7 @@ export function SignIn() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting}>
+                        <Button className="w-full" disabled={isSubmitting || !cfVerified}>
                             Entrar agora
                         </Button>
                     </motion.div>
@@ -143,7 +153,7 @@ export function SignIn() {
                             Criar conta agora
                         </Link>
                     </motion.div>
-                    <CloudflareCheck />
+                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
                 </form>
             </div>
         </div>

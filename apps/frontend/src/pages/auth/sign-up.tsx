@@ -26,13 +26,23 @@ const signUpForm = z.object({
 
 type SignUpForm = z.infer<typeof signUpForm>;
 
+const passwordRules = [
+    { id: 'len', label: 'Mínimo de 8 caracteres', test: (v: string) => v.length >= 8 },
+    { id: 'upper', label: 'Letra maiúscula', test: (v: string) => /[A-Z]/.test(v) },
+    { id: 'lower', label: 'Letra minúscula', test: (v: string) => /[a-z]/.test(v) },
+    { id: 'num', label: 'Número', test: (v: string) => /\d/.test(v) },
+    { id: 'sym', label: 'Símbolo especial (%, &, $, #...)', test: (v: string) => /[@$!%*?&#]/.test(v) },
+];
+
 export function SignUp() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
         handleSubmit,
+        watch,
         formState: { isSubmitting, errors },
     } = useForm<SignUpForm>({
         resolver: zodResolver(signUpForm),
@@ -43,7 +53,17 @@ export function SignUp() {
         },
     });
 
+    const password = watch('password') ?? '';
+    const allRulesPassed = passwordRules.every((r) => r.test(password));
+
     async function handleSignUp(data: SignUpForm) {
+        const token = (window as any).turnstileToken;
+
+        if (!token) {
+            toast.error('Por favor, complete a verificação de segurança');
+            return;
+        }
+
         try {
             await axios.post('http://localhost:3000/auth/register', {
                 name: data.name,
@@ -51,7 +71,7 @@ export function SignUp() {
                 password: data.password,
             });
             toast.success('Cadastro realizado com sucesso!');
-            navigate('/login');
+            navigate('/digitar-codigo', { state: { email: data.email } });
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || 'Erro ao fazer cadastro');
@@ -59,7 +79,7 @@ export function SignUp() {
                 toast.error('Erro ao fazer cadastro');
             }
         }
-    }    
+    }
 
     return (
         <div className="p-8">
@@ -92,12 +112,13 @@ export function SignUp() {
                                 id="name"
                                 type="text"
                                 placeholder="Digite seu nome completo"
-                                className="pl-10 pr-4 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('name')}
                             />
                         </div>
                         {errors.name && <span className="text-xs text-red-500">{errors.name.message}</span>}
                     </motion.div>
+
                     <motion.div
                         className="space-y-2"
                         initial={{ opacity: 0, y: 20 }}
@@ -111,12 +132,13 @@ export function SignUp() {
                                 id="email"
                                 type="email"
                                 placeholder="email@aluno.unifapce.edu.br"
-                                className="pl-10 pr-4 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-4 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('email')}
                             />
                         </div>
                         {errors.email && <span className="text-xs text-red-500">{errors.email.message}</span>}
                     </motion.div>
+
                     <motion.div
                         className="space-y-2"
                         initial={{ opacity: 0, y: 20 }}
@@ -130,7 +152,7 @@ export function SignUp() {
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Digite sua senha (mínimo 6 caracteres)"
-                                className="pl-10 pr-10 bg-gray-100 border border-gray-200  focus:ring-2 focus:ring-gray-300 focus:outline-none"
+                                className="pl-10 pr-10 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('password')}
                             />
                             {showPassword ? (
@@ -146,14 +168,27 @@ export function SignUp() {
                             )}
                         </div>
 
-                        <span className=" text-[#244C4E] text-[10px] leading-none">
-                            <span className="text-[#204749]">Requisitos para a senha são:</span>{' '}
-                            <span className="text-[#B2B5BD]">Mínimo de 8 caracteres</span> ,{' '}
-                            <span className="text-[#B2B5BD]">símbolos especiais como (%, &, $, #)</span>,{' '}
-                            <span className="text-[#B2B5BD]">letras maiúsculas</span>,{' '}
-                            <span className="text-[#B2B5BD]">letras minúsculas</span> e{' '}
-                            <span className="text-[#B2B5BD]">número</span>.
-                        </span>
+                        <div className="flex flex-col gap-1">
+                            {passwordRules.map((rule) => {
+                                const ok = rule.test(password);
+                                return (
+                                    <span
+                                        key={rule.id}
+                                        className={`flex items-center gap-1.5 text-[10px] leading-none transition-colors duration-200 ${
+                                            ok ? 'text-[#6ECC30]' : 'text-[#B2B5BD]'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-200 ${
+                                                ok ? 'bg-[#6ECC30]' : 'bg-[#B2B5BD]'
+                                            }`}
+                                        />
+                                        {rule.label}
+                                    </span>
+                                );
+                            })}
+                        </div>
+
                         {errors.password && <span className="text-xs text-red-500">{errors.password.message}</span>}
                     </motion.div>
 
@@ -162,10 +197,11 @@ export function SignUp() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting}>
+                        <Button className="w-full" disabled={isSubmitting || !allRulesPassed}>
                             Criar conta agora
                         </Button>
                     </motion.div>
+
                     <motion.div
                         className="flex justify-center flex-col gap-2 items-center"
                         initial={{ opacity: 0 }}
@@ -181,7 +217,7 @@ export function SignUp() {
                         <span className="text-xs text-[#244C4E]">Suas informações estão protegidas</span>
                     </motion.div>
 
-                    <CloudflareCheck />
+                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
                 </form>
             </div>
         </div>

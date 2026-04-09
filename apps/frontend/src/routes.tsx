@@ -5,11 +5,11 @@ import { SignUp } from './pages/auth/sign-up';
 import { LanguageSelect } from './pages/apps/LanguageSelect';
 import { InterestSelection } from './pages/apps/InterestSelection';
 import { SuccessPage } from './pages/apps/SuccessPage';
+import { TypeCode } from './pages/auth/type-code';
 
 
 
 export const router = createBrowserRouter([
-
     {
         path: '/',
         element: <AuthLayout />,
@@ -22,14 +22,17 @@ export const router = createBrowserRouter([
                 path: '/cadastrar',
                 element: <SignUp />,
             },
+            {
+                path: '/digitar-codigo',
+                element: <TypeCode />,
+            },
         ],
-    },   
+    },
     {
         path: '/selecionar-linguagem',
         element: <LanguageSelect />,
-       
     },
-    
+
     {
         path: '/formulario-interesse',
         element: <InterestSelection />,
