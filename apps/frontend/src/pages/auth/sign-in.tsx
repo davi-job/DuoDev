@@ -43,7 +43,7 @@ export function SignIn() {
             });
             localStorage.setItem('access_token', response.data.access_token);
             toast.success('Login feito com sucesso');
-            navigate('/');
+            navigate('/selecionar-linguagem');
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || 'Erro ao fazer login');
