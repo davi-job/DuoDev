@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner'; // 1. Importar o toast
 
 type Skill = {
   name: string;
@@ -20,30 +22,39 @@ const skills: Skill[] = [
 ];
 
 export function LanguageSelect() {
-  // Alterado para Array para suportar seleção múltipla
+  const navigate = useNavigate();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
 
   const toggleSkill = (skillName: string) => {
     setSelectedSkills((prev) =>
       prev.includes(skillName)
-        ? prev.filter((name) => name !== skillName) // Remove se já estiver selecionado
-        : [...prev, skillName] // Adiciona se não estiver
+        ? prev.filter((name) => name !== skillName)
+        : [...prev, skillName]
     );
   };
 
   const hasSelection = selectedSkills.length > 0;
 
+  const handleContinue = () => {
+    if (hasSelection) {
+      navigate('/formulario-interesse');
+    } else {
+      // 2. Disparar erro caso não haja seleção
+      toast.error('Selecione pelo menos uma linguagem para continuar.', {
+        description: 'Você precisa escolher o que deseja aprender.',
+        duration: 3000,
+      });
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
       <div className="w-full max-w-2xl flex flex-col items-center">
         
-        {/* HEADER */}
         <h1 className="text-2xl md:text-3xl font-medium text-[#3D5A5C] mb-8 md:mb-10 text-center">
           Quero aprender
         </h1>
 
-        {/* GRID DE SKILLS RESPONSIVO */}
-        {/* grid-cols-2 para mobile (iPhone) e md:grid-cols-3 para tablets/desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
           {skills.map((skill, index) => {
             const isSelected = selectedSkills.includes(skill.name);
@@ -62,7 +73,6 @@ export function LanguageSelect() {
                     : 'border-[#F0F4F4] bg-[#F8FAFA] hover:border-gray-200'}
                 `}
               >
-                {/* Visual do Checkbox/Radio */}
                 <div className={`
                   absolute top-3 right-3 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors
                   ${isSelected ? 'border-[#9EEA6C] bg-[#9EEA6C]' : 'border-gray-200'}
@@ -72,11 +82,9 @@ export function LanguageSelect() {
                   )}
                 </div>
 
-                {/* Icon */}
                 <img src={skill.icon} alt={skill.name} className="w-8 h-8 md:w-10 md:h-10 mb-2 object-contain" />
                 
-                {/* Name */}
-                <span className="text-[10px] md:text-xs font-medium text-[#5A7173] uppercase tracking-wider">
+                <span className="text-[10px] md:text-xs font-medium text-[#5A7173] capitalize tracking-wider">
                   {skill.name}
                 </span>
               </motion.div>
@@ -84,17 +92,17 @@ export function LanguageSelect() {
           })}
         </div>
 
-        {/* BOTÃO CONTINUAR FIXO NO MOBILE OU ABAIXO NO DESKTOP */}
         <div className="w-full flex justify-center mt-10">
           <motion.button
-            whileHover={hasSelection ? { scale: 1.05 } : {}}
-            whileTap={hasSelection ? { scale: 0.95 } : {}}
-            disabled={!hasSelection}
+            onClick={handleContinue}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            // Removido o 'disabled' para permitir o clique que dispara o toast
             className={`
-              flex items-center justify-center gap-2 px-10 py-3.5 rounded-full font-semibold transition-all w-full md:w-auto
+              flex items-center justify-center gap-2 px-6 py-2 rounded-full font-semibold transition-all w-full md:w-auto
               ${hasSelection 
                 ? 'bg-[#9EEA6C] text-[#244C4E] shadow-lg shadow-green-100' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+                : 'bg-gray-200 text-gray-400'} 
             `}
           >
             Continuar

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner'; // 1. Importar o toast
 import { 
   ArrowRight, 
   Smartphone, 
@@ -27,7 +29,20 @@ const reasons: Reason[] = [
 ];
 
 export function InterestSelection() {
+  const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const handleContinue = () => {
+    if (selectedId) {
+      navigate('/pagina-sucesso');
+    } else {
+      // 2. Notificação caso o usuário tente prosseguir sem selecionar um motivo
+      toast.error('Por favor, selecione um motivo.', {
+        description: 'Precisamos entender o seu interesse antes de continuar.',
+        duration: 3000,
+      });
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
@@ -53,18 +68,15 @@ export function InterestSelection() {
                 className="group relative flex items-center justify-between py-5 cursor-pointer border-b border-[#F0F4F4] transition-colors hover:bg-[#FBFDFD]"
               >
                 <div className="flex items-center gap-4 pr-4">
-                  {/* Icon Container */}
                   <div className="flex-shrink-0">
                     <reason.icon size={24} color={reason.iconColor} strokeWidth={1.5} />
                   </div>
 
-                  {/* Label */}
                   <span className="text-sm md:text-base text-[#4A6466] font-normal leading-tight">
                     {reason.label}
                   </span>
                 </div>
 
-                {/* Radio Circle Visual */}
                 <div className={`
                   w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
                   ${isSelected ? 'border-[#9EEA6C] bg-[#9EEA6C]' : 'border-[#E2E8F0]'}
@@ -80,13 +92,15 @@ export function InterestSelection() {
 
         {/* BOTÃO CONTINUAR */}
         <motion.button
-          whileHover={selectedId ? { scale: 1.02 } : {}}
-          whileTap={selectedId ? { scale: 0.98 } : {}}
+          onClick={handleContinue}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          // Removido 'disabled' para que o Sonner possa avisar o erro no clique
           className={`
-            mt-12 flex items-center gap-2 px-10 py-3 rounded-full font-medium transition-all
+            mt-12 flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all
             ${selectedId 
-              ? 'bg-[#9EEA6C] text-[#244C4E] shadow-md' 
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+              ? 'bg-[#9EEA6C] text-[#244C4E] shadow-md cursor-pointer' 
+              : 'bg-gray-100 text-gray-400'}
           `}
         >
           Continuar
