@@ -9,12 +9,12 @@ import { Lock, Eye, AtSign, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 
 const signInForm = z.object({
-    email: z.string().email('E-mail inválido'),
-    password: z.string(),
+    email: z.string().min(1, 'E-mail é obrigatório').email('E-mail inválido'),
+    password: z.string().min(1, 'Senha é obrigatória'),
 });
 
 type SignInForm = z.infer<typeof signInForm>;
@@ -27,7 +27,7 @@ export function SignIn() {
     const {
         register,
         handleSubmit,
-        formState: { isSubmitting },
+        formState: { isSubmitting, errors },
     } = useForm<SignInForm>({
         resolver: zodResolver(signInForm),
         defaultValues: {
@@ -37,6 +37,17 @@ export function SignIn() {
     });
 
     async function handleSignIn(data: SignInForm) {
+        // Verifica se o email foi preenchido mas a senha não
+        if (data.email && !data.password) {
+            toast.error('Por favor, digite sua senha');
+            return;
+        }
+
+        // Verifica se a senha foi preenchida mas o email não
+        if (!data.email && data.password) {
+            toast.error('Por favor, digite seu email');
+            return;
+        }
 
         const token = (window as any).turnstileToken;
 
@@ -46,7 +57,6 @@ export function SignIn() {
         }
 
         try {
-            
             const response = await axios.post('http://localhost:3000/auth/login', {
                 email: data.email,
                 password: data.password,
@@ -61,7 +71,18 @@ export function SignIn() {
                 toast.error('Erro ao fazer login');
             }
         }
-    }    
+    }
+
+    // Handler para evitar envio se campos estiverem vazios
+    const onSubmit = (data: SignInForm) => {
+        // Verificação adicional: se ambos estiverem vazios
+        if (!data.email && !data.password) {
+            toast.error('Por favor, adicione seu email e senha');
+            return;
+        }
+
+        handleSignIn(data);
+    };
 
     return (
         <div className="p-8">
@@ -80,7 +101,7 @@ export function SignIn() {
                     </p>
                 </motion.div>
 
-                <form className="space-y-4" onSubmit={handleSubmit(handleSignIn)}>
+                <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                     <motion.div
                         className="space-y-2"
                         initial={{ opacity: 0, y: 20 }}
@@ -98,6 +119,7 @@ export function SignIn() {
                                 {...register('email')}
                             />
                         </div>
+                        {errors.email && <span className="text-xs text-red-500">{errors.email.message}</span>}
                     </motion.div>
 
                     <motion.div
@@ -128,6 +150,7 @@ export function SignIn() {
                                 />
                             )}
                         </div>
+                        {errors.password && <span className="text-xs text-red-500">{errors.password.message}</span>}
                     </motion.div>
 
                     <motion.div

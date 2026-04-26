@@ -7,8 +7,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './users/user.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-
-console.log('DB_PASSWORD type:', typeof process.env.DB_PASSWORD, '| value:', process.env.DB_PASSWORD);
 @Module({
     imports: [
         ConfigModule.forRoot({

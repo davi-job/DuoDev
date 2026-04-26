@@ -33,7 +33,7 @@ export class AuthService {
         }
 
         const code = crypto.randomInt(1000, 9999).toString();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
 
         pendingRegistrations.set(registerUserDto.email, {
             code,
@@ -49,8 +49,7 @@ export class AuthService {
 
         return { message: 'Código enviado para o e-mail' };
     }
-
-    // Novo método: valida o código e cria o usuário
+    
     async verifyCode(verifyCodeDto: VerifyCodeDto) {
         const pending = pendingRegistrations.get(verifyCodeDto.email);
 
@@ -64,8 +63,7 @@ export class AuthService {
         if (pending.code !== verifyCodeDto.code) {
             throw new BadRequestException('Código inválido');
         }
-
-        // Código correto — agora cria o usuário de verdade
+        
         const hashedPassword = await bcrypt.hash(pending.data.password, 10);
         const user = await this.usersService.create({
             ...pending.data,

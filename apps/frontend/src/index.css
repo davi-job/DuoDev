@@ -12,7 +12,8 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: #9EEA6C;
+    --primary-hover: #9EEA6C;
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -126,6 +127,14 @@
   html {
     @apply font-sans;
     }
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Google Sans Flex", sans-serif;
+}
+
+p, span, a, button, label {
+    font-family: "Inter", sans-serif;
 }
 
 /* CSS global */

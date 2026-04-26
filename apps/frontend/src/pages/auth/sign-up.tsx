@@ -168,26 +168,25 @@ export function SignUp() {
                             )}
                         </div>
 
-                        <div className="flex flex-col gap-1">
-                            {passwordRules.map((rule) => {
-                                const ok = rule.test(password);
-                                return (
-                                    <span
-                                        key={rule.id}
-                                        className={`flex items-center gap-1.5 text-[10px] leading-none transition-colors duration-200 ${
-                                            ok ? 'text-[#6ECC30]' : 'text-[#B2B5BD]'
-                                        }`}
-                                    >
-                                        <span
-                                            className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-200 ${
-                                                ok ? 'bg-[#6ECC30]' : 'bg-[#B2B5BD]'
-                                            }`}
-                                        />
-                                        {rule.label}
-                                    </span>
-                                );
-                            })}
-                        </div>
+                        <p className="text-[10px] mt-1 leading-relaxed text-gray-500">
+                            <span className="font-medium text-gray-600">Requisitos para a senha são: </span>
+                            <span className={passwordRules[0].test(password) ? 'text-green-600' : ''}>
+                                Mínimo de 8 caracteres
+                            </span>
+                            ,{' '}
+                            <span className={passwordRules[4].test(password) ? 'text-green-600' : ''}>
+                                símbolos especiais (%, &, $, #)
+                            </span>
+                            ,{' '}
+                            <span className={passwordRules[1].test(password) ? 'text-green-600' : ''}>
+                                letras maiúsculas
+                            </span>
+                            ,{' '}
+                            <span className={passwordRules[2].test(password) ? 'text-green-600' : ''}>
+                                letras minúsculas
+                            </span>{' '}
+                            e <span className={passwordRules[3].test(password) ? 'text-green-600' : ''}>número</span>.
+                        </p>
 
                         {errors.password && <span className="text-xs text-red-500">{errors.password.message}</span>}
                     </motion.div>
