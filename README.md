@@ -79,6 +79,81 @@ O processo de instalação segue o padrão definido na documentação técnica:
 
 ---
 
+## Pacote de Banco de Dados (`@duodev/db`)
+
+O pacote `packages/db` centraliza toda a camada de dados do projeto: esquemas, relações e o cliente Drizzle conectado ao PostgreSQL. Todos os apps do monorepo importam daqui.
+
+### Estrutura
+
+```text
+packages/db/
+├── drizzle.config.ts        ← configuração do drizzle-kit (lê DATABASE_URL)
+├── tsconfig.json
+└── src/
+    ├── index.ts             ← ponto de entrada (re-exporta tudo)
+    ├── client.ts            ← pool Postgres + instância do Drizzle
+    └── schema/
+        ├── users.ts
+        ├── user-interests.ts
+        ├── user-languages.ts
+        ├── trails.ts
+        ├── user-trails.ts
+        ├── streak-logs.ts
+        ├── blog-posts.ts
+        ├── relations.ts     ← todas as relações definidas aqui
+        └── index.ts
+```
+
+### Scripts disponíveis
+
+Execute os comandos abaixo a partir da raiz do projeto (os scripts rodam no contexto do workspace `@duodev/db`):
+
+| Comando                             | Descrição                                                     |
+| ----------------------------------- | ------------------------------------------------------------- |
+| `npm run build -w @duodev/db`       | Compila o pacote TS → `dist/`                                 |
+| `npm run db:generate -w @duodev/db` | Gera arquivos SQL de migração a partir das mudanças no schema |
+| `npm run db:push -w @duodev/db`     | Aplica o schema diretamente no banco                          |
+| `npm run db:studio -w @duodev/db`   | Abre o Drizzle Studio no browser para inspecionar os dados    |
+
+### Fluxo de trabalho recomendado
+
+**Desenvolvimento (iteração rápida):**
+
+```bash
+# 1. Compile o pacote após qualquer mudança no schema
+npm run build -w @duodev/db
+
+# 2. Aplique direto no banco local (sem gerar arquivo de migração)
+npm run db:push -w @duodev/db
+```
+
+**Preparando uma migration para subir ao repositório:**
+
+```bash
+# Gera um arquivo SQL versionado em packages/db/migrations/
+npm run db:generate -w @duodev/db
+
+# Inspecione o SQL gerado antes de commitar
+```
+
+### Como importar nos apps
+
+```ts
+import { db, users, trails, blogPosts } from '@duodev/db';
+
+// Buscar todos os usuários
+const allUsers = await db.select().from(users);
+
+// Buscar trilhas com os usuários que as iniciaram (usando relações)
+const result = await db.query.trails.findMany({
+    with: { userTrails: { with: { user: true } } },
+});
+```
+
+> **Atenção:** o pacote precisa ser compilado (`npm run build -w @duodev/db`) antes de o backend conseguir importá-lo. Em produção, o Dockerfile do backend já executa o build automaticamente.
+
+---
+
 ## Docker
 
 Todos os serviços são orquestrados via Docker Compose a partir da raiz do projeto.
