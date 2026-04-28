@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react'; // Adicionado Check
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner'; // 1. Importar o toast
 
@@ -19,6 +19,7 @@ const skills: Skill[] = [
   { name: 'CSS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
   { name: 'Git', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
   { name: 'Github', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' },
+  
 ];
 
 export function LanguageSelect() {
@@ -48,14 +49,14 @@ export function LanguageSelect() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
+    <div className="flex items-center justify-center min-h-screen bg-white p-3 font-sans">
       <div className="w-full max-w-2xl flex flex-col items-center">
         
         <h1 className="text-2xl md:text-3xl font-medium text-[#3D5A5C] mb-8 md:mb-10 text-center">
           Quero aprender
         </h1>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full">
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-3 md:gap-2.5 w-full">
           {skills.map((skill, index) => {
             const isSelected = selectedSkills.includes(skill.name);
             
@@ -67,9 +68,11 @@ export function LanguageSelect() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className={`
-                  relative flex flex-col items-center justify-center p-4 md:p-6 rounded-2xl border-2 cursor-pointer transition-all h-28 md:h-32
+                  relative flex flex-col items-center justify-center p-4 md:p-6 rounded-2xl border-2 cursor-pointer transition-all h-28 md:h-32 w-full
+                  ${index === skills.length - 1 && skills.length % 2 !== 0 ? 'sm:col-span-2 md:col-span-1' : ''}
+
                   ${isSelected 
-                    ? 'border-[#9EEA6C] bg-[#F8FFF2]' 
+                    ? 'border-[#9EEA6C] bg-white' 
                     : 'border-[#F0F4F4] bg-[#F8FAFA] hover:border-gray-200'}
                 `}
               >
@@ -78,7 +81,7 @@ export function LanguageSelect() {
                   ${isSelected ? 'border-[#9EEA6C] bg-[#9EEA6C]' : 'border-gray-200'}
                 `}>
                   {isSelected && (
-                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                    <Check className="text-white w-4 h-4" strokeWidth={3} />
                   )}
                 </div>
 
@@ -99,9 +102,9 @@ export function LanguageSelect() {
             whileTap={{ scale: 0.95 }}
             // Removido o 'disabled' para permitir o clique que dispara o toast
             className={`
-              flex items-center justify-center gap-2 px-6 py-2 rounded-full font-semibold transition-all w-full md:w-auto
+              flex items-center justify-center gap-2 px-6 py-2 rounded-full font-medium transition-all w-full md:w-auto
               ${hasSelection 
-                ? 'bg-[#9EEA6C] text-[#244C4E] shadow-lg shadow-green-100' 
+                ? 'bg-[#9EEA6C] text-[#244C4E]' 
                 : 'bg-gray-200 text-gray-400'} 
             `}
           >

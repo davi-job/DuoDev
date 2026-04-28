@@ -35,7 +35,7 @@ export function SuccessPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          className="flex items-center gap-2 px-8 py-3 bg-[#9EEA6C] text-[#244C4E] rounded-full font-medium shadow-lg shadow-green-100 transition-all hover:bg-[#8DDA5C]"
+          className="flex items-center gap-2 px-8 py-3 bg-[#9EEA6C] text-[#244C4E] rounded-full font-medium transition-all hover:bg-[#8DDA5C]"
         >
           Acessar plataforma
           <ArrowRight size={18} />

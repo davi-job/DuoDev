@@ -9,7 +9,8 @@ import {
   Briefcase, 
   Users, 
   Search, 
-  MoreHorizontal 
+  MoreHorizontal,
+  Check
 } from 'lucide-react';
 
 type Reason = {
@@ -82,7 +83,7 @@ export function InterestSelection() {
                   ${isSelected ? 'border-[#9EEA6C] bg-[#9EEA6C]' : 'border-[#E2E8F0]'}
                 `}>
                   {isSelected && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <Check className="text-white w-4 h-4" strokeWidth={3} />
                   )}
                 </div>
               </motion.div>
@@ -99,7 +100,7 @@ export function InterestSelection() {
           className={`
             mt-12 flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all
             ${selectedId 
-              ? 'bg-[#9EEA6C] text-[#244C4E] shadow-md cursor-pointer' 
+              ? 'bg-[#9EEA6C] text-[#244C4E]' 
               : 'bg-gray-100 text-gray-400'}
           `}
         >
