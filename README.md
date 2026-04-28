@@ -150,3 +150,62 @@ Cada app tem um Dockerfile multi-stage com 4 estágios:
 | `dev`     | desenvolvimento | Inicia com hot-reload (`nest start --watch` / `vite --host`) |
 | `builder` | produção        | Compila o código (`nest build` / `vite build`)               |
 | `runner`  | produção        | Imagem final enxuta (Node.js ou Nginx)                       |
+
+
+
+
+#  Guia de Inicialização do Backend
+
+Este documento descreve os passos necessários para configurar o ambiente local e inicializar o servidor do backend com sucesso.
+
+##  Pré-requisitos
+
+Antes de começar, certifique-se de ter instalado em sua máquina:
+* [Node.js](https://nodejs.org/)
+* [PostgreSQL](https://www.postgresql.org/)
+
+---
+
+##  Configuração do Ambiente (.env)
+
+
+O backend depende de variáveis de ambiente para se conectar ao banco de dados e ao serviço de e-mail. Siga os passos abaixo para configurar o seu arquivo `.env`.
+
+1. Na raiz do projeto, crie um arquivo chamado `.env` (ou renomeie o `.env.example`).
+2. Copie e cole as informações abaixo:
+
+
+# Configurações do Banco de Dados
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=seu_usuario_aqui
+DB_PASSWORD=sua_senha_aqui
+DB_DB=duodev
+
+# Configurações de E-mail (SMTP)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=seu-email@gmail.com
+MAIL_PASS=sua_chave_de_app_aqui
+
+
+
+## Detalhes das Credenciais 
+
+1. Banco de Dados (PostgreSQL)
+Você deve substituir os campos DB_USER e DB_PASSWORD pelos dados que você configurou na instalação local do seu PostgreSQL.
+
+DB_USER: Geralmente o padrão é postgres.
+
+DB_PASSWORD: A senha definida por você ao instalar o banco.
+
+2. Serviço de E-mail (Gmail)
+Para que o sistema envie e-mails, siga este processo:
+
+MAIL_USER: Insira o endereço de e-mail que deseja utilizar.
+
+MAIL_PASS (Senha de App): 1. Acesse as configurações da sua conta Google.
+2. Ative a Verificação em Duas Etapas.
+3. Procure por "Senhas de App" (App Passwords).
+4. Gere uma nova senha para o nosso projeto e copie o código de 16 dígitos.
+5. Cole esse código no campo MAIL_PASS (não utilize a sua senha comum do e-mail).
