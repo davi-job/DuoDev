@@ -37,13 +37,12 @@ export function SignIn() {
     });
 
     async function handleSignIn(data: SignInForm) {
-        // Verifica se o email foi preenchido mas a senha não
+        
         if (data.email && !data.password) {
             toast.error('Por favor, digite sua senha');
             return;
         }
-
-        // Verifica se a senha foi preenchida mas o email não
+        
         if (!data.email && data.password) {
             toast.error('Por favor, digite seu email');
             return;
