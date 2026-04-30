@@ -6,7 +6,7 @@ import { LanguageSelect } from './pages/apps/LanguageSelect';
 import { InterestSelection } from './pages/apps/InterestSelection';
 import { SuccessPage } from './pages/apps/SuccessPage';
 import { TypeCode } from './pages/auth/type-code';
-
+import AuthGuard from './components/utils/AuthGuard';
 
 
 export const router = createBrowserRouter([
@@ -35,7 +35,7 @@ export const router = createBrowserRouter([
 
     {
         path: '/formulario-interesse',
-        element: <InterestSelection />,
+        element: <AuthGuard><InterestSelection /></AuthGuard>,
     },
 
     {
