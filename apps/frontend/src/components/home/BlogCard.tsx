@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router'
+
 interface BlogCardProps {
   tag: string
   title: string
@@ -6,17 +8,29 @@ interface BlogCardProps {
   thumbClass: string
 }
 
+const slugMap: Record<string, string> = {
+  'Segurança': 'seguranca',
+  'Back-end':  'backend',
+  'Mobile':    'mobile',
+}
+
 export default function BlogCard({ tag, title, description, author, thumbClass }: BlogCardProps) {
+  const navigate = useNavigate()
+  const slug = slugMap[tag] ?? tag.toLowerCase()
+
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
-      <div className={`h-24 flex items-center justify-center font-syne text-xl font-bold text-green-900 ${thumbClass}`}>
+    <div
+      onClick={() => navigate(`/blog/${slug}`)}
+      className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200"
+    >
+      <div className={`h-28 flex items-center justify-center font-syne text-3xl font-bold text-green-900 ${thumbClass}`}>
         {tag}
       </div>
-      <div className="p-3">
-        <p className="text-[11px] font-semibold text-green-500 mb-1">{tag}</p>
-        <p className="text-[13px] font-medium text-gray-900 leading-snug mb-2">{title}</p>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-2">{description}</p>
-        <p className="text-[11px] text-gray-400">{author}</p>
+      <div className="p-4">
+        <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">{tag}</p>
+        <p className="text-[12px] font-semibold text-gray-800 leading-snug mb-1.5">{title}</p>
+        <p className="text-[11px] text-gray-400 leading-relaxed mb-2">{description}</p>
+        <p className="text-[10px] text-gray-400">{author}</p>
       </div>
     </div>
   )
