@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Check } from 'lucide-react'; // Adicionado Check
+import { ArrowRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { toast } from 'sonner'; // 1. Importar o toast
+import { toast } from 'sonner';
+import { updateUserPreferences } from '../../lib/api'; // Import the API function
 
 type Skill = {
   name: string;
@@ -19,12 +20,12 @@ const skills: Skill[] = [
   { name: 'CSS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
   { name: 'Git', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
   { name: 'Github', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' },
-  
 ];
 
 export function LanguageSelect() {
   const navigate = useNavigate();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const toggleSkill = (skillName: string) => {
     setSelectedSkills((prev) =>
@@ -36,22 +37,34 @@ export function LanguageSelect() {
 
   const hasSelection = selectedSkills.length > 0;
 
-  const handleContinue = () => {
-    if (hasSelection) {
-      navigate('/formulario-interesse');
-    } else {
-      // 2. Disparar erro caso não haja seleção
+  const handleContinue = async () => {
+    if (!hasSelection) {
       toast.error('Selecione pelo menos uma linguagem para continuar.', {
         description: 'Você precisa escolher o que deseja aprender.',
         duration: 3000,
       });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await updateUserPreferences({ interests: selectedSkills });
+      toast.success('Preferências de linguagem salvas com sucesso!');
+      navigate('/formulario-interesse');
+    } catch (error) {
+      console.error('Failed to update language preferences:', error);
+      toast.error('Erro ao salvar preferências de linguagem.', {
+        description: 'Por favor, tente novamente.',
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-3 font-sans">
       <div className="w-full max-w-2xl flex flex-col items-center">
-        
         <h1 className="text-2xl md:text-3xl font-medium text-[#3D5A5C] mb-8 md:mb-10 text-center">
           Quero aprender
         </h1>
@@ -59,7 +72,7 @@ export function LanguageSelect() {
         <div className="grid grid-cols-3 md:grid-cols-3 gap-3 md:gap-2.5 w-full">
           {skills.map((skill, index) => {
             const isSelected = selectedSkills.includes(skill.name);
-            
+
             return (
               <motion.div
                 key={skill.name}
@@ -71,8 +84,8 @@ export function LanguageSelect() {
                   relative flex flex-col items-center justify-center p-4 md:p-6 rounded-2xl border-2 cursor-pointer transition-all h-28 md:h-32 w-full
                   ${index === skills.length - 1 && skills.length % 2 !== 0 ? 'sm:col-span-2 md:col-span-1' : ''}
 
-                  ${isSelected 
-                    ? 'border-[#9EEA6C] bg-white' 
+                  ${isSelected
+                    ? 'border-[#9EEA6C] bg-white'
                     : 'border-[#F0F4F4] bg-[#F8FAFA] hover:border-gray-200'}
                 `}
               >
@@ -86,7 +99,7 @@ export function LanguageSelect() {
                 </div>
 
                 <img src={skill.icon} alt={skill.name} className="w-8 h-8 md:w-10 md:h-10 mb-2 object-contain" />
-                
+
                 <span className="text-[10px] md:text-xs font-medium text-[#5A7173] capitalize tracking-wider">
                   {skill.name}
                 </span>
@@ -100,16 +113,17 @@ export function LanguageSelect() {
             onClick={handleContinue}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            // Removido o 'disabled' para permitir o clique que dispara o toast
+            disabled={loading} // Disable button while loading
             className={`
               flex items-center justify-center gap-2 px-6 py-2 rounded-full font-medium transition-all w-full md:w-auto
-              ${hasSelection 
-                ? 'bg-[#9EEA6C] text-[#244C4E]' 
-                : 'bg-gray-200 text-gray-400'} 
+              ${hasSelection
+                ? 'bg-[#9EEA6C] text-[#244C4E]'
+                : 'bg-gray-200 text-gray-400'}
+              ${loading ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >
-            Continuar
-            <ArrowRight size={20} />
+            {loading ? 'Salvando...' : 'Continuar'}
+            {!loading && <ArrowRight size={20} />}
           </motion.button>
         </div>
       </div>

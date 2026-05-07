@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -8,11 +15,24 @@ export class User {
     @Column({ unique: true })
     email: string;
 
-    @Column()
-    password: string;
-
-    @Column()
+    @Column({ nullable: true })
     name: string;
+
+    @Exclude()
+    @Column({ nullable: true })
+    password?: string;
+
+    @Column({ nullable: true })
+    avatarUrl?: string;
+
+    @Column({ default: 'en' }) // Default language
+    language: string;
+
+    @Column('simple-array', { nullable: true }) // Stores interests as a comma-separated string
+    interests: string[];
+
+    @Column({ default: false })
+    onboardingCompleted: boolean;
 
     @CreateDateColumn()
     createdAt: Date;
@@ -20,3 +40,4 @@ export class User {
     @UpdateDateColumn()
     updatedAt: Date;
 }
+

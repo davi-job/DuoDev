@@ -9,6 +9,8 @@ import type {
 import { questions } from '../../components/quizGame/questions';
 import { RotateCcw, House } from 'lucide-react';
 import { useNavigate } from 'react-router';
+// import { updateUserPreferences } from '../../lib/api'; // Removed import
+// import { toast } from 'sonner'; // Removed import
 
 // Componente de Confete
 const Confetti = () => {
@@ -98,6 +100,7 @@ export default function QuizGame() {
     const [finished, setFinished] = useState(false);
     const [score, setScore] = useState(0);
     const [showConfetti, setShowConfetti] = useState(false);
+    // const [loading, setLoading] = useState(false); // Removed loading state
 
     const navigate = useNavigate();
 
@@ -133,6 +136,7 @@ export default function QuizGame() {
             setShowConfetti(true);
             // Remove o confete após 4 segundos
             setTimeout(() => setShowConfetti(false), 4000);
+            // The actual navigation to home and marking onboarding complete will happen when user clicks "Início"
         } else {
             setCurrentIndex((i) => i + 1);
             setSelectedOption(null);
@@ -325,26 +329,26 @@ export default function QuizGame() {
                                             onClick={() => !feedback && setSelectedOption(opt.label)}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all
                         ${
-                            isCorrect
-                                ? 'border-green-400 bg-green-50'
-                                : isWrong
-                                  ? 'border-red-400 bg-red-50'
-                                  : isSelected
-                                    ? 'border-green-400 bg-green-50'
-                                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                                                isCorrect
+                                                    ? 'border-green-400 bg-green-50'
+                                                    : isWrong
+                                                      ? 'border-red-400 bg-red-50'
+                                                      : isSelected
+                                                        ? 'border-green-400 bg-green-50'
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            }`}
                                         >
                                             <span
                                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
                           ${
-                              isCorrect
-                                  ? 'bg-green-400 text-white'
-                                  : isWrong
-                                    ? 'bg-red-400 text-white'
-                                    : isSelected
-                                      ? 'bg-green-400 text-white'
-                                      : 'bg-gray-100 text-gray-500'
-                          }`}
+                                                    isCorrect
+                                                        ? 'bg-green-400 text-white'
+                                                        : isWrong
+                                                          ? 'bg-red-400 text-white'
+                                                          : isSelected
+                                                            ? 'bg-green-400 text-white'
+                                                            : 'bg-gray-100 text-gray-500'
+                                            }`}
                                             >
                                                 {opt.label}
                                             </span>
@@ -418,10 +422,10 @@ export default function QuizGame() {
                                             disabled={used || !!feedback}
                                             className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all
                         ${
-                            used
-                                ? 'border-gray-200 text-gray-300 bg-gray-50 cursor-not-allowed'
-                                : 'border-gray-300 text-gray-700 bg-white hover:border-green-400 hover:bg-green-50'
-                        }`}
+                                                used
+                                                    ? 'border-gray-200 text-gray-300 bg-gray-50 cursor-not-allowed'
+                                                    : 'border-gray-300 text-gray-700 bg-white hover:border-green-400 hover:bg-green-50'
+                                            }`}
                                         >
                                             {word}
                                         </button>
@@ -454,10 +458,10 @@ export default function QuizGame() {
                             disabled={!canAnswer}
                             className={`font-semibold text-sm px-6 py-2.5 rounded-xl transition-all
                 ${
-                    canAnswer
-                        ? 'bg-green-400 hover:bg-green-500 text-white'
-                        : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                }`}
+                                canAnswer
+                                    ? 'bg-green-400 hover:bg-green-500 text-white'
+                                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            }`}
                         >
                             Responder
                         </button>

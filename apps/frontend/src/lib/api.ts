@@ -86,3 +86,20 @@ export async function updateMinhaSenha(data: { senhaAtual: string; novaSenha: st
   }
   return res.json()
 }
+
+export async function updateUserPreferences(data: {
+  language?: string
+  interests?: string[]
+  onboardingCompleted?: boolean
+}) {
+  const res = await fetch(`${API_URL}/users/me/preferences`, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Erro ao atualizar preferências do usuário')
+  }
+  return res.json()
+}

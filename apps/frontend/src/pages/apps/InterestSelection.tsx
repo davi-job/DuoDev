@@ -48,13 +48,11 @@ export function InterestSelection() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
       <div className="w-full max-w-xl flex flex-col items-center">
-        
-        {/* HEADER */}
+      
         <h1 className="text-xl md:text-2xl font-medium text-[#3D5A5C] mb-12 text-center leading-snug">
           Por quais motivos você se interessou <br className="hidden md:block" /> pela área?
         </h1>
-
-        {/* LISTA DE MOTIVOS */}
+        
         <div className="w-full border-t border-[#F0F4F4]">
           {reasons.map((reason, index) => {
             const isSelected = selectedId === reason.id;

@@ -1,14 +1,30 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { updateUserPreferences } from '../../lib/api'; // Import the API function
+import { toast } from 'sonner';
+import { useState } from 'react'; // Import useState
 
 export function SuccessPage() {
-
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false); // Add loading state
 
-   const handleContinue = () => { 
+  const handleContinue = async () => {
+    setLoading(true);
+    try {
+      await updateUserPreferences({ onboardingCompleted: true });
+      toast.success('Onboarding concluído com sucesso!');
       navigate('/home');
-   };
+    } catch (error) {
+      console.error('Failed to mark onboarding as complete:', error);
+      toast.error('Erro ao finalizar onboarding.', {
+        description: 'Por favor, tente novamente.',
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
       <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
@@ -42,10 +58,11 @@ export function SuccessPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
+                  disabled={loading} // Disable button while loading
                   className="flex items-center gap-2 px-8 py-3 bg-[#9EEA6C] text-[#244C4E] rounded-full font-medium transition-all hover:bg-[#8DDA5C]"
               >
-                  Acessar plataforma
-                  <ArrowRight size={18} />
+                  {loading ? 'Carregando...' : 'Acessar plataforma'}
+                  {!loading && <ArrowRight size={18} />}
               </motion.button>
           </div>
       </div>

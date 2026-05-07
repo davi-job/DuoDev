@@ -90,7 +90,8 @@ export class AuthService {
 
     async validateUser(email: string, pass: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(email);
-        if (user && (await bcrypt.compare(pass, user.password))) {
+        // Ensure user exists and has a password before comparing
+        if (user && user.password && (await bcrypt.compare(pass, user.password))) {
             const { password, ...result } = user;
             return result;
         }
@@ -135,6 +136,11 @@ export class AuthService {
 
         if (!user) {
             throw new NotFoundException('Usuário não encontrado');
+        }
+
+        // Ensure user has a password before comparing
+        if (!user.password) {
+            throw new BadRequestException('Usuário não possui senha definida.');
         }
 
         // Verifica se a senha atual está correta

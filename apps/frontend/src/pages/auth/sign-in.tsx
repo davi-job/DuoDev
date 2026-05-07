@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
+import { fetchMeuPerfil } from '../../lib/api'; // Import fetchMeuPerfil
 
 const signInForm = z.object({
     email: z.string().min(1, 'E-mail é obrigatório').email('E-mail inválido'),
@@ -37,12 +38,12 @@ export function SignIn() {
     });
 
     async function handleSignIn(data: SignInForm) {
-        
+
         if (data.email && !data.password) {
             toast.error('Por favor, digite sua senha');
             return;
         }
-        
+
         if (!data.email && data.password) {
             toast.error('Por favor, digite seu email');
             return;
@@ -62,7 +63,14 @@ export function SignIn() {
             });
             localStorage.setItem('access_token', response.data.access_token);
             toast.success('Login feito com sucesso');
-            navigate('/selecionar-linguagem');
+
+            // Fetch user profile to check onboarding status
+            const user = await fetchMeuPerfil();
+            if (user && !user.onboardingCompleted) {
+                navigate('/selecionar-linguagem');
+            } else {
+                navigate('/home');
+            }
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || 'Erro ao fazer login');

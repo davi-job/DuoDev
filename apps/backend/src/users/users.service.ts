@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserPreferencesDto } from './dto/update-user-preferences.dto'; // Import the new DTO
 
 @Injectable()
 export class UsersService {
@@ -54,5 +55,24 @@ export class UsersService {
         const user = await this.findById(id);
         user.password = hashedPassword;
         await this.usersRepository.save(user);
+    }
+
+    async updateUserPreferences(
+        id: string,
+        updateUserPreferencesDto: UpdateUserPreferencesDto,
+    ): Promise<User> {
+        const user = await this.findById(id);
+
+        if (updateUserPreferencesDto.language !== undefined) {
+            user.language = updateUserPreferencesDto.language;
+        }
+        if (updateUserPreferencesDto.interests !== undefined) {
+            user.interests = updateUserPreferencesDto.interests;
+        }
+        if (updateUserPreferencesDto.onboardingCompleted !== undefined) {
+            user.onboardingCompleted = updateUserPreferencesDto.onboardingCompleted;
+        }
+
+        return this.usersRepository.save(user);
     }
 }

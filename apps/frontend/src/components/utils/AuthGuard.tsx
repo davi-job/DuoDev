@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router'; // Import useLocation
+import { fetchMeuPerfil } from '../../lib/api'; // Import fetchMeuPerfil
 
 interface AuthGuardProps {
     children: React.ReactNode;
 }
 
+const onboardingPaths = ['/selecionar-linguagem', '/formulario-interesse', '/pagina-sucesso'];
+
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation(); // Get current location
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
@@ -17,31 +21,33 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             return;
         }
 
-        const validateWithBackend = async () => {
+        const validateAndCheckOnboarding = async () => {
             try {
-                const response = await fetch('http://localhost:3000/auth/me', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                const user = await fetchMeuPerfil(); // Fetch user profile
 
-                if (!response.ok) {
+                if (!user) {
                     // Token inválido, expirado ou usuário não existe mais
                     localStorage.removeItem('access_token');
                     navigate('/login');
                     return;
                 }
 
+                // Check onboarding status
+                if (!user.onboardingCompleted && !onboardingPaths.includes(location.pathname)) {
+                    navigate('/selecionar-linguagem');
+                    return;
+                }
+
                 setChecking(false);
-            } catch {
-                // Falha de rede — decide se bloqueia ou deixa passar
+            } catch (error) {
+                console.error('Authentication or onboarding check failed:', error);
                 localStorage.removeItem('access_token');
                 navigate('/login');
             }
         };
 
-        validateWithBackend();
-    }, [navigate]);
+        validateAndCheckOnboarding();
+    }, [navigate, location.pathname]); // Add location.pathname to dependencies
 
     if (checking) return null; // ou um spinner
 
