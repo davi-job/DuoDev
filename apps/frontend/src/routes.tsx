@@ -10,6 +10,11 @@ import { TypeCode } from './pages/auth/type-code';
 import AuthGuard from './components/utils/AuthGuard';
 import Home from './pages/apps/Home';
 import BlogPost from './pages/apps/BlogPost';
+import Perfil from './pages/apps/Perfil';
+import Configuracoes from './pages/apps/Configuracoes';
+import Trail from './pages/apps/Trail';
+import QuizGame from './pages/apps/QuizGame';
+
 
 export const router = createBrowserRouter([
     {
@@ -70,6 +75,38 @@ export const router = createBrowserRouter([
         element: (
             <AuthGuard>
                 <BlogPost />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/trilha/:slug',
+        element: (
+            <AuthGuard>
+                <Trail />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/perfil',
+        element: (
+            <AuthGuard>
+                <Perfil />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/configuracoes',
+        element: (
+            <AuthGuard>
+                <Configuracoes />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/quiz',
+        element: (
+            <AuthGuard>
+                <QuizGame />
             </AuthGuard>
         ),
     },

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { useNavigate } from 'react-router'
 
 interface TrailCardProps {
   name: string
@@ -10,8 +11,15 @@ interface TrailCardProps {
 }
 
 export default function TrailCard({ name, level, duration, progress, thumbClass, icon }: TrailCardProps) {
+
+  const navigate = useNavigate();
+
+  const goToTrailDetails = () => {      
+      navigate(`/trilha/${name}`);
+  };
+
   return (
-    <div className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+    <div className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200" onClick={goToTrailDetails}>
       <div className={`h-32 flex items-center justify-center ${thumbClass}`}>
         {icon}
       </div>
