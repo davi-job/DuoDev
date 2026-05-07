@@ -148,9 +148,9 @@ export default function Home() {
                 {/* Trilhas */}
                 <section>
                   <h2 className="font-syne text-lg font-semibold text-green-400 mb-1">
-                    Trilhas em andamento
+                    Categorias em andamento
                   </h2>
-                  <p className="text-sm text-gray-400 mb-4">Continue vendo suas trilhas. Não pare de aprender</p>
+                  <p className="text-sm text-gray-400 mb-4">Continue vendo suas categorias. Não pare de aprender</p>
                   {loading ? (
                     <p className="text-sm text-gray-400">Carregando trilhas...</p>
                   ) : trails.length === 0 ? (

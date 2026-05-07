@@ -81,7 +81,7 @@ export default function Trail() {
                             </p>
 
                             {/* Conteúdos */}
-                            <h2 className="text-lg font-bold text-green-500 mb-3">Conteúdos</h2>
+                            <h2 className="text-lg font-bold text-green-500 mb-3">Trilhas</h2>
                             <div className="relative">
                                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                                     {contents.map((item, i) => (
