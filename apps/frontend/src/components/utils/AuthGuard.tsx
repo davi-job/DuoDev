@@ -1,38 +1,51 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { jwtDecode } from 'jwt-decode';
 
 interface AuthGuardProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
 
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-    try {
-      const decodedToken: { exp: number } = jwtDecode(token);
-      const currentTime = Date.now() / 1000; 
+        const validateWithBackend = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/auth/me', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-      if (decodedToken.exp < currentTime) {        
-        localStorage.removeItem('token'); 
-        navigate('/login');
-      }
-    } catch (error) {      
-      console.error('Invalid token:', error);
-      localStorage.removeItem('token'); // Clear invalid token
-      navigate('/login');
-    }
-  }, [navigate]);
+                if (!response.ok) {
+                    // Token inválido, expirado ou usuário não existe mais
+                    localStorage.removeItem('access_token');
+                    navigate('/login');
+                    return;
+                }
 
-  return <>{children}</>;
+                setChecking(false);
+            } catch {
+                // Falha de rede — decide se bloqueia ou deixa passar
+                localStorage.removeItem('access_token');
+                navigate('/login');
+            }
+        };
+
+        validateWithBackend();
+    }, [navigate]);
+
+    if (checking) return null; // ou um spinner
+
+    return <>{children}</>;
 };
 
 export default AuthGuard;
