@@ -3,7 +3,7 @@ import { categories } from './categories';
 
 export const trails = pgTable('trails', {
     id: uuid('id').primaryKey().defaultRandom(),
-    categoryId: uuid('category_id').references(() => categories.id),
+    categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     level: varchar('level', { length: 100 }).notNull(),
     description: text('description').notNull(),

@@ -7,6 +7,8 @@ export interface Categoria {
     status: StatusCategoria;
     icon: string | null;
     thumbColor: string;
+    duration: string | null;
+    totalHours: number | null;
     totalTrails: number;
     totalLessons: number;
     totalQuestions: number;
