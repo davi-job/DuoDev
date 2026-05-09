@@ -1,31 +1,50 @@
+import { Fragment } from 'react';
+import { Link } from '@tanstack/react-router';
 import './ModuleHeader.css';
 
-interface HeaderProps {
-    path: Array<string>;
-    title: string;
-    btnLabel: string;
-    btnOnClick: () => void;
+interface PathItem {
+    label: string;
+    to?: string;
 }
 
-function ModuleHeader({ path, title, btnLabel, btnOnClick }: HeaderProps) {
+interface HeaderProps {
+    path: Array<PathItem | string>;
+    title: string;
+    btnLabel?: string;
+    btnOnClick?: () => void;
+    btnDisabled?: boolean;
+}
+
+function ModuleHeader({ path, title, btnLabel, btnOnClick, btnDisabled }: HeaderProps) {
+    const items = path.map((item) =>
+        typeof item === 'string' ? { label: item } : item,
+    );
+
     return (
         <header className="modulo-header">
             <div className="title">
                 <h4>
-                    {path.map((item, index) => (
-                        <>
-                            {index > 0 && (
-                                <span key={-index} className="title_divider">
-                                    /
-                                </span>
+                    {items.map((item, index) => (
+                        <Fragment key={index}>
+                            {index > 0 && <span className="title_divider">/</span>}
+                            {item.to ? (
+                                <Link to={item.to} className="breadcrumb-link">
+                                    {item.label}
+                                </Link>
+                            ) : (
+                                <span>{item.label}</span>
                             )}
-                            <span key={index}>{item}</span>
-                        </>
+                        </Fragment>
                     ))}
                 </h4>
                 <h2>{title}</h2>
             </div>
-            <button onClick={btnOnClick}>{btnLabel}</button>
+
+            {btnLabel && (
+                <button onClick={btnOnClick} disabled={btnDisabled}>
+                    {btnLabel}
+                </button>
+            )}
         </header>
     );
 }

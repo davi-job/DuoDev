@@ -2,17 +2,28 @@ export type StatusCategoria = 'publicado' | 'rascunho' | 'revisao' | 'arquivado'
 
 export interface Categoria {
     id: string;
-    nome: string;
-    descricao: string;
+    name: string;
+    description: string | null;
     status: StatusCategoria;
-    icone: string; // nome do ícone do lucide-react
-    corDestaque: string; // cor hexadecimal de destaque
-    totalTrilhas: number;
-    totalAulas: number;
-    totalQuestoes: number;
-    criadoEm: string;
-    atualizadoEm: string;
+    icon: string | null;
+    thumbColor: string;
+    totalTrails: number;
+    totalLessons: number;
+    totalQuestions: number;
+    totalChallenges: number;
+    createdAt: string;
+    updatedAt: string;
 }
+
+export interface CreateCategoriaDto {
+    name: string;
+    description?: string;
+    status?: StatusCategoria;
+    icon?: string;
+    thumbColor: string;
+}
+
+export interface UpdateCategoriaDto extends Partial<CreateCategoriaDto> {}
 
 export const STATUS_CONFIG: Record<
     StatusCategoria,

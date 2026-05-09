@@ -4,23 +4,23 @@ import type { LucideIcon } from 'lucide-react';
 import './CelulaCategoria.css';
 
 interface CelulaCategoriaProps {
-    nome: string;
-    icone: string;
-    corDestaque: string;
+    name: string;
+    icon: string | null;
+    thumbColor: string;
 }
 
-function CelulaCategoria({ nome, icone, corDestaque }: CelulaCategoriaProps) {
-    const Icone = (icons[icone as keyof typeof icons] as LucideIcon) ?? icons.Code;
+function CelulaCategoria({ name, icon, thumbColor }: CelulaCategoriaProps) {
+    const Icone = (icons[(icon ?? '') as keyof typeof icons] as LucideIcon) ?? icons.Code;
 
     return (
         <div className="celula-categoria">
             <div
                 className="celula-categoria-icone"
-                style={{ backgroundColor: `${corDestaque}20`, color: corDestaque }}
+                style={{ backgroundColor: `${thumbColor}20`, color: thumbColor }}
             >
                 <Icone size={18} />
             </div>
-            <span className="celula-categoria-nome">{nome}</span>
+            <span className="celula-categoria-nome">{name}</span>
         </div>
     );
 }

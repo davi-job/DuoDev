@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import CampoFormulario from './CampoFormulario';
 import StatusPill from './StatusPill';
 
-import type { Categoria, StatusCategoria } from '../types';
+import type { Categoria, CreateCategoriaDto, StatusCategoria } from '../types';
 import { STATUS_CONFIG } from '../types';
 
 import './FormularioCategoria.css';
@@ -23,20 +23,20 @@ const CORES_DISPONIVEIS = [
 
 interface FormularioCategoriaProps {
     categoria?: Categoria;
-    onSalvar: (dados: Omit<Categoria, 'id' | 'criadoEm' | 'atualizadoEm' | 'totalTrilhas' | 'totalAulas' | 'totalQuestoes'>) => void;
+    onSalvar: (dados: CreateCategoriaDto) => void;
     onCancelar: () => void;
 }
 
 function FormularioCategoria({ categoria, onSalvar, onCancelar }: FormularioCategoriaProps) {
-    const [nome, setNome] = useState(categoria?.nome ?? '');
-    const [descricao, setDescricao] = useState(categoria?.descricao ?? '');
+    const [name, setName] = useState(categoria?.name ?? '');
+    const [description, setDescription] = useState(categoria?.description ?? '');
     const [status, setStatus] = useState<StatusCategoria>(categoria?.status ?? 'rascunho');
-    const [icone, setIcone] = useState(categoria?.icone ?? 'Code');
-    const [corDestaque, setCorDestaque] = useState(categoria?.corDestaque ?? CORES_DISPONIVEIS[0]);
+    const [icon, setIcon] = useState(categoria?.icon ?? 'Code');
+    const [thumbColor, setThumbColor] = useState(categoria?.thumbColor ?? CORES_DISPONIVEIS[0]);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        onSalvar({ nome, descricao, status, icone, corDestaque });
+        onSalvar({ name, description, status, icon, thumbColor });
     }
 
     return (
@@ -44,8 +44,8 @@ function FormularioCategoria({ categoria, onSalvar, onCancelar }: FormularioCate
             <CampoFormulario label="Nome">
                 <input
                     type="text"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: Fundamentos da Web"
                     required
                 />
@@ -53,10 +53,9 @@ function FormularioCategoria({ categoria, onSalvar, onCancelar }: FormularioCate
 
             <CampoFormulario label="Descrição">
                 <textarea
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
+                    value={description ?? ''}
+                    onChange={(e) => setDescription(e.target.value)}
                     placeholder="Descreva o objetivo desta categoria..."
-                    required
                 />
             </CampoFormulario>
 
@@ -83,16 +82,16 @@ function FormularioCategoria({ categoria, onSalvar, onCancelar }: FormularioCate
                             <button
                                 key={nomeIcone}
                                 type="button"
-                                className={`icone-opcao ${icone === nomeIcone ? 'selecionado' : ''}`}
-                                onClick={() => setIcone(nomeIcone)}
+                                className={`icone-opcao ${icon === nomeIcone ? 'selecionado' : ''}`}
+                                onClick={() => setIcon(nomeIcone)}
                                 title={nomeIcone}
                                 style={
-                                    icone === nomeIcone
-                                        ? { borderColor: corDestaque, backgroundColor: `${corDestaque}15` }
+                                    icon === nomeIcone
+                                        ? { borderColor: thumbColor, backgroundColor: `${thumbColor}15` }
                                         : undefined
                                 }
                             >
-                                <IconeComponente size={20} color={icone === nomeIcone ? corDestaque : undefined} />
+                                <IconeComponente size={20} color={icon === nomeIcone ? thumbColor : undefined} />
                             </button>
                         );
                     })}
@@ -105,29 +104,28 @@ function FormularioCategoria({ categoria, onSalvar, onCancelar }: FormularioCate
                         <button
                             key={cor}
                             type="button"
-                            className={`cor-opcao ${corDestaque === cor ? 'selecionado' : ''}`}
-                            onClick={() => setCorDestaque(cor)}
+                            className={`cor-opcao ${thumbColor === cor ? 'selecionado' : ''}`}
+                            onClick={() => setThumbColor(cor)}
                             style={{ backgroundColor: cor }}
                         />
                     ))}
                 </div>
             </CampoFormulario>
 
-            {/* Prévia */}
             <CampoFormulario label="Prévia">
                 <div className="previa-categoria">
                     <div
                         className="previa-icone"
-                        style={{ backgroundColor: `${corDestaque}20`, color: corDestaque }}
+                        style={{ backgroundColor: `${thumbColor}20`, color: thumbColor }}
                     >
                         {(() => {
-                            const Icone = icons[icone as keyof typeof icons] as LucideIcon;
+                            const Icone = icons[(icon ?? '') as keyof typeof icons] as LucideIcon ?? icons.Code;
                             return <Icone size={24} />;
                         })()}
                     </div>
                     <div className="previa-info">
-                        <span className="previa-nome">{nome || 'Nome da Categoria'}</span>
-                        <span className="previa-descricao">{descricao || 'Descrição da categoria...'}</span>
+                        <span className="previa-nome">{name || 'Nome da Categoria'}</span>
+                        <span className="previa-descricao">{description || 'Descrição da categoria...'}</span>
                     </div>
                 </div>
             </CampoFormulario>

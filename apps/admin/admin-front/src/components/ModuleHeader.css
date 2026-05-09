@@ -16,6 +16,20 @@
     margin-bottom: 0.5rem;
 }
 
+.modulo-header .breadcrumb-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.modulo-header .breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.modulo-header button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .modulo-header button {
     display: flex;
     gap: 0.5rem;
