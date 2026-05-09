@@ -14,6 +14,8 @@ services:
         build:
             target: dev
         command: npm run start:dev
+        environment:
+            DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
         volumes:
             - ./apps/backend:/app/apps/backend:z
             - ./packages:/app/packages:z
@@ -24,6 +26,8 @@ services:
         build:
             target: dev
         command: npm run start:dev
+        environment:
+            DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
         volumes:
             - ./apps/admin/admin-back:/app/apps/admin/admin-back:z
             - ./packages:/app/packages:z

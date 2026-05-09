@@ -165,11 +165,12 @@ Todos os serviços são orquestrados via Docker Compose a partir da raiz do proj
 
 ### Desenvolvimento
 
-| Comando             | Descrição                                |
-| ------------------- | ---------------------------------------- |
-| `npm run dev`       | Sobe todos os serviços em modo dev       |
-| `npm run dev:build` | Reconstrói as imagens e sobe em modo dev |
-| `npm run dev:down`  | Derruba todos os containers              |
+| Comando              | Descrição                                |
+| -------------------- | ---------------------------------------- |
+| `npm run dev`        | Sobe todos os serviços em modo dev       |
+| `npm run dev:build`  | Reconstrói as imagens e sobe em modo dev |
+| `npm run dev:down`   | Derruba todos os containers              |
+| `npm run dev:down:v` | Derruba todos os containers e volumes    |
 
 ```bash
 # Primeira vez ou após mudanças no Dockerfile / dependências
@@ -180,6 +181,9 @@ npm run dev
 
 # Encerrar
 npm run dev:down
+
+# Encerrar e deletar volumes
+npm run dev:down:v
 ```
 
 Serviços disponíveis em dev:

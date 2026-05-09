@@ -8,6 +8,7 @@
         "dev": "docker compose up",
         "dev:build": "docker compose up --build",
         "dev:down": "docker compose down",
+        "dev:down:v": "docker compose down -v",
         "prod": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d",
         "prod:build": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build",
         "prod:down": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down"
@@ -28,5 +29,15 @@
         "apps/*",
         "apps/admin/*",
         "packages/*"
-    ]
+    ],
+    "dependencies": {
+        "dotenv": "^17.3.1",
+        "drizzle-orm": "^0.45.1",
+        "pg": "^8.20.0"
+    },
+    "devDependencies": {
+        "@types/pg": "^8.20.0",
+        "drizzle-kit": "^0.31.10",
+        "tsx": "^4.21.0"
+    }
 }

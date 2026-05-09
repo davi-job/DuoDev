@@ -1,0 +1,37 @@
+.data {
+    display: flex;
+    flex-direction: column;
+
+    gap: 1.5rem;
+
+    align-items: center;
+
+    width: 100%;
+
+    padding: 1.5rem 2rem;
+}
+
+.data .boxList {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 1.5rem;
+
+    width: 100%;
+}
+
+.celula-link {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.celula-link:hover .celula-categoria-nome {
+    text-decoration: underline;
+}
+
+.loading {
+    padding: 2rem;
+    color: var(--text-tertiary);
+}

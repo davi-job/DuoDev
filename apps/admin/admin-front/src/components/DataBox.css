@@ -1,0 +1,27 @@
+.dataBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    gap: 1rem;
+
+    background-color: var(--bg-card);
+
+    border: 2px solid var(--border-primary);
+    border-radius: 1rem;
+
+    padding: 1.5rem;
+
+    width: 100%;
+    max-width: 250px;
+}
+
+.dataBox .valor {
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+.dataBox .texto {
+    font-size: 1rem;
+    color: var(--text-tertiary);
+}

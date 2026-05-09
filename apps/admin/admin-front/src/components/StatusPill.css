@@ -1,0 +1,15 @@
+.pill {
+    display: flex;
+    gap: 0.5rem;
+
+    margin: 0 auto;
+
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+
+    border-radius: 50rem;
+
+    padding: 0.25rem 1rem;
+}

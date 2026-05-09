@@ -1,0 +1,106 @@
+.barra-filtros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+}
+
+/* ─── Abas ─── */
+
+.abas {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.aba {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.625rem 1.25rem;
+
+    font-size: 0.875rem;
+
+    background-color: transparent;
+    color: var(--text-secondary);
+
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.aba:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.aba-ativa {
+    background-color: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent-mid);
+}
+
+.aba-ativa:hover {
+    background-color: var(--accent-dim);
+    color: var(--accent);
+}
+
+.aba-quantidade {
+    font-size: 0.75rem;
+    font-weight: 700;
+
+    padding: 0.125rem 0.5rem;
+
+    border-radius: 50rem;
+
+    background-color: var(--bg-hover);
+    color: var(--text-tertiary);
+}
+
+.aba-ativa .aba-quantidade {
+    background-color: var(--accent-mid);
+    color: var(--accent);
+}
+
+/* ─── Busca ─── */
+
+.campo-busca {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.625rem 1rem;
+
+    background-color: var(--bg-tertiary);
+
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+
+    color: var(--text-tertiary);
+
+    transition: border-color 150ms ease;
+}
+
+.campo-busca:focus-within {
+    border-color: var(--accent-mid);
+    color: var(--text-secondary);
+}
+
+.campo-busca input {
+    background: none;
+    border: none;
+    outline: none;
+
+    font-size: 0.875rem;
+
+    color: var(--text-primary);
+
+    width: 180px;
+}
+
+.campo-busca input::placeholder {
+    color: var(--text-tertiary);
+}
