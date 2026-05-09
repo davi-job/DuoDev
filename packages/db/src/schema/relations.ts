@@ -6,6 +6,7 @@ import { userTrails } from './user-trails';
 import { streakLogs } from './streak-logs';
 import { blogPosts } from './blog-posts';
 import { trails } from './trails';
+import { categories } from './categories';
 
 export const usersRelations = relations(users, ({ many }) => ({
     interests: many(userInterests),
@@ -23,7 +24,12 @@ export const userLanguagesRelations = relations(userLanguages, ({ one }) => ({
     user: one(users, { fields: [userLanguages.userId], references: [users.id] }),
 }));
 
-export const trailsRelations = relations(trails, ({ many }) => ({
+export const categoriesRelations = relations(categories, ({ many }) => ({
+    trails: many(trails),
+}));
+
+export const trailsRelations = relations(trails, ({ one, many }) => ({
+    category: one(categories, { fields: [trails.categoryId], references: [categories.id] }),
     userTrails: many(userTrails),
 }));
 
