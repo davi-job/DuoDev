@@ -1,4 +1,4 @@
-.actionBtn button {
+.actionBtn-trigger {
     background-color: transparent;
     border: none;
 
@@ -7,12 +7,11 @@
     color: var(--text-primary);
 }
 
-.actionBtn .popup {
-    position: absolute;
+.popup {
+    position: fixed;
+    z-index: 100;
 
-    top: 100%;
-    right: 0;
-    margin-top: 4;
+    transform: translateX(-100%);
 
     display: flex;
     flex-direction: column;
@@ -25,28 +24,37 @@
     border-radius: 1rem;
 
     padding: 1rem;
-    z-index: 10;
 }
 
-.actionBtn .popup button {
+.popup button {
     padding: 1rem 2rem;
 
+    background-color: transparent;
+    color: var(--text-primary);
+
+    border: none;
     border-radius: 0.5rem;
+
+    font-size: 0.875rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+    text-align: left;
 }
 
-.actionBtn .popup button:hover {
+.popup button:hover {
     background-color: var(--bg-hover);
 }
 
-.actionBtn .popup button:last-of-type {
+.popup button:last-of-type {
     color: var(--danger);
 }
 
-.actionBtn .popup button:last-of-type:hover {
+.popup button:last-of-type:hover {
     background-color: var(--danger-dim);
 }
 
-.actionBtn .popup span {
+.popup span {
     display: block;
     border-top: 1px solid var(--border-primary);
 }

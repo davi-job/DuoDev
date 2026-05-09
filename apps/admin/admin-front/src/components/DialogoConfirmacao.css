@@ -1,0 +1,119 @@
+.dialogo-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+
+.dialogo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 0.75rem;
+
+    width: min(90%, 400px);
+
+    padding: 2rem;
+
+    background-color: var(--bg-secondary);
+
+    border: 2px solid var(--border-primary);
+    border-radius: 1rem;
+
+    text-align: center;
+}
+
+.dialogo-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 3rem;
+    height: 3rem;
+
+    border-radius: 50%;
+
+    margin-bottom: 0.25rem;
+}
+
+.dialogo-icone.perigo {
+    background-color: var(--danger-dim);
+    color: var(--danger);
+}
+
+.dialogo-icone.padrao {
+    background-color: var(--accent-dim);
+    color: var(--accent);
+}
+
+.dialogo-titulo {
+    font-size: 1.125rem;
+    color: var(--text-primary);
+}
+
+.dialogo-mensagem {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.dialogo-acoes {
+    display: flex;
+    gap: 0.75rem;
+
+    width: 100%;
+
+    margin-top: 0.75rem;
+}
+
+.dialogo-btn {
+    flex: 1;
+
+    padding: 0.75rem 1.5rem;
+
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    border: none;
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.dialogo-btn.cancelar {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+}
+
+.dialogo-btn.cancelar:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.dialogo-btn.confirmar.perigo {
+    background-color: var(--danger);
+    color: var(--text-primary);
+}
+
+.dialogo-btn.confirmar.perigo:hover {
+    background-color: var(--danger-dim);
+}
+
+.dialogo-btn.confirmar.padrao {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+}
+
+.dialogo-btn.confirmar.padrao:hover {
+    background-color: var(--accent-mid);
+    color: var(--text-primary);
+}
