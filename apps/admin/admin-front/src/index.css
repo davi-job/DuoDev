@@ -66,6 +66,8 @@ body {
 
 #root {
     display: flex;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 h2 {
@@ -91,6 +93,7 @@ h4 {
 }
 
 main {
-    width: 100%;
+    flex: 1;
     height: 100dvh;
+    overflow-y: auto;
 }
