@@ -1,4 +1,4 @@
-header {
+.modulo-header {
     width: 100%;
     border-bottom: 2px solid var(--border-primary);
 
@@ -9,14 +9,14 @@ header {
     padding: 1.5rem 2rem;
 }
 
-header .title h4 {
+.modulo-header .title h4 {
     display: flex;
     gap: 0.5rem;
 
     margin-bottom: 0.5rem;
 }
 
-header button {
+.modulo-header button {
     display: flex;
     gap: 0.5rem;
 
@@ -34,7 +34,7 @@ header button {
     transition: all 150ms ease;
 }
 
-header button:hover {
+.modulo-header button:hover {
     color: var(--text-primary);
     background-color: var(--accent-mid);
 }

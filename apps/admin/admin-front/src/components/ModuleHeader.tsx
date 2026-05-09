@@ -9,7 +9,7 @@ interface HeaderProps {
 
 function ModuleHeader({ path, title, btnLabel, btnOnClick }: HeaderProps) {
     return (
-        <header>
+        <header className="modulo-header">
             <div className="title">
                 <h4>
                     {path.map((item, index) => (
