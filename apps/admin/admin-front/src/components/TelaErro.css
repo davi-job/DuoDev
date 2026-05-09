@@ -1,0 +1,81 @@
+.tela-erro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 3rem 2rem;
+}
+
+.tela-erro-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+
+    padding: 2.5rem 3rem;
+    max-width: 420px;
+    width: 100%;
+
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: 1rem;
+
+    text-align: center;
+}
+
+.tela-erro-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 4rem;
+    height: 4rem;
+
+    background-color: var(--danger-dim);
+    color: var(--danger);
+
+    border-radius: 1rem;
+}
+
+.tela-erro-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tela-erro-titulo {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tela-erro-mensagem {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.tela-erro-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.625rem 1.5rem;
+
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    background-color: var(--accent-mid);
+    color: var(--accent);
+
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.tela-erro-btn:hover {
+    background-color: var(--accent-dim);
+    border-color: var(--accent);
+}
