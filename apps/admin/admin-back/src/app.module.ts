@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { CategoriesModule } from './categories/categories.module';
 import { TrailsModule } from './trails/trails.module';
+import { ContentModule } from './content/content.module';
 
 @Module({
-    imports: [DatabaseModule, CategoriesModule, TrailsModule],
+    imports: [DatabaseModule, CategoriesModule, TrailsModule, ContentModule],
 })
 export class AppModule {}
