@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { lessons, questions, challenges } from '@duodev/db';
 import type { DB } from '@duodev/db';
 import { CreateLessonDto } from './dto/create-lesson.dto';

@@ -25,16 +25,16 @@ export class TrailsService {
                 createdAt: trails.createdAt,
                 updatedAt: trails.updatedAt,
                 totalLessons: sql<number>`(
-                    select count(*) from ${lessons}
-                    where ${lessons.trailId} = ${trails.id}
+                    select count(*) from "lessons"
+                    where "lessons"."trail_id" = "trails"."id"
                 )`.mapWith(Number),
                 totalQuestions: sql<number>`(
-                    select count(*) from ${questions}
-                    where ${questions.trailId} = ${trails.id}
+                    select count(*) from "questions"
+                    where "questions"."trail_id" = "trails"."id"
                 )`.mapWith(Number),
                 totalChallenges: sql<number>`(
-                    select count(*) from ${challenges}
-                    where ${challenges.trailId} = ${trails.id}
+                    select count(*) from "challenges"
+                    where "challenges"."trail_id" = "trails"."id"
                 )`.mapWith(Number),
             })
             .from(trails)

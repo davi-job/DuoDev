@@ -23,23 +23,23 @@ export class CategoriesService {
                 createdAt: categories.createdAt,
                 updatedAt: categories.updatedAt,
                 totalTrails: sql<number>`(
-                    select count(*) from ${trails}
-                    where ${trails.categoryId} = ${categories.id}
+                    select count(*) from "trails"
+                    where "trails"."category_id" = "categories"."id"
                 )`.mapWith(Number),
                 totalLessons: sql<number>`(
-                    select count(*) from ${lessons}
-                    inner join ${trails} on ${lessons.trailId} = ${trails.id}
-                    where ${trails.categoryId} = ${categories.id}
+                    select count(*) from "lessons"
+                    inner join "trails" on "lessons"."trail_id" = "trails"."id"
+                    where "trails"."category_id" = "categories"."id"
                 )`.mapWith(Number),
                 totalQuestions: sql<number>`(
-                    select count(*) from ${questions}
-                    inner join ${trails} on ${questions.trailId} = ${trails.id}
-                    where ${trails.categoryId} = ${categories.id}
+                    select count(*) from "questions"
+                    inner join "trails" on "questions"."trail_id" = "trails"."id"
+                    where "trails"."category_id" = "categories"."id"
                 )`.mapWith(Number),
                 totalChallenges: sql<number>`(
-                    select count(*) from ${challenges}
-                    inner join ${trails} on ${challenges.trailId} = ${trails.id}
-                    where ${trails.categoryId} = ${categories.id}
+                    select count(*) from "challenges"
+                    inner join "trails" on "challenges"."trail_id" = "trails"."id"
+                    where "trails"."category_id" = "categories"."id"
                 )`.mapWith(Number),
             })
             .from(categories)
