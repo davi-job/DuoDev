@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as modulesConteudoIndexRouteImport } from './routes/(modules)/conteudo/index'
 import { Route as modulesConteudoCategoriaIdRouteImport } from './routes/(modules)/conteudo/$categoriaId'
+import { Route as modulesConteudoCategoriaIdIndexRouteImport } from './routes/(modules)/conteudo/$categoriaId/index'
+import { Route as modulesConteudoCategoriaIdTrilhaIdRouteImport } from './routes/(modules)/conteudo/$categoriaId/$trilhaId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,38 +31,66 @@ const modulesConteudoCategoriaIdRoute =
     path: '/conteudo/$categoriaId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const modulesConteudoCategoriaIdIndexRoute =
+  modulesConteudoCategoriaIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => modulesConteudoCategoriaIdRoute,
+  } as any)
+const modulesConteudoCategoriaIdTrilhaIdRoute =
+  modulesConteudoCategoriaIdTrilhaIdRouteImport.update({
+    id: '/$trilhaId',
+    path: '/$trilhaId',
+    getParentRoute: () => modulesConteudoCategoriaIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRoute
+  '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/conteudo/': typeof modulesConteudoIndexRoute
+  '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
+  '/conteudo/$categoriaId/': typeof modulesConteudoCategoriaIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRoute
   '/conteudo': typeof modulesConteudoIndexRoute
+  '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
+  '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/(modules)/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRoute
+  '/(modules)/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/(modules)/conteudo/': typeof modulesConteudoIndexRoute
+  '/(modules)/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
+  '/(modules)/conteudo/$categoriaId/': typeof modulesConteudoCategoriaIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/conteudo/$categoriaId' | '/conteudo/'
+  fullPaths:
+    | '/'
+    | '/conteudo/$categoriaId'
+    | '/conteudo/'
+    | '/conteudo/$categoriaId/$trilhaId'
+    | '/conteudo/$categoriaId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/conteudo/$categoriaId' | '/conteudo'
+  to:
+    | '/'
+    | '/conteudo'
+    | '/conteudo/$categoriaId/$trilhaId'
+    | '/conteudo/$categoriaId'
   id:
     | '__root__'
     | '/'
     | '/(modules)/conteudo/$categoriaId'
     | '/(modules)/conteudo/'
+    | '/(modules)/conteudo/$categoriaId/$trilhaId'
+    | '/(modules)/conteudo/$categoriaId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  modulesConteudoCategoriaIdRoute: typeof modulesConteudoCategoriaIdRoute
+  modulesConteudoCategoriaIdRoute: typeof modulesConteudoCategoriaIdRouteWithChildren
   modulesConteudoIndexRoute: typeof modulesConteudoIndexRoute
 }
 
@@ -87,12 +117,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof modulesConteudoCategoriaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(modules)/conteudo/$categoriaId/': {
+      id: '/(modules)/conteudo/$categoriaId/'
+      path: '/'
+      fullPath: '/conteudo/$categoriaId/'
+      preLoaderRoute: typeof modulesConteudoCategoriaIdIndexRouteImport
+      parentRoute: typeof modulesConteudoCategoriaIdRoute
+    }
+    '/(modules)/conteudo/$categoriaId/$trilhaId': {
+      id: '/(modules)/conteudo/$categoriaId/$trilhaId'
+      path: '/$trilhaId'
+      fullPath: '/conteudo/$categoriaId/$trilhaId'
+      preLoaderRoute: typeof modulesConteudoCategoriaIdTrilhaIdRouteImport
+      parentRoute: typeof modulesConteudoCategoriaIdRoute
+    }
   }
 }
 
+interface modulesConteudoCategoriaIdRouteChildren {
+  modulesConteudoCategoriaIdTrilhaIdRoute: typeof modulesConteudoCategoriaIdTrilhaIdRoute
+  modulesConteudoCategoriaIdIndexRoute: typeof modulesConteudoCategoriaIdIndexRoute
+}
+
+const modulesConteudoCategoriaIdRouteChildren: modulesConteudoCategoriaIdRouteChildren =
+  {
+    modulesConteudoCategoriaIdTrilhaIdRoute:
+      modulesConteudoCategoriaIdTrilhaIdRoute,
+    modulesConteudoCategoriaIdIndexRoute: modulesConteudoCategoriaIdIndexRoute,
+  }
+
+const modulesConteudoCategoriaIdRouteWithChildren =
+  modulesConteudoCategoriaIdRoute._addFileChildren(
+    modulesConteudoCategoriaIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  modulesConteudoCategoriaIdRoute: modulesConteudoCategoriaIdRoute,
+  modulesConteudoCategoriaIdRoute: modulesConteudoCategoriaIdRouteWithChildren,
   modulesConteudoIndexRoute: modulesConteudoIndexRoute,
 }
 export const routeTree = rootRouteImport

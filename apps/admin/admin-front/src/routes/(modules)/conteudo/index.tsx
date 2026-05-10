@@ -114,7 +114,9 @@ function Conteudo() {
     });
 
     function abrirNova() {
-        void navigate({ to: '/conteudo/$categoriaId', params: { categoriaId: 'nova' } });
+        setCategoriaEditando(undefined);
+        setPainelKey((k) => k + 1);
+        setPainelAberto(true);
     }
 
     function abrirEdicaoRapida(indiceFiltrado: number) {
@@ -198,8 +200,8 @@ function Conteudo() {
             <PainelLateral
                 aberto={painelAberto}
                 onFechar={fecharPainel}
-                titulo="Editar Categoria"
-                subtitulo="Edição rápida"
+                titulo={categoriaEditando ? 'Editar Categoria' : 'Nova Categoria'}
+                subtitulo={categoriaEditando ? 'Edição rápida' : 'Preencha os dados da nova categoria'}
             >
                 <FormularioCategoria
                     key={painelKey}
