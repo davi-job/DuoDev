@@ -61,6 +61,95 @@ export interface CreateCategoriaDto {
 
 export interface UpdateCategoriaDto extends Partial<CreateCategoriaDto> {}
 
+export type TipoConteudo = 'aula' | 'questao' | 'desafio';
+
+export interface LessonElement {
+    id: string;
+    type: 'texto' | 'imagem';
+    content: string;
+    order: number;
+}
+export type StatusConteudo = 'publicado' | 'rascunho' | 'arquivado';
+
+export interface Alternative {
+    id: string;
+    text: string;
+}
+
+export interface Aula {
+    id: string;
+    trailId: string;
+    order: number;
+    title: string;
+    elements: LessonElement[];
+    status: StatusConteudo;
+    createdAt: string;
+    updatedAt: string;
+    type: 'aula';
+}
+
+export interface Questao {
+    id: string;
+    trailId: string;
+    order: number;
+    title: string;
+    description: string | null;
+    alternatives: Alternative[];
+    answer: string;
+    status: StatusConteudo;
+    createdAt: string;
+    updatedAt: string;
+    type: 'questao';
+}
+
+export interface Desafio {
+    id: string;
+    trailId: string;
+    order: number;
+    title: string;
+    description: string | null;
+    instructions: string | null;
+    status: StatusConteudo;
+    createdAt: string;
+    updatedAt: string;
+    type: 'desafio';
+}
+
+export type ItemConteudo = Aula | Questao | Desafio;
+
+export interface CreateAulaDto {
+    trailId: string;
+    order: number;
+    title: string;
+    elements: LessonElement[];
+    status?: StatusConteudo;
+}
+
+export interface CreateQuestaoDto {
+    trailId: string;
+    order: number;
+    title: string;
+    description?: string;
+    alternatives: Alternative[];
+    answer: string;
+    status?: StatusConteudo;
+}
+
+export interface CreateDesafioDto {
+    trailId: string;
+    order: number;
+    title: string;
+    description?: string;
+    instructions?: string;
+    status?: StatusConteudo;
+}
+
+export interface ReorderItemDto {
+    id: string;
+    type: TipoConteudo;
+    order: number;
+}
+
 export const STATUS_CONFIG: Record<
     StatusCategoria,
     { label: string; cor: 'verde' | 'amarelo' | 'vermelho' | 'azul' }
