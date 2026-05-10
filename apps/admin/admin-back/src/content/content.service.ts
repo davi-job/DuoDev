@@ -39,8 +39,7 @@ export class ContentService {
                 trailId: dto.trailId,
                 order: dto.order,
                 title: dto.title,
-                description: dto.description,
-                videoUrl: dto.videoUrl,
+                elements: dto.elements,
                 status: dto.status ?? 'rascunho',
             })
             .returning();
