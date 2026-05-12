@@ -11,5 +11,8 @@
 
     border-radius: 50rem;
 
-    padding: 0.25rem 1rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
 }

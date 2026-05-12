@@ -1,21 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
-import {
-    TrendingUpIcon,
-    TrendingDownIcon,
-    UsersIcon,
-    BookOpenIcon,
-    BrainCircuitIcon,
-    LayersIcon,
-    PlusCircleIcon,
-    EditIcon,
-    Trash2Icon,
-    CheckCircleIcon,
-    GlobeIcon,
-    FileCode2Icon,
-    ServerIcon,
-    SmartphoneIcon,
-    DatabaseIcon,
-} from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { BookOpenIcon, BrainCircuitIcon, LayersIcon, FolderIcon, ArrowUpIcon, ArrowDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+
+import { dashboardApi } from '../api/dashboard';
+import TelaErro from '../components/TelaErro';
+import type { StatusCount, CategoriaDashboard, UltimoConteudoItem } from '../types';
 
 import './index.css';
 
@@ -23,7 +13,39 @@ export const Route = createFileRoute('/')({
     component: Home,
 });
 
-/* ─── Tudo mock / descartável ─── */
+const STATUS_CORES: Record<string, string> = {
+    publicado: '#9eea6c',
+    rascunho: '#f59e0b',
+    revisao: '#ef4444',
+    arquivado: '#3178C6',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+    publicado: 'Publicado',
+    rascunho: 'Rascunho',
+    revisao: 'Revisão',
+    arquivado: 'Arquivado',
+};
+
+const TIPO_CONFIG: Record<string, { label: string; cor: string }> = {
+    aula: { label: 'Aula', cor: '#5B9BD5' },
+    questao: { label: 'Questão', cor: '#3CEFB0' },
+    desafio: { label: 'Desafio', cor: '#FF8A65' },
+};
+
+const STATUS_ORDEM = ['publicado', 'rascunho', 'revisao', 'arquivado'] as const;
+
+function tempoRelativo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Agora';
+    if (mins < 60) return `Há ${mins}min`;
+    const horas = Math.floor(mins / 60);
+    if (horas < 24) return `Há ${horas}h`;
+    const dias = Math.floor(horas / 24);
+    if (dias === 1) return 'Ontem';
+    return `Há ${dias} dias`;
+}
 
 function Home() {
     const hoje = new Date().toLocaleDateString('pt-BR', {
@@ -33,9 +55,27 @@ function Home() {
         year: 'numeric',
     });
 
+    const { data, isLoading, isError, refetch } = useQuery({
+        queryKey: ['dashboard'],
+        queryFn: dashboardApi.buscar,
+        staleTime: 0,
+    });
+
+    if (isLoading) return <div className="loading">Carregando painel...</div>;
+
+    if (isError || !data) {
+        return (
+            <TelaErro
+                mensagem="Não foi possível carregar o painel. Verifique a conexão com o servidor."
+                onTentar={() => void refetch()}
+            />
+        );
+    }
+
+    const totalExercicios = data.totais.questoes + data.totais.desafios;
+
     return (
         <div className="home">
-            {/* Header */}
             <div className="home-header">
                 <div>
                     <h4>Admin / Home</h4>
@@ -44,179 +84,132 @@ function Home() {
                 <span className="data-hoje">{hoje}</span>
             </div>
 
-            {/* Stats */}
             <div className="home-stats">
-                <StatCard label="USUÁRIOS ATIVOS" valor="1.247" variacao="+12%" positivo />
-                <StatCard label="CATEGORIAS" valor="8" variacao="+2 este mês" positivo />
-                <StatCard label="AULAS CONCLUÍDAS" valor="4.832" variacao="+23%" positivo />
-                <StatCard label="TAXA DE ABANDONO" valor="8.2%" variacao="-3.1%" positivo={false} />
+                <StatCard
+                    icone={<FolderIcon size={18} />}
+                    label="CATEGORIAS"
+                    valor={data.totais.categorias}
+                    sub={`${data.categoriasPorStatus.publicado} publicadas`}
+                    cor="#3CEFB0"
+                />
+                <StatCard
+                    icone={<LayersIcon size={18} />}
+                    label="TRILHAS"
+                    valor={data.totais.trilhas}
+                    sub={`${data.trilhasPorStatus.publicado} publicadas`}
+                    cor="#9eea6c"
+                />
+                <StatCard
+                    icone={<BookOpenIcon size={18} />}
+                    label="AULAS"
+                    valor={data.totais.aulas}
+                    sub="Total de aulas criadas"
+                    cor="#5B9BD5"
+                />
+                <StatCard
+                    icone={<BrainCircuitIcon size={18} />}
+                    label="EXERCÍCIOS"
+                    valor={totalExercicios}
+                    sub={`${data.totais.questoes} questões · ${data.totais.desafios} desafios`}
+                    cor="#FF8A65"
+                />
             </div>
 
-            {/* Cards em grid livre */}
-            <div className="home-cards">
-                <div style={{ gridArea: 'grafico' }}><GraficoBarras /></div>
-                <div style={{ gridArea: 'atividade' }}><AtividadeRecente /></div>
-                <div style={{ gridArea: 'top' }}><TopCategorias /></div>
-                <div style={{ gridArea: 'donut' }}><DonutStatus /></div>
-                <div style={{ gridArea: 'usuarios' }}><UsuariosPorCategoria /></div>
-                <div style={{ gridArea: 'mini' }}><MiniEstatisticas /></div>
+            <div className="home-grid">
+                <div className="home-grid-esquerda">
+                    <DonutCard titulo="Status das Categorias" status={data.categoriasPorStatus} />
+                    <StatusBarras titulo="Status das Trilhas" status={data.trilhasPorStatus} />
+                </div>
+                <ConteudoPorCategoria categorias={data.trilhasPorCategoria} />
             </div>
+
+            <UltimoConteudo itens={data.ultimoConteudo} />
+            <RankingTrilhas />
         </div>
     );
 }
 
-/* ─── Componentes internos (tudo aqui, descartável) ─── */
-
 function StatCard({
+    icone,
     label,
     valor,
-    variacao,
-    positivo,
+    sub,
+    cor,
 }: {
+    icone: React.ReactNode;
     label: string;
-    valor: string;
-    variacao: string;
-    positivo: boolean;
+    valor: number;
+    sub: string;
+    cor: string;
 }) {
     return (
         <div className="stat-card">
-            <span className="stat-label">{label}</span>
-            <span className="stat-valor">{valor}</span>
-            <span className={`stat-sub ${positivo ? 'positivo' : 'negativo'}`}>
-                {positivo ? <TrendingUpIcon size={14} /> : <TrendingDownIcon size={14} />}
-                {variacao}
-            </span>
-        </div>
-    );
-}
-
-function GraficoBarras() {
-    const meses = [
-        { label: 'Jan', valor: 65 },
-        { label: 'Fev', valor: 45 },
-        { label: 'Mar', valor: 80 },
-        { label: 'Abr', valor: 52 },
-        { label: 'Mai', valor: 90 },
-        { label: 'Jun', valor: 70 },
-        { label: 'Jul', valor: 85 },
-        { label: 'Ago', valor: 60 },
-        { label: 'Set', valor: 95 },
-        { label: 'Out', valor: 75 },
-        { label: 'Nov', valor: 88 },
-        { label: 'Dez', valor: 42 },
-    ];
-
-    return (
-        <div className="grafico-card">
-            <span className="grafico-titulo">Aulas concluídas por mês</span>
-            <div className="grafico-barras">
-                {meses.map((m) => (
-                    <div key={m.label} className="barra-grupo">
-                        <div
-                            className="barra"
-                            style={{
-                                height: `${m.valor}%`,
-                                backgroundColor: m.valor > 75 ? '#9eea6c' : m.valor > 50 ? '#9eea6c80' : '#9eea6c40',
-                            }}
-                        />
-                        <span className="barra-label">{m.label}</span>
-                    </div>
-                ))}
+            <div className="stat-icone" style={{ backgroundColor: `${cor}20`, color: cor }}>
+                {icone}
+            </div>
+            <div className="stat-info">
+                <span className="stat-label">{label}</span>
+                <span className="stat-valor">{valor}</span>
+                <span className="stat-sub">{sub}</span>
             </div>
         </div>
     );
 }
 
-function AtividadeRecente() {
-    const atividades = [
-        { icone: <PlusCircleIcon size={14} />, cor: '#3CEFB0', texto: 'Categoria "Mobile" criada', tempo: 'Há 2 horas' },
-        { icone: <EditIcon size={14} />, cor: '#F7DF1E', texto: 'Trilha "React Básico" editada', tempo: 'Há 3 horas' },
-        { icone: <CheckCircleIcon size={14} />, cor: '#9eea6c', texto: '12 questões publicadas', tempo: 'Há 5 horas' },
-        { icone: <Trash2Icon size={14} />, cor: '#ef4444', texto: 'Aula duplicada removida', tempo: 'Há 8 horas' },
-        { icone: <PlusCircleIcon size={14} />, cor: '#3CEFB0', texto: 'Desafio "FizzBuzz" criado', tempo: 'Há 1 dia' },
-        { icone: <EditIcon size={14} />, cor: '#F7DF1E', texto: 'Categoria "Backend" atualizada', tempo: 'Há 1 dia' },
-        { icone: <CheckCircleIcon size={14} />, cor: '#9eea6c', texto: 'Trilha "SQL" publicada', tempo: 'Há 2 dias' },
-    ];
-
-    return (
-        <div className="atividade-card">
-            <span className="atividade-titulo">Atividade Recente</span>
-            <div className="atividade-lista">
-                {atividades.map((a, i) => (
-                    <div key={i} className="atividade-item">
-                        <div
-                            className="atividade-icone"
-                            style={{ backgroundColor: `${a.cor}20`, color: a.cor }}
-                        >
-                            {a.icone}
-                        </div>
-                        <div className="atividade-info">
-                            <span>{a.texto}</span>
-                            <span>{a.tempo}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-function DonutStatus() {
-    const dados = [
-        { label: 'Publicado', valor: 4, cor: '#9eea6c' },
-        { label: 'Rascunho', valor: 2, cor: '#f59e0b' },
-        { label: 'Revisão', valor: 1, cor: '#ef4444' },
-        { label: 'Arquivado', valor: 1, cor: '#3178C6' },
-    ];
-    const total = dados.reduce((s, d) => s + d.valor, 0);
-
-    // Calcular segmentos do donut SVG
+function DonutCard({ titulo, status }: { titulo: string; status: StatusCount }) {
+    const total = STATUS_ORDEM.reduce((s, k) => s + status[k], 0);
     const raio = 52;
     const circunferencia = 2 * Math.PI * raio;
     let offset = 0;
 
     return (
-        <div className="donut-card">
-            <span className="donut-titulo">Status das Categorias</span>
+        <div className="card">
+            <span className="card-titulo">{titulo}</span>
             <div className="donut-conteudo">
                 <svg className="donut-svg" viewBox="0 0 140 140">
-                    {dados.map((d) => {
-                        const proporcao = d.valor / total;
-                        const dashLength = proporcao * circunferencia;
-                        const dashGap = circunferencia - dashLength;
-                        const currentOffset = offset;
-                        offset += dashLength;
-
-                        return (
-                            <circle
-                                key={d.label}
-                                cx="70"
-                                cy="70"
-                                r={raio}
-                                fill="none"
-                                stroke={d.cor}
-                                strokeWidth="16"
-                                strokeDasharray={`${dashLength} ${dashGap}`}
-                                strokeDashoffset={-currentOffset}
-                                strokeLinecap="butt"
-                                transform="rotate(-90 70 70)"
-                            />
-                        );
-                    })}
+                    {total === 0 ? (
+                        <circle
+                            cx="70" cy="70" r={raio}
+                            fill="none"
+                            stroke="var(--border-primary)"
+                            strokeWidth="16"
+                        />
+                    ) : (
+                        STATUS_ORDEM.map((key) => {
+                            if (status[key] === 0) return null;
+                            const proporcao = status[key] / total;
+                            const dashLength = proporcao * circunferencia;
+                            const dashGap = circunferencia - dashLength;
+                            const currentOffset = offset;
+                            offset += dashLength;
+                            return (
+                                <circle
+                                    key={key}
+                                    cx="70" cy="70" r={raio}
+                                    fill="none"
+                                    stroke={STATUS_CORES[key]}
+                                    strokeWidth="16"
+                                    strokeDasharray={`${dashLength} ${dashGap}`}
+                                    strokeDashoffset={-currentOffset}
+                                    transform="rotate(-90 70 70)"
+                                />
+                            );
+                        })
+                    )}
                     <text x="70" y="66" textAnchor="middle" fill="var(--text-primary)" fontSize="24" fontWeight="900">
                         {total}
                     </text>
                     <text x="70" y="84" textAnchor="middle" fill="var(--text-tertiary)" fontSize="10">
-                        categorias
+                        total
                     </text>
                 </svg>
-
                 <div className="donut-legenda">
-                    {dados.map((d) => (
-                        <div key={d.label} className="legenda-item">
-                            <div className="legenda-cor" style={{ backgroundColor: d.cor }} />
+                    {STATUS_ORDEM.map((key) => (
+                        <div key={key} className="legenda-item">
+                            <div className="legenda-cor" style={{ backgroundColor: STATUS_CORES[key] }} />
                             <span>
-                                {d.label} ({d.valor})
+                                {STATUS_LABELS[key]}{' '}
+                                <span className="legenda-num">({status[key]})</span>
                             </span>
                         </div>
                     ))}
@@ -226,114 +219,240 @@ function DonutStatus() {
     );
 }
 
-function UsuariosPorCategoria() {
-    const categorias = [
-        { nome: 'Fundamentos', icone: <GlobeIcon size={14} />, cor: '#3CEFB0', usuarios: 482, conclusao: 67 },
-        { nome: 'JavaScript', icone: <FileCode2Icon size={14} />, cor: '#F7DF1E', usuarios: 351, conclusao: 43 },
-        { nome: 'Backend', icone: <ServerIcon size={14} />, cor: '#5B9BD5', usuarios: 198, conclusao: 31 },
-        { nome: 'Mobile', icone: <SmartphoneIcon size={14} />, cor: '#FF8A65', usuarios: 124, conclusao: 22 },
-        { nome: 'Banco de Dados', icone: <DatabaseIcon size={14} />, cor: '#3178C6', usuarios: 215, conclusao: 54 },
-    ];
-
-    const maxUsuarios = Math.max(...categorias.map((c) => c.usuarios));
+function StatusBarras({ titulo, status }: { titulo: string; status: StatusCount }) {
+    const total = STATUS_ORDEM.reduce((s, k) => s + status[k], 0);
 
     return (
-        <div className="card-aux">
-            <span className="card-aux-titulo">Usuários por Categoria</span>
-            <div className="resumo-lista">
-                {categorias.map((cat) => (
-                    <div key={cat.nome} className="resumo-item">
-                        <div className="resumo-item-esquerda">
-                            <div
-                                className="resumo-item-icone"
-                                style={{ backgroundColor: `${cat.cor}20`, color: cat.cor }}
-                            >
-                                {cat.icone}
-                            </div>
-                            <span className="resumo-item-nome">{cat.nome}</span>
-                        </div>
-                        <div className="resumo-item-direita">
-                            <div className="resumo-barra-bg">
+        <div className="card">
+            <span className="card-titulo">{titulo}</span>
+            <div className="status-barras">
+                {total > 0 && (
+                    <div className="status-barra-stacked">
+                        {STATUS_ORDEM.map((key) => {
+                            if (status[key] === 0) return null;
+                            return (
                                 <div
-                                    className="resumo-barra-fill"
+                                    key={key}
+                                    className="status-barra-segmento"
                                     style={{
-                                        width: `${(cat.usuarios / maxUsuarios) * 100}%`,
-                                        backgroundColor: cat.cor,
+                                        width: `${(status[key] / total) * 100}%`,
+                                        backgroundColor: STATUS_CORES[key],
                                     }}
+                                    title={`${STATUS_LABELS[key]}: ${status[key]}`}
                                 />
+                            );
+                        })}
+                    </div>
+                )}
+                <div className="status-lista">
+                    {STATUS_ORDEM.map((key) => (
+                        <div key={key} className="status-item">
+                            <div className="status-item-esq">
+                                <div className="legenda-cor" style={{ backgroundColor: STATUS_CORES[key] }} />
+                                <span>{STATUS_LABELS[key]}</span>
                             </div>
-                            <span className="resumo-item-valor" title={`${cat.conclusao}% concluem`}>
-                                {cat.usuarios}
-                            </span>
+                            <span className="status-item-num">{status[key]}</span>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
 }
 
-function TopCategorias() {
-    const top = [
-        { nome: 'JavaScript', icone: <FileCode2Icon size={16} />, cor: '#F7DF1E', pos: 2 },
-        { nome: 'Fundamentos', icone: <GlobeIcon size={16} />, cor: '#3CEFB0', pos: 1 },
-        { nome: 'Banco de Dados', icone: <DatabaseIcon size={16} />, cor: '#3178C6', pos: 3 },
-    ];
-
-    const alturas = ['65%', '90%', '50%'];
-
+function BarraEmpilhada({ status, total }: { status: StatusCount; total: number }) {
+    if (total === 0) {
+        return <div className="cat-barra-bg" />;
+    }
     return (
-        <div className="card-aux">
-            <span className="card-aux-titulo">Top Categorias</span>
-            <div className="podium">
-                {top.map((cat, i) => (
-                    <div key={cat.nome} className="podium-item">
-                        <div
-                            className="podium-icone"
-                            style={{ backgroundColor: `${cat.cor}20`, color: cat.cor }}
-                        >
-                            {cat.icone}
-                        </div>
-                        <div
-                            className="podium-barra"
-                            style={{ height: alturas[i], backgroundColor: `${cat.cor}15` }}
-                        >
-                            <span className="podium-posicao">{cat.pos}°</span>
-                            <span className="podium-nome">{cat.nome}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
+        <div className="cat-barra-bg cat-barra-stacked">
+            {STATUS_ORDEM.map((key) => {
+                if (status[key] === 0) return null;
+                return (
+                    <div
+                        key={key}
+                        className="cat-barra-segmento"
+                        style={{
+                            width: `${(status[key] / total) * 100}%`,
+                            backgroundColor: STATUS_CORES[key],
+                        }}
+                        title={`${STATUS_LABELS[key]}: ${status[key]}`}
+                    />
+                );
+            })}
         </div>
     );
 }
 
-function MiniEstatisticas() {
+function ConteudoPorCategoria({ categorias }: { categorias: CategoriaDashboard[] }) {
     return (
-        <div className="card-aux">
-            <span className="card-aux-titulo">Resumo Geral</span>
-            <div className="mini-stats">
-                <div className="mini-stat">
-                    <span className="mini-stat-label">TRILHAS</span>
-                    <span className="mini-stat-valor">26</span>
-                    <span className="mini-stat-sub">em 8 categorias</span>
+        <div className="card">
+            <span className="card-titulo">Conteúdo por Categoria</span>
+            {categorias.length === 0 ? (
+                <p className="vazio">Nenhuma categoria cadastrada.</p>
+            ) : (
+                <div className="cat-lista">
+                    <div className="cat-header">
+                        <span>Categoria</span>
+                        <span>Trilhas</span>
+                        <span>Conteúdo</span>
+                    </div>
+                    {categorias.map((cat) => (
+                        <div key={cat.id} className="cat-item">
+                            <div className="cat-nome">
+                                <div className="cat-cor" style={{ backgroundColor: cat.thumbColor }} />
+                                <Link
+                                    to="/conteudo/$categoriaId"
+                                    params={{ categoriaId: cat.id }}
+                                    className="cat-link"
+                                >
+                                    {cat.nome}
+                                </Link>
+                            </div>
+                            <div className="cat-barra-wrap">
+                                <BarraEmpilhada status={cat.trilhasPorStatus} total={cat.totalTrilhas} />
+                                <span className="cat-num">{cat.totalTrilhas}</span>
+                            </div>
+                            <div className="cat-barra-wrap">
+                                <BarraEmpilhada status={cat.conteudoPorStatus} total={cat.totalConteudo} />
+                                <span className="cat-num">{cat.totalConteudo}</span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <div className="mini-stat">
-                    <span className="mini-stat-label">QUESTÕES</span>
-                    <span className="mini-stat-valor">530</span>
-                    <span className="mini-stat-sub">87% ativas</span>
-                </div>
-                <div className="mini-stat">
-                    <span className="mini-stat-label">DESAFIOS</span>
-                    <span className="mini-stat-valor">42</span>
-                    <span className="mini-stat-sub">12 novos</span>
-                </div>
-                <div className="mini-stat">
-                    <span className="mini-stat-label">MÉDIA/DIA</span>
-                    <span className="mini-stat-valor">89</span>
-                    <span className="mini-stat-sub">aulas concluídas</span>
-                </div>
+            )}
+        </div>
+    );
+}
+
+function RankingTrilhas() {
+    const [pagina, setPagina] = useState(1);
+    const [ordem, setOrdem] = useState<'asc' | 'desc'>('desc');
+
+    const { data, isFetching } = useQuery({
+        queryKey: ['dashboard', 'trilhas-ranking', pagina, ordem],
+        queryFn: () => dashboardApi.trilhasPorUsuarios(pagina, ordem),
+        staleTime: 0,
+        placeholderData: keepPreviousData,
+    });
+
+    function toggleOrdem() {
+        setOrdem((o) => (o === 'desc' ? 'asc' : 'desc'));
+        setPagina(1);
+    }
+
+    const inicio = data ? (pagina - 1) * data.porPagina + 1 : 0;
+
+    return (
+        <div className={`card${isFetching ? ' card-buscando' : ''}`}>
+            <div className="ranking-topo">
+                <span className="card-titulo">Trilhas por Inscrições</span>
+                <button className="btn-sec btn-ordem" onClick={toggleOrdem}>
+                    {ordem === 'desc'
+                        ? <><ArrowDownIcon size={14} /> Mais inscritas</>
+                        : <><ArrowUpIcon size={14} /> Menos inscritas</>
+                    }
+                </button>
             </div>
+
+            {!data || data.data.length === 0 ? (
+                <p className="vazio">Nenhuma trilha encontrada.</p>
+            ) : (
+                <>
+                    <div className="ranking-lista">
+                        <div className="ranking-header">
+                            <span>#</span>
+                            <span>Trilha</span>
+                            <span>Progresso médio</span>
+                            <span>Inscritos</span>
+                        </div>
+                        {data.data.map((trilha, i) => (
+                            <div key={trilha.id} className="ranking-item">
+                                <span className="ranking-pos">{inicio + i}</span>
+                                <div className="ranking-nome">
+                                    <div className="cat-cor" style={{ backgroundColor: trilha.thumb_color }} />
+                                    <div className="ranking-nome-info">
+                                        <span>{trilha.nome}</span>
+                                        {trilha.categoria_nome && (
+                                            <span className="ranking-categoria">{trilha.categoria_nome}</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="ranking-progresso">
+                                    <div className="cat-barra-bg">
+                                        <div
+                                            className="cat-barra-segmento"
+                                            style={{
+                                                width: `${trilha.progresso_medio}%`,
+                                                backgroundColor: '#9eea6c',
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="ranking-pct">{trilha.progresso_medio}%</span>
+                                </div>
+                                <span className="ranking-usuarios">{trilha.total_usuarios}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="ranking-paginacao">
+                        <button
+                            className="btn-sec btn-pag"
+                            onClick={() => setPagina((p) => p - 1)}
+                            disabled={pagina === 1}
+                        >
+                            <ChevronLeftIcon size={16} />
+                        </button>
+                        <span className="pag-info">
+                            Página {pagina} de {data.totalPaginas}
+                        </span>
+                        <button
+                            className="btn-sec btn-pag"
+                            onClick={() => setPagina((p) => p + 1)}
+                            disabled={pagina >= data.totalPaginas}
+                        >
+                            <ChevronRightIcon size={16} />
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+function UltimoConteudo({ itens }: { itens: UltimoConteudoItem[] }) {
+    return (
+        <div className="card">
+            <span className="card-titulo">Últimos Conteúdos Criados</span>
+            {itens.length === 0 ? (
+                <p className="vazio">Nenhum conteúdo cadastrado ainda.</p>
+            ) : (
+                <div className="feed-lista">
+                    <div className="feed-header">
+                        <span>Título</span>
+                        <span>Trilha</span>
+                        <span>Criado</span>
+                    </div>
+                    {itens.map((item) => {
+                        const cfg = TIPO_CONFIG[item.tipo] ?? { label: item.tipo, cor: '#888' };
+                        return (
+                            <div key={item.id} className="feed-item">
+                                <div className="feed-titulo">
+                                    <span
+                                        className="tipo-badge"
+                                        style={{ backgroundColor: `${cfg.cor}20`, color: cfg.cor }}
+                                    >
+                                        {cfg.label}
+                                    </span>
+                                    <span>{item.title}</span>
+                                </div>
+                                <span className="feed-trilha">{item.trail_name}</span>
+                                <span className="feed-tempo">{tempoRelativo(item.created_at)}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }

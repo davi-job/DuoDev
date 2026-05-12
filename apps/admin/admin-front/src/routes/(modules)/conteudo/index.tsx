@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -15,11 +15,15 @@ import { useToast } from '../../../components/Toast';
 import TelaErro from '../../../components/TelaErro';
 
 import { categoriasApi } from '../../../api/categorias';
+import { exportImportApi } from '../../../api/exportImport';
 import { STATUS_CONFIG, type Categoria, type StatusCategoria, type CreateCategoriaDto } from '../../../types';
 
 import '../Categorias.css';
 
 export const Route = createFileRoute('/(modules)/conteudo/')({
+    validateSearch: (search: Record<string, unknown>) => ({
+        status: typeof search.status === 'string' ? search.status : 'todos',
+    }),
     component: Conteudo,
 });
 
@@ -28,7 +32,9 @@ function Conteudo() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const [abaAtiva, setAbaAtiva] = useState('todos');
+    const { status: abaAtiva } = Route.useSearch();
+    const setAbaAtiva = (status: string) =>
+        void navigate({ to: '/conteudo', search: { status } });
     const [termoBusca, setTermoBusca] = useState('');
 
     const [painelAberto, setPainelAberto] = useState(false);
@@ -113,6 +119,60 @@ function Conteudo() {
         ];
     });
 
+    const inputImportRef = useRef<HTMLInputElement>(null);
+    const [importando, setImportando] = useState(false);
+    const [exportando, setExportando] = useState(false);
+
+    async function handleExportar() {
+        setExportando(true);
+        try {
+            const data = await exportImportApi.exportar();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `duodev-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch {
+            mostrarToast('erro', 'Erro ao exportar conteúdo.');
+        } finally {
+            setExportando(false);
+        }
+    }
+
+    async function handleImportar(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+
+        setImportando(true);
+        try {
+            const text = await file.text();
+            const json = JSON.parse(text) as { categories?: unknown[] };
+            if (!Array.isArray(json.categories)) {
+                mostrarToast('erro', 'Arquivo inválido: campo "categories" não encontrado.');
+                return;
+            }
+            const resultado = await exportImportApi.importar({ categories: json.categories });
+            const { criados, pulados } = resultado;
+            const msg = [
+                `${criados.categorias} categorias, ${criados.trilhas} trilhas,`,
+                `${criados.aulas} aulas, ${criados.questoes} questões, ${criados.desafios} desafios criados.`,
+                pulados.categorias > 0 ? `${pulados.categorias} puladas (já existiam).` : '',
+            ].filter(Boolean).join(' ');
+            mostrarToast('sucesso', msg);
+            queryClient.invalidateQueries({ queryKey: ['categorias'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        } catch {
+            mostrarToast('erro', 'Erro ao importar: verifique se o arquivo é um JSON válido.');
+        } finally {
+            setImportando(false);
+        }
+    }
+
     function abrirNova() {
         setCategoriaEditando(undefined);
         setPainelKey((k) => k + 1);
@@ -161,11 +221,37 @@ function Conteudo() {
 
     return (
         <>
+            <input
+                ref={inputImportRef}
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                onChange={(e) => void handleImportar(e)}
+            />
+
             <ModuleHeader
                 path={[{ label: 'Admin' }, { label: 'Conteúdo' }]}
                 title="Conteúdo"
                 btnLabel="Nova Categoria"
                 btnOnClick={abrirNova}
+                acoes={
+                    <>
+                        <button
+                            className="btn-sec"
+                            onClick={() => inputImportRef.current?.click()}
+                            disabled={importando}
+                        >
+                            {importando ? 'Importando...' : 'Importar JSON'}
+                        </button>
+                        <button
+                            className="btn-sec"
+                            onClick={() => void handleExportar()}
+                            disabled={exportando}
+                        >
+                            {exportando ? 'Exportando...' : 'Exportar JSON'}
+                        </button>
+                    </>
+                }
             />
 
             <section className="data">
