@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { BookOpenIcon, BrainCircuitIcon, LayersIcon, FolderIcon } from 'lucide-react';
+import { BookOpenIcon, BrainCircuitIcon, LayersIcon, FolderIcon, ArrowUpIcon, ArrowDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
 import { dashboardApi } from '../api/dashboard';
 import TelaErro from '../components/TelaErro';
@@ -123,6 +124,7 @@ function Home() {
             </div>
 
             <UltimoConteudo itens={data.ultimoConteudo} />
+            <RankingTrilhas />
         </div>
     );
 }
@@ -318,6 +320,101 @@ function ConteudoPorCategoria({ categorias }: { categorias: CategoriaDashboard[]
                         </div>
                     ))}
                 </div>
+            )}
+        </div>
+    );
+}
+
+function RankingTrilhas() {
+    const [pagina, setPagina] = useState(1);
+    const [ordem, setOrdem] = useState<'asc' | 'desc'>('desc');
+
+    const { data, isFetching } = useQuery({
+        queryKey: ['dashboard', 'trilhas-ranking', pagina, ordem],
+        queryFn: () => dashboardApi.trilhasPorUsuarios(pagina, ordem),
+        staleTime: 0,
+        placeholderData: keepPreviousData,
+    });
+
+    function toggleOrdem() {
+        setOrdem((o) => (o === 'desc' ? 'asc' : 'desc'));
+        setPagina(1);
+    }
+
+    const inicio = data ? (pagina - 1) * data.porPagina + 1 : 0;
+
+    return (
+        <div className={`card${isFetching ? ' card-buscando' : ''}`}>
+            <div className="ranking-topo">
+                <span className="card-titulo">Trilhas por Inscrições</span>
+                <button className="btn-sec btn-ordem" onClick={toggleOrdem}>
+                    {ordem === 'desc'
+                        ? <><ArrowDownIcon size={14} /> Mais inscritas</>
+                        : <><ArrowUpIcon size={14} /> Menos inscritas</>
+                    }
+                </button>
+            </div>
+
+            {!data || data.data.length === 0 ? (
+                <p className="vazio">Nenhuma trilha encontrada.</p>
+            ) : (
+                <>
+                    <div className="ranking-lista">
+                        <div className="ranking-header">
+                            <span>#</span>
+                            <span>Trilha</span>
+                            <span>Progresso médio</span>
+                            <span>Inscritos</span>
+                        </div>
+                        {data.data.map((trilha, i) => (
+                            <div key={trilha.id} className="ranking-item">
+                                <span className="ranking-pos">{inicio + i}</span>
+                                <div className="ranking-nome">
+                                    <div className="cat-cor" style={{ backgroundColor: trilha.thumb_color }} />
+                                    <div className="ranking-nome-info">
+                                        <span>{trilha.nome}</span>
+                                        {trilha.categoria_nome && (
+                                            <span className="ranking-categoria">{trilha.categoria_nome}</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="ranking-progresso">
+                                    <div className="cat-barra-bg">
+                                        <div
+                                            className="cat-barra-segmento"
+                                            style={{
+                                                width: `${trilha.progresso_medio}%`,
+                                                backgroundColor: '#9eea6c',
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="ranking-pct">{trilha.progresso_medio}%</span>
+                                </div>
+                                <span className="ranking-usuarios">{trilha.total_usuarios}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="ranking-paginacao">
+                        <button
+                            className="btn-sec btn-pag"
+                            onClick={() => setPagina((p) => p - 1)}
+                            disabled={pagina === 1}
+                        >
+                            <ChevronLeftIcon size={16} />
+                        </button>
+                        <span className="pag-info">
+                            Página {pagina} de {data.totalPaginas}
+                        </span>
+                        <button
+                            className="btn-sec btn-pag"
+                            onClick={() => setPagina((p) => p + 1)}
+                            disabled={pagina >= data.totalPaginas}
+                        >
+                            <ChevronRightIcon size={16} />
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );

@@ -185,6 +185,23 @@ export interface UltimoConteudoItem {
     trail_name: string;
 }
 
+export interface TrilhaRankingItem {
+    id: string;
+    nome: string;
+    categoria_nome: string | null;
+    thumb_color: string;
+    total_usuarios: number;
+    progresso_medio: number;
+}
+
+export interface TrilhasRankingResponse {
+    data: TrilhaRankingItem[];
+    pagina: number;
+    porPagina: number;
+    total: number;
+    totalPaginas: number;
+}
+
 export interface DashboardData {
     totais: DashboardTotais;
     categoriasPorStatus: StatusCount;

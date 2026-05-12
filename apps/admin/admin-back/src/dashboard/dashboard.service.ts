@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm';
 import { categories, trails } from '@duodev/db';
 import type { DB } from '@duodev/db';
 
+const POR_PAGINA = 10;
+
 @Injectable()
 export class DashboardService {
     constructor(@Inject('DB') private readonly db: DB) {}
@@ -152,6 +154,64 @@ export class DashboardService {
             ),
             trilhasPorCategoria,
             ultimoConteudo: ultimoConteudoResult.rows,
+        };
+    }
+
+    async getTrilhasPorUsuarios(pagina: number, ordem: 'asc' | 'desc') {
+        const offset = (pagina - 1) * POR_PAGINA;
+
+        const [totalResult, rowsResult] = await Promise.all([
+            this.db.execute(sql`
+                select count(*)::int as total from "trails"
+            `),
+            ordem === 'asc'
+                ? this.db.execute(sql`
+                    select
+                        t.id,
+                        t.name as nome,
+                        c.name as categoria_nome,
+                        t.thumb_color,
+                        count(ut.id)::int as total_usuarios,
+                        coalesce(round(avg(ut.progress_pct))::int, 0) as progresso_medio
+                    from "trails" t
+                    left join "categories" c on t.category_id = c.id
+                    left join "user_trail" ut on ut.trail_id = t.id
+                    group by t.id, t.name, c.name, t.thumb_color
+                    order by total_usuarios asc, t.name asc
+                    limit ${POR_PAGINA} offset ${offset}
+                `)
+                : this.db.execute(sql`
+                    select
+                        t.id,
+                        t.name as nome,
+                        c.name as categoria_nome,
+                        t.thumb_color,
+                        count(ut.id)::int as total_usuarios,
+                        coalesce(round(avg(ut.progress_pct))::int, 0) as progresso_medio
+                    from "trails" t
+                    left join "categories" c on t.category_id = c.id
+                    left join "user_trail" ut on ut.trail_id = t.id
+                    group by t.id, t.name, c.name, t.thumb_color
+                    order by total_usuarios desc, t.name asc
+                    limit ${POR_PAGINA} offset ${offset}
+                `),
+        ]);
+
+        const total = (totalResult.rows[0] as { total: number }).total;
+
+        return {
+            data: rowsResult.rows as {
+                id: string;
+                nome: string;
+                categoria_nome: string | null;
+                thumb_color: string;
+                total_usuarios: number;
+                progresso_medio: number;
+            }[],
+            pagina,
+            porPagina: POR_PAGINA,
+            total,
+            totalPaginas: Math.ceil(total / POR_PAGINA),
         };
     }
 }
