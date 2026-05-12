@@ -6,7 +6,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "docker compose up",
-        "dev:build": "docker compose up --build",
+        "dev:build": "tsx scripts/dev-build.ts",
         "dev:down": "docker compose down",
         "dev:down:v": "docker compose down -v",
         "prod": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d",
