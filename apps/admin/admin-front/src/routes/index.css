@@ -274,10 +274,16 @@
     overflow: hidden;
 }
 
-.cat-barra-fill {
+.cat-barra-stacked {
+    display: flex;
+    gap: 2px;
+    background-color: transparent;
+}
+
+.cat-barra-segmento {
     height: 100%;
     border-radius: 50rem;
-    transition: width 400ms ease;
+    transition: width 300ms ease;
     min-width: 4px;
 }
 

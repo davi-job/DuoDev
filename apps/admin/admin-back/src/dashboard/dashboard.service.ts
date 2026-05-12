@@ -52,7 +52,7 @@ export class DashboardService {
             group by status
         `);
 
-        const trilhasPorCategoria = await this.db
+        const trilhasPorCategoriaBase = await this.db
             .select({
                 id: categories.id,
                 nome: categories.name,
@@ -78,6 +78,47 @@ export class DashboardService {
             })
             .from(categories)
             .orderBy(categories.name);
+
+        const [trilhaStatusPorCatResult, conteudoStatusPorCatResult] = await Promise.all([
+            this.db.execute(sql`
+                select category_id, status, count(*)::int as total
+                from "trails"
+                group by category_id, status
+            `),
+            this.db.execute(sql`
+                select t.category_id, c.status, count(*)::int as total
+                from (
+                    select trail_id, status from "lessons"
+                    union all
+                    select trail_id, status from "questions"
+                    union all
+                    select trail_id, status from "challenges"
+                ) c
+                inner join "trails" t on c.trail_id = t.id
+                group by t.category_id, c.status
+            `),
+        ]);
+
+        type StatusRow = { category_id: string; status: string; total: number };
+        const emptyStatus = () => ({ publicado: 0, rascunho: 0, revisao: 0, arquivado: 0 });
+
+        const buildStatusMap = (rows: StatusRow[]) => {
+            const map: Record<string, Record<string, number>> = {};
+            for (const r of rows) {
+                if (!map[r.category_id]) map[r.category_id] = emptyStatus();
+                map[r.category_id][r.status] = r.total;
+            }
+            return map;
+        };
+
+        const trilhaStatusMap = buildStatusMap(trilhaStatusPorCatResult.rows as StatusRow[]);
+        const conteudoStatusMap = buildStatusMap(conteudoStatusPorCatResult.rows as StatusRow[]);
+
+        const trilhasPorCategoria = trilhasPorCategoriaBase.map((cat) => ({
+            ...cat,
+            trilhasPorStatus: trilhaStatusMap[cat.id] ?? emptyStatus(),
+            conteudoPorStatus: conteudoStatusMap[cat.id] ?? emptyStatus(),
+        }));
 
         const ultimoConteudoResult = await this.db.execute(sql`
             select u.id, u.title, u.tipo, u.status, u.created_at, t.name as trail_name

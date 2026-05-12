@@ -172,6 +172,8 @@ export interface CategoriaDashboard {
     icon: string | null;
     totalTrilhas: number;
     totalConteudo: number;
+    trilhasPorStatus: StatusCount;
+    conteudoPorStatus: StatusCount;
 }
 
 export interface UltimoConteudoItem {

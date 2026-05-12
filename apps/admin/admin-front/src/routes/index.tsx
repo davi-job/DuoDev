@@ -258,10 +258,31 @@ function StatusBarras({ titulo, status }: { titulo: string; status: StatusCount 
     );
 }
 
-function ConteudoPorCategoria({ categorias }: { categorias: CategoriaDashboard[] }) {
-    const maxTrilhas = Math.max(...categorias.map((c) => c.totalTrilhas), 1);
-    const maxConteudo = Math.max(...categorias.map((c) => c.totalConteudo), 1);
+function BarraEmpilhada({ status, total }: { status: StatusCount; total: number }) {
+    if (total === 0) {
+        return <div className="cat-barra-bg" />;
+    }
+    return (
+        <div className="cat-barra-bg cat-barra-stacked">
+            {STATUS_ORDEM.map((key) => {
+                if (status[key] === 0) return null;
+                return (
+                    <div
+                        key={key}
+                        className="cat-barra-segmento"
+                        style={{
+                            width: `${(status[key] / total) * 100}%`,
+                            backgroundColor: STATUS_CORES[key],
+                        }}
+                        title={`${STATUS_LABELS[key]}: ${status[key]}`}
+                    />
+                );
+            })}
+        </div>
+    );
+}
 
+function ConteudoPorCategoria({ categorias }: { categorias: CategoriaDashboard[] }) {
     return (
         <div className="card">
             <span className="card-titulo">Conteúdo por Categoria</span>
@@ -287,27 +308,11 @@ function ConteudoPorCategoria({ categorias }: { categorias: CategoriaDashboard[]
                                 </Link>
                             </div>
                             <div className="cat-barra-wrap">
-                                <div className="cat-barra-bg">
-                                    <div
-                                        className="cat-barra-fill"
-                                        style={{
-                                            width: `${(cat.totalTrilhas / maxTrilhas) * 100}%`,
-                                            backgroundColor: '#9eea6c',
-                                        }}
-                                    />
-                                </div>
+                                <BarraEmpilhada status={cat.trilhasPorStatus} total={cat.totalTrilhas} />
                                 <span className="cat-num">{cat.totalTrilhas}</span>
                             </div>
                             <div className="cat-barra-wrap">
-                                <div className="cat-barra-bg">
-                                    <div
-                                        className="cat-barra-fill"
-                                        style={{
-                                            width: `${(cat.totalConteudo / maxConteudo) * 100}%`,
-                                            backgroundColor: '#5B9BD5',
-                                        }}
-                                    />
-                                </div>
+                                <BarraEmpilhada status={cat.conteudoPorStatus} total={cat.totalConteudo} />
                                 <span className="cat-num">{cat.totalConteudo}</span>
                             </div>
                         </div>
