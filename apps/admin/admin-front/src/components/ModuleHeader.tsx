@@ -13,9 +13,10 @@ interface HeaderProps {
     btnLabel?: string;
     btnOnClick?: () => void;
     btnDisabled?: boolean;
+    acoes?: React.ReactNode;
 }
 
-function ModuleHeader({ path, title, btnLabel, btnOnClick, btnDisabled }: HeaderProps) {
+function ModuleHeader({ path, title, btnLabel, btnOnClick, btnDisabled, acoes }: HeaderProps) {
     const items = path.map((item) =>
         typeof item === 'string' ? { label: item } : item,
     );
@@ -40,10 +41,15 @@ function ModuleHeader({ path, title, btnLabel, btnOnClick, btnDisabled }: Header
                 <h2>{title}</h2>
             </div>
 
-            {btnLabel && (
-                <button onClick={btnOnClick} disabled={btnDisabled}>
-                    {btnLabel}
-                </button>
+            {(acoes || btnLabel) && (
+                <div className="header-acoes">
+                    {acoes}
+                    {btnLabel && (
+                        <button onClick={btnOnClick} disabled={btnDisabled}>
+                            {btnLabel}
+                        </button>
+                    )}
+                </div>
             )}
         </header>
     );
