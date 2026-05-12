@@ -20,6 +20,9 @@ import { STATUS_CONFIG, type Categoria, type StatusCategoria, type CreateCategor
 import '../Categorias.css';
 
 export const Route = createFileRoute('/(modules)/conteudo/')({
+    validateSearch: (search: Record<string, unknown>) => ({
+        status: typeof search.status === 'string' ? search.status : 'todos',
+    }),
     component: Conteudo,
 });
 
@@ -28,7 +31,9 @@ function Conteudo() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const [abaAtiva, setAbaAtiva] = useState('todos');
+    const { status: abaAtiva } = Route.useSearch();
+    const setAbaAtiva = (status: string) =>
+        void navigate({ to: '/conteudo', search: { status } });
     const [termoBusca, setTermoBusca] = useState('');
 
     const [painelAberto, setPainelAberto] = useState(false);
