@@ -150,6 +150,48 @@ export interface ReorderItemDto {
     order: number;
 }
 
+export interface DashboardTotais {
+    categorias: number;
+    trilhas: number;
+    aulas: number;
+    questoes: number;
+    desafios: number;
+}
+
+export interface StatusCount {
+    publicado: number;
+    rascunho: number;
+    revisao: number;
+    arquivado: number;
+}
+
+export interface CategoriaDashboard {
+    id: string;
+    nome: string;
+    thumbColor: string;
+    icon: string | null;
+    totalTrilhas: number;
+    totalConteudo: number;
+}
+
+export interface UltimoConteudoItem {
+    id: string;
+    title: string;
+    tipo: TipoConteudo;
+    status: string;
+    created_at: string;
+    trail_name: string;
+}
+
+export interface DashboardData {
+    totais: DashboardTotais;
+    categoriasPorStatus: StatusCount;
+    trilhasPorStatus: StatusCount;
+    conteudoPorStatus: StatusCount;
+    trilhasPorCategoria: CategoriaDashboard[];
+    ultimoConteudo: UltimoConteudoItem[];
+}
+
 export const STATUS_CONFIG: Record<
     StatusCategoria,
     { label: string; cor: 'verde' | 'amarelo' | 'vermelho' | 'azul' }
