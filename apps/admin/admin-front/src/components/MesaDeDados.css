@@ -1,0 +1,104 @@
+.mesa-container {
+    width: 100%;
+
+    border: 1px solid var(--border-primary);
+    border-radius: 1rem;
+
+    overflow: hidden;
+
+    background-color: var(--bg-tertiary);
+}
+
+table {
+    font-size: 1rem;
+    width: 100%;
+
+    border-spacing: 0;
+
+    text-align: center;
+}
+
+table thead {
+    background-color: var(--bg-secondary);
+}
+
+table thead th {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+table tbody td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+
+    color: var(--text-secondary);
+}
+
+table thead th:first-of-type,
+table tbody td:first-of-type {
+    text-align: left;
+}
+
+table tbody td:first-of-type {
+    color: var(--text-primary);
+}
+
+/* ─── Paginação ─── */
+
+.paginacao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 1rem 1.5rem;
+
+    border-top: 1px solid var(--border-primary);
+    background-color: var(--bg-secondary);
+}
+
+.paginacao-info {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+}
+
+.paginacao-controles {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.paginacao-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2rem;
+    height: 2rem;
+
+    font-size: 0.875rem;
+
+    background-color: transparent;
+    color: var(--text-secondary);
+
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.paginacao-btn:hover:not(:disabled) {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.paginacao-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.paginacao-btn.ativo {
+    background-color: var(--accent-mid);
+    color: var(--accent);
+    border: 1px solid var(--accent-mid);
+}

@@ -26,6 +26,7 @@ import { BlogPostModule } from './blog-post/blog-post.module';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 type: 'postgres',
+                url: configService.get('DATABASE_URL'),
                 host: configService.get('POSTGRES_HOST'),
                 port: parseInt(configService.get('POSTGRES_PORT') || '5432', 10),
                 username: configService.get('POSTGRES_USER'),

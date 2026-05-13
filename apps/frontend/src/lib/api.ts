@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000'
+export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
 function getToken(): string {
   return localStorage.getItem('access_token') ?? ''
@@ -90,6 +90,7 @@ export async function updateMinhaSenha(data: { senhaAtual: string; novaSenha: st
 export async function updateUserPreferences(data: {
   language?: string
   interests?: string[]
+  interestReason?: string
   onboardingCompleted?: boolean
 }) {
   const res = await fetch(`${API_URL}/users/me/preferences`, {

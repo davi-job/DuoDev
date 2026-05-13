@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
 import axios from 'axios';
+import { API_URL } from '../../lib/api';
 
 const signUpForm = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -65,13 +66,19 @@ export function SignUp() {
         }
 
         try {
-            await axios.post('http://localhost:3000/auth/register', {
+            const response = await axios.post<{ message: string; devCode?: string }>(`${API_URL}/auth/register`, {
                 name: data.name,
                 email: data.email,
                 password: data.password,
+                turnstileToken: token,
             });
-            toast.success('Cadastro realizado com sucesso!');
-            navigate('/digitar-codigo', { state: { email: data.email } });
+            toast.success(response.data.message || 'Cadastro realizado com sucesso!');
+            navigate('/digitar-codigo', {
+                state: {
+                    email: data.email,
+                    devCode: response.data.devCode,
+                },
+            });
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || 'Erro ao fazer cadastro');

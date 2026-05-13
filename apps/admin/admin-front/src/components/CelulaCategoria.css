@@ -1,0 +1,21 @@
+.celula-categoria {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.celula-categoria-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+
+    border-radius: 0.5rem;
+}
+
+.celula-categoria-nome {
+    font-weight: 600;
+}

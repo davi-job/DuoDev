@@ -11,6 +11,10 @@ export class UpdateUserPreferencesDto {
     interests?: string[];
 
     @IsOptional()
+    @IsString()
+    interestReason?: string;
+
+    @IsOptional()
     @IsBoolean()
     onboardingCompleted?: boolean;
 }

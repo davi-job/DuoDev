@@ -1,5 +1,5 @@
 
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import { AuthLayout } from './pages/_layouts/auth';
 import { SignIn } from './pages/auth/sign-in';
 import { SignUp } from './pages/auth/sign-up';
@@ -21,6 +21,10 @@ export const router = createBrowserRouter([
         path: '/',
         element: <AuthLayout />,
         children: [
+            {
+                index: true,
+                element: <Navigate to="/login" replace />,
+            },
             {
                 path: '/login',
                 element: <SignIn />,
@@ -71,6 +75,22 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: '/categorias',
+        element: <Navigate to="/home" replace />,
+    },
+    {
+        path: '/meus-conteudos',
+        element: <Navigate to="/perfil" replace />,
+    },
+    {
+        path: '/projetos',
+        element: <Navigate to="/quiz" replace />,
+    },
+    {
+        path: '/conheca-o-projeto',
+        element: <Navigate to="/home" replace />,
+    },
+    {
         path: '/blog/:slug',
         element: (
             <AuthGuard>
@@ -110,5 +130,8 @@ export const router = createBrowserRouter([
             </AuthGuard>
         ),
     },
+    {
+        path: '*',
+        element: <Navigate to="/home" replace />,
+    },
 ]);
-

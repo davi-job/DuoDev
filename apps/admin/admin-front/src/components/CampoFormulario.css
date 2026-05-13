@@ -1,0 +1,58 @@
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.campo-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+}
+
+.campo input,
+.campo textarea,
+.campo select {
+    width: 100%;
+
+    padding: 0.75rem 1rem;
+
+    font-size: 0.9375rem;
+    font-family: inherit;
+
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+
+    outline: none;
+    transition: border-color 150ms ease;
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus {
+    border-color: var(--accent-mid);
+}
+
+.campo textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.campo select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555c6e' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+}
+
+.campo select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
