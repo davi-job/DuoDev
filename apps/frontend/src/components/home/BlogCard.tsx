@@ -28,7 +28,7 @@ export default function BlogCard({ tag, title, description, author, thumbClass }
       </div>
       <div className="p-5">
         <p className="text-xs font-bold text-green-500 uppercase tracking-[0.18em] mb-2">{tag}</p>
-        <p className="text-[17px] font-semibold text-gray-800 leading-snug mb-2">{title}</p>
+        <p className="text-lg font-semibold text-gray-800 leading-snug mb-2">{title}</p>
         <p className="text-sm text-gray-400 leading-relaxed mb-3">{description}</p>
         <p className="text-xs text-gray-400">{author}</p>
       </div>

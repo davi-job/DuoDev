@@ -24,10 +24,10 @@ export default function TrailCard({ name, level, duration, progress, thumbClass,
         {icon}
       </div>
       <div className="p-5">
-        <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-green-800 text-white tracking-[0.18em] uppercase mb-3">
+        <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full bg-green-800 text-white tracking-[0.18em] uppercase mb-3">
           {level}
         </span>
-        <p className="font-syne font-bold text-[20px] text-green-500 mb-1">{name}</p>
+        <p className="font-syne text-xl font-bold text-green-500 mb-1">{name}</p>
         <p className="text-xs text-gray-400 uppercase tracking-[0.18em] mb-4">{duration}</p>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div

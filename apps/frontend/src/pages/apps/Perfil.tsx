@@ -106,7 +106,7 @@ export default function Perfil() {
                                             className="flex flex-col items-center gap-0.5 bg-[#f5f5f0] rounded-2xl px-4 py-3 min-w-[72px]"
                                         >
                                             <span className={`font-syne text-xl font-bold ${s.color}`}>{s.value}</span>
-                                            <span className="text-[11px] text-gray-400 text-center leading-tight">
+                                            <span className="text-xs text-gray-400 text-center leading-tight">
                                                 {s.label}
                                             </span>
                                         </div>

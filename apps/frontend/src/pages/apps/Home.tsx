@@ -141,7 +141,7 @@ export default function Home() {
               {/* Coluna esquerda */}
               <div className="flex flex-col gap-8">
 
-                <h1 className="font-syne text-3xl lg:text-[34px] font-semibold text-gray-900">
+                <h1 className="font-syne text-3xl lg:text-4xl font-semibold text-gray-900">
                   Olá {userName}, pronto para aprender? 👋
                 </h1>
 

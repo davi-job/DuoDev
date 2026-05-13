@@ -71,11 +71,11 @@ export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs }: 
 
       <div className="grid grid-cols-2 gap-4 mt-5">
         <div className="bg-gray-50 rounded-2xl p-4 text-center">
-          <p className="text-[30px] font-bold text-gray-900">{sequenciaAtual}</p>
+          <p className="text-3xl font-bold text-gray-900">{sequenciaAtual}</p>
           <p className="text-xs text-gray-400">Streak atual</p>
         </div>
         <div className="bg-gray-50 rounded-2xl p-4 text-center">
-          <p className="text-[30px] font-bold text-gray-900">{melhorSequencia}</p>
+          <p className="text-3xl font-bold text-gray-900">{melhorSequencia}</p>
           <p className="text-xs text-gray-400">Melhor streak</p>
         </div>
       </div>
