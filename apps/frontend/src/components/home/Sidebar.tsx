@@ -74,20 +74,20 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       )}
       <aside
         className={`
-          fixed top-0 left-0 h-screen z-30 w-48
-          bg-white flex flex-col py-5 px-3
+          fixed top-0 left-0 h-screen z-30 w-64
+          bg-white flex flex-col py-7 px-4
           transition-transform duration-300
           ${open ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
       >
         {/* Logo */}
-        <div className="font-syne text-[20px] font-bold text-green-500 tracking-tight mb-6 px-2">
+        <div className="font-syne text-[28px] font-bold text-green-500 tracking-tight mb-8 px-3">
           duo<span className="text-gray-900">dev</span>
         </div>
 
         {/* Nav principal */}
-        <p className="text-[9px] font-bold tracking-widest text-gray-300 uppercase mb-1.5 px-2 flex items-center gap-2">
+        <p className="text-[11px] font-bold tracking-[0.18em] text-gray-300 uppercase mb-2 px-3 flex items-center gap-2">
           Aprendizado <span className="flex-1 h-px bg-gray-100"></span>
         </p>
         {navItems.map((item) => (
@@ -95,7 +95,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             key={item.label}
             href={item.url}
             className={`
-              flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-[13px] mb-0.5 transition-all
+              flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] mb-1 transition-all
               ${item.active
                 ? 'bg-green-50 text-green-600 font-medium'
                 : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}
@@ -106,14 +106,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </a>
         ))}
 
-        <p className="text-[9px] font-bold tracking-widest text-gray-300 uppercase mb-1.5 px-2 mt-4 flex items-center gap-2">
+        <p className="text-[11px] font-bold tracking-[0.18em] text-gray-300 uppercase mb-2 px-3 mt-6 flex items-center gap-2">
           Outros <span className="flex-1 h-px bg-gray-100"></span>
         </p>
         {otherItems.map((item) => (
           <a
             key={item.label}
             href={item.url}
-            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-[13px] text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all mb-0.5"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all mb-1"
           >
             <span>{item.icon}</span>
             {item.label}
@@ -123,13 +123,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         {/* Toast */}
         {toastVisible && (
           <div className="mt-auto">
-            <div className="bg-green-50 border border-green-100 text-xs p-3 rounded-2xl relative">
+            <div className="bg-green-50 border border-green-100 text-sm p-4 rounded-2xl relative">
               <button
                 onClick={() => setToastVisible(false)}
-                className="absolute top-2 right-2 text-green-400 hover:text-green-600 text-xs"
+                className="absolute top-3 right-3 text-green-400 hover:text-green-600 text-sm"
               >✕</button>
-              <p className="pr-4 mb-1 text-gray-500 leading-relaxed">Não esqueça de avaliar o nosso projeto.</p>
-              <a href="#" className="font-semibold text-green-500 hover:underline">
+              <p className="pr-5 mb-2 text-gray-500 leading-relaxed">Não esqueça de avaliar o nosso projeto.</p>
+              <a href="#" className="font-semibold text-green-500 hover:underline text-sm">
                 Avaliar agora ↗
               </a>
             </div>

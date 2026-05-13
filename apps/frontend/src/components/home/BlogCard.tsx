@@ -23,14 +23,14 @@ export default function BlogCard({ tag, title, description, author, thumbClass }
       onClick={() => navigate(`/blog/${slug}`)}
       className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200"
     >
-      <div className={`h-28 flex items-center justify-center font-syne text-3xl font-bold text-green-900 ${thumbClass}`}>
+      <div className={`h-36 flex items-center justify-center font-syne text-4xl font-bold text-green-900 ${thumbClass}`}>
         {tag}
       </div>
-      <div className="p-4">
-        <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">{tag}</p>
-        <p className="text-[12px] font-semibold text-gray-800 leading-snug mb-1.5">{title}</p>
-        <p className="text-[11px] text-gray-400 leading-relaxed mb-2">{description}</p>
-        <p className="text-[10px] text-gray-400">{author}</p>
+      <div className="p-5">
+        <p className="text-xs font-bold text-green-500 uppercase tracking-[0.18em] mb-2">{tag}</p>
+        <p className="text-[17px] font-semibold text-gray-800 leading-snug mb-2">{title}</p>
+        <p className="text-sm text-gray-400 leading-relaxed mb-3">{description}</p>
+        <p className="text-xs text-gray-400">{author}</p>
       </div>
     </div>
   )

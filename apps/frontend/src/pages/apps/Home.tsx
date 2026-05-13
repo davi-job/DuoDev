@@ -131,32 +131,32 @@ export default function Home() {
     <div className="min-h-screen bg-[#f5f5f0] font-dm">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex flex-col min-h-screen lg:ml-48">
+      <div className="flex flex-col min-h-screen lg:ml-64">
         <Topbar onMenuToggle={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 lg:p-8">
-          <div className="max-w-screen-xl mx-auto">
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
+        <main className="flex-1 p-5 lg:p-8 xl:p-10">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-8">
 
               {/* Coluna esquerda */}
               <div className="flex flex-col gap-8">
 
-                <h1 className="font-syne text-2xl lg:text-[26px] font-semibold text-gray-900">
+                <h1 className="font-syne text-3xl lg:text-[34px] font-semibold text-gray-900">
                   Olá {userName}, pronto para aprender? 👋
                 </h1>
 
                 {/* Trilhas */}
                 <section>
-                  <h2 className="font-syne text-lg font-semibold text-green-400 mb-1">
+                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">
                     Categorias em andamento
                   </h2>
-                  <p className="text-sm text-gray-400 mb-4">Continue vendo suas categorias. Não pare de aprender</p>
+                  <p className="text-base text-gray-400 mb-5">Continue vendo suas categorias. Não pare de aprender</p>
                   {loading ? (
-                    <p className="text-sm text-gray-400">Carregando trilhas...</p>
+                    <p className="text-base text-gray-400">Carregando trilhas...</p>
                   ) : trails.length === 0 ? (
-                    <p className="text-sm text-gray-400">Nenhuma trilha em andamento.</p>
+                    <p className="text-base text-gray-400">Nenhuma trilha em andamento.</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                       {trails.map((ut) => (
                         <TrailCard
                           key={ut.trail.id}
@@ -174,14 +174,14 @@ export default function Home() {
 
                 {/* Blog */}
                 <section>
-                  <h2 className="font-syne text-lg font-semibold text-green-400 mb-1">Blog</h2>
-                  <p className="text-sm text-gray-400 mb-4">Dicas sobre programação, segurança e muito mais</p>
+                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">Blog</h2>
+                  <p className="text-base text-gray-400 mb-5">Dicas sobre programação, segurança e muito mais</p>
                   {loading ? (
-                    <p className="text-sm text-gray-400">Carregando posts...</p>
+                    <p className="text-base text-gray-400">Carregando posts...</p>
                   ) : blogs.length === 0 ? (
-                    <p className="text-sm text-gray-400">Nenhum post publicado ainda.</p>
+                    <p className="text-base text-gray-400">Nenhum post publicado ainda.</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                       {blogs.map((b) => (
                         <BlogCard
                           key={b.id}
