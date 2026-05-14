@@ -8,11 +8,15 @@ interface TrailCardProps {
   duration: string
   progress?: number
   meta?: string
-  thumbClass: string
-  icon: ReactNode
+  thumbColor?: string
+  icon?: ReactNode | null
 }
 
-export default function TrailCard({ id, name, level, duration, progress, meta, thumbClass, icon }: TrailCardProps) {
+function getBadgeText(name: string) {
+  return name.split(' ').filter(Boolean)[0] ?? 'Trilha'
+}
+
+export default function TrailCard({ id, name, level, duration, progress, meta, thumbColor, icon }: TrailCardProps) {
 
   const navigate = useNavigate();
 
@@ -22,8 +26,17 @@ export default function TrailCard({ id, name, level, duration, progress, meta, t
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200" onClick={goToTrailDetails}>
-      <div className={`h-40 flex items-center justify-center ${thumbClass}`}>
-        {icon}
+      <div
+        className="h-40 flex items-center justify-center"
+        style={{ backgroundColor: thumbColor ?? '#9eea6c' }}
+      >
+        {icon ? (
+          icon
+        ) : (
+          <span className="font-syne text-3xl font-bold text-white tracking-tight px-4 text-center">
+            {getBadgeText(name)}
+          </span>
+        )}
       </div>
       <div className="p-5">
         <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full bg-green-800 text-white tracking-[0.18em] uppercase mb-3">

@@ -42,12 +42,6 @@ const iconMap: Record<string, ReactNode> = {
   ),
 }
 
-const thumbMap: Record<string, string> = {
-  Java:   'bg-gradient-to-br from-orange-500 to-amber-500',
-  Python: 'bg-gradient-to-br from-yellow-500 to-yellow-300',
-  Docker: 'bg-gradient-to-br from-blue-600 to-sky-400',
-}
-
 const blogThumbMap: Record<string, string> = {
   Segurança: 'bg-gradient-to-br from-green-600 to-green-400',
   'Back-end': 'bg-gradient-to-br from-green-500 to-emerald-400',
@@ -168,7 +162,7 @@ export default function Home() {
                           level={trail.level}
                           duration={trail.duration ?? `Conclusão em ${trail.totalHours ?? 0}H`}
                           meta={`${trail.contentCounts.lessons} aulas · ${trail.contentCounts.questions} questões · ${trail.contentCounts.challenges} desafios`}
-                          thumbClass={thumbMap[trail.name] ?? 'bg-gradient-to-br from-gray-500 to-gray-400'}
+                          thumbColor={trail.thumbColor}
                           icon={iconMap[trail.name] ?? null}
                         />
                       ))}
