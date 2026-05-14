@@ -9,6 +9,7 @@
         "dev:build": "tsx scripts/dev-build.ts",
         "dev:down": "docker compose down",
         "dev:down:v": "docker compose down -v",
+        "seed:demo": "npm run seed:demo --workspace=admin-back",
         "prod": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d",
         "prod:build": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build",
         "prod:down": "docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down"

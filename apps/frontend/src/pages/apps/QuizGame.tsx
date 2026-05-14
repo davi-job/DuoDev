@@ -8,7 +8,7 @@ import type {
     LearningQuestionItem,
     MultipleChoiceQuestion,
 } from '../../components/interfaces/interfaces';
-import { fetchLearningTrailContent } from '../../lib/api';
+import { fetchLearningTrailContent, submitTrailQuiz } from '../../lib/api';
 
 type QuizQuestion = MultipleChoiceQuestion | FillBlankQuestion | CodeReadingQuestion;
 
@@ -94,8 +94,12 @@ function mapQuestion(item: LearningQuestionItem): QuizQuestion | null {
         return null;
     }
 
+    const correctIndex = item.alternatives.findIndex((alternative) => alternative.id === item.answer);
+    const correctLabel =
+        correctIndex >= 0 ? String.fromCharCode(65 + correctIndex) : String.fromCharCode(65);
+
     const options = item.alternatives.map((alternative, index) => ({
-        label: alternative.id || String.fromCharCode(65 + index),
+        label: String.fromCharCode(65 + index),
         text: alternative.text,
     }));
 
@@ -106,7 +110,7 @@ function mapQuestion(item: LearningQuestionItem): QuizQuestion | null {
             question: item.title,
             code: item.codeSnippet ?? '',
             options,
-            correct: item.answer,
+            correct: correctLabel,
         };
     }
 
@@ -115,7 +119,7 @@ function mapQuestion(item: LearningQuestionItem): QuizQuestion | null {
         type: 'multiple-choice',
         question: item.title,
         options,
-        correct: item.answer,
+        correct: correctLabel,
     };
 }
 
@@ -131,6 +135,7 @@ export default function QuizGame() {
     const [error, setError] = useState('');
     const [trailName, setTrailName] = useState('');
     const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+    const [questionIds, setQuestionIds] = useState<string[]>([]);
 
     const navigate = useNavigate();
     const { trailId } = useParams();
@@ -158,6 +163,7 @@ export default function QuizGame() {
                     .filter((item): item is QuizQuestion => item !== null);
 
                 setQuestions(quizQuestions);
+                setQuestionIds(quizQuestions.map((item) => String(item.id)));
 
                 if (!quizQuestions.length) {
                     setError('Essa trilha ainda não possui questões publicadas.');
@@ -206,8 +212,19 @@ export default function QuizGame() {
         if (isCorrect) setScore((current) => current + 1);
     }
 
-    function handleNext() {
+    async function handleNext() {
         if (currentIndex + 1 >= questions.length) {
+            if (trailId) {
+                try {
+                    await submitTrailQuiz(trailId, {
+                        questionIds,
+                        correctAnswers: score,
+                        incorrectAnswers: questions.length - score,
+                    });
+                } catch (err) {
+                    console.error(err);
+                }
+            }
             setFinished(true);
             setShowConfetti(true);
             setTimeout(() => setShowConfetti(false), 4000);
@@ -528,7 +545,7 @@ export default function QuizGame() {
                         ) : (
                             <button
                                 type="button"
-                                onClick={handleNext}
+                                onClick={() => void handleNext()}
                                 className="px-5 py-3 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold transition-colors"
                             >
                                 Próxima questão

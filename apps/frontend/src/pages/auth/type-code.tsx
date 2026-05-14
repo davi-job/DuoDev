@@ -96,7 +96,9 @@ export function TypeCode() {
                             {digits.map((digit, i) => (
                                 <Input
                                     key={i}
-                                    ref={(el) => (inputRefs.current[i] = el)}
+                                    ref={(el) => {
+                                        inputRefs.current[i] = el;
+                                    }}
                                     type="text"
                                     inputMode="numeric"
                                     maxLength={1}

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
-import { fetchMeuPerfil, updateMeuPerfil, updateMinhaSenha } from '../../lib/api';
+import { fetchMeuPerfil, updateMeuPerfil } from '../../lib/api';
 import Avatar from '../../components/perfil/avatar';
-import type { UserProfile } from '../../components/interfaces/interfaces';
+import type { JwtPayload, UserProfile } from '../../components/interfaces/interfaces';
 import EditProfileForm from '../../components/configuracoes/editProfileForm';
 import ChangePasswordForm from '../../components/configuracoes/changePasswordForm';
 import InfoField from '../../components/configuracoes/infoField';
@@ -17,7 +17,6 @@ export default function Configuracoes() {
     const [section, setSection] = useState<Section>('info');
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
 
      useEffect(() => {
          async function load() {
@@ -39,7 +38,7 @@ export default function Configuracoes() {
                              email: decoded.email || '',
                          });
                      } catch {
-                         setError('Erro ao carregar dados do perfil');
+                         setProfile(null);
                      }
                  }
              } finally {

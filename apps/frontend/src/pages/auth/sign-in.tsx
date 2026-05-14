@@ -65,11 +65,17 @@ export function SignIn() {
             localStorage.setItem('access_token', response.data.access_token);
             toast.success('Login feito com sucesso');
 
-            // Fetch user profile to check onboarding status
-            const user = await fetchMeuPerfil();
-            if (user && !user.onboardingCompleted) {
-                navigate('/selecionar-linguagem');
-            } else {
+            try {
+                const user = await fetchMeuPerfil();
+                if (user && !user.onboardingCompleted) {
+                    navigate('/selecionar-linguagem');
+                    return;
+                }
+            } catch (profileError) {
+                console.error('Falha ao buscar perfil após login:', profileError);
+            }
+
+            {
                 navigate('/home');
             }
         } catch (error) {

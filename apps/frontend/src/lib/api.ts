@@ -45,6 +45,46 @@ export async function fetchMeuProgresso() {
   return res.json()
 }
 
+export async function startTrail(trailId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/iniciar`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao iniciar trilha')
+  return res.json()
+}
+
+export async function completeLesson(trailId: string, lessonId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/aulas/${lessonId}/concluir`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao concluir aula')
+  return res.json()
+}
+
+export async function completeChallenge(trailId: string, challengeId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/desafios/${challengeId}/concluir`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao concluir desafio')
+  return res.json()
+}
+
+export async function submitTrailQuiz(
+  trailId: string,
+  data: { questionIds: string[]; correctAnswers: number; incorrectAnswers: number },
+) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/quiz/finalizar`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Erro ao salvar resultado do quiz')
+  return res.json()
+}
+
 // ── Blog ──
 export async function fetchBlog() {
   const res = await fetch(`${API_URL}/blog`, { headers: headers() })

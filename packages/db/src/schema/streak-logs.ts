@@ -1,11 +1,11 @@
-import { pgTable, uuid, date, boolean, timestamp } from 'drizzle-orm/pg-core';
-import { users } from './users';
+import { pgTable, uuid, date, boolean } from 'drizzle-orm/pg-core';
+import { legacyUsers } from './legacy-user';
 
 export const streakLogs = pgTable('streak_log', {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id')
+    userId: uuid('idUsuario')
         .notNull()
-        .references(() => users.id, { onDelete: 'cascade' }),
-    logDate: date('log_date').notNull(),
-    completed: boolean('completed').notNull().default(false),
+        .references(() => legacyUsers.id, { onDelete: 'cascade' }),
+    logDate: date('dataRegistro').notNull(),
+    completed: boolean('concluido').notNull().default(false),
 });

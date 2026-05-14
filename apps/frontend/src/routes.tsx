@@ -11,6 +11,7 @@ import AuthGuard from './components/utils/AuthGuard';
 import Home from './pages/apps/Home';
 import BlogPost from './pages/apps/BlogPost';
 import Perfil from './pages/apps/Perfil';
+import MeusConteudos from './pages/apps/MeusConteudos';
 import Configuracoes from './pages/apps/Configuracoes';
 import Trail from './pages/apps/Trail';
 import LessonPage from './pages/apps/LessonPage';
@@ -82,7 +83,11 @@ export const router = createBrowserRouter([
     },
     {
         path: '/meus-conteudos',
-        element: <Navigate to="/perfil" replace />,
+        element: (
+            <AuthGuard>
+                <MeusConteudos />
+            </AuthGuard>
+        ),
     },
     {
         path: '/projetos',

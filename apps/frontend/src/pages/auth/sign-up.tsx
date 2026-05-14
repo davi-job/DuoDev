@@ -38,7 +38,6 @@ const passwordRules = [
 export function SignUp() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
@@ -223,7 +222,7 @@ export function SignUp() {
                         <span className="text-xs text-[#244C4E]">Suas informações estão protegidas</span>
                     </motion.div>
 
-                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
+                    <CloudflareCheck onVerified={() => undefined} />
                 </form>
             </div>
         </div>

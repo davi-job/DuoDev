@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, BookOpen, BrainCircuit, ImageIcon } from 'lucide
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
 import type { LearningLessonItem, LearningTrailContentResponse } from '../../components/interfaces/interfaces';
-import { fetchLearningTrailContent } from '../../lib/api';
+import { completeLesson, fetchLearningTrailContent } from '../../lib/api';
 
 export default function LessonPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -62,15 +62,22 @@ export default function LessonPage() {
         }
     }
 
-    function goToNextLesson() {
-        if (trailId && nextLesson) {
-            navigate(`/trilha/${trailId}/aula/${nextLesson.id}`);
-        }
-    }
+    async function handleCompleteLesson() {
+        if (!trailId || !lessonId) return;
 
-    function goToQuiz() {
-        if (trailId && firstQuestion) {
-            navigate(`/trilha/${trailId}/quiz`);
+        try {
+            await completeLesson(trailId, lessonId);
+            if (nextLesson) {
+                navigate(`/trilha/${trailId}/aula/${nextLesson.id}`);
+                return;
+            }
+            if (firstQuestion) {
+                navigate(`/trilha/${trailId}/quiz`);
+                return;
+            }
+            navigate(`/trilha/${trailId}`);
+        } catch (err) {
+            console.error(err);
         }
     }
 
@@ -158,21 +165,20 @@ export default function LessonPage() {
                                 {nextLesson ? (
                                     <button
                                         type="button"
-                                        onClick={goToNextLesson}
+                                        onClick={handleCompleteLesson}
                                         className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-green-400 text-white text-sm font-semibold hover:bg-green-500 transition-colors"
                                     >
-                                        Próxima aula
+                                        Concluir e seguir
                                         <ArrowRight className="w-4 h-4" />
                                     </button>
                                 ) : (
                                     <button
                                         type="button"
-                                        onClick={goToQuiz}
-                                        disabled={!firstQuestion}
+                                        onClick={firstQuestion ? handleCompleteLesson : goBackToTrail}
                                         className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-green-400 text-white text-sm font-semibold hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Ir para o quiz
-                                        <BrainCircuit className="w-4 h-4" />
+                                        {firstQuestion ? 'Concluir e ir para o quiz' : 'Concluir aula'}
+                                        {firstQuestion ? <BrainCircuit className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                                     </button>
                                 )}
                             </div>

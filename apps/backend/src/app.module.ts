@@ -27,17 +27,21 @@ import { LearningModule } from './learning/learning.module';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                type: 'postgres',
-                url: configService.get('DATABASE_URL'),
-                host: configService.get('POSTGRES_HOST'),
-                port: parseInt(configService.get('POSTGRES_PORT') || '5432', 10),
-                username: configService.get('POSTGRES_USER'),
-                password: configService.get('POSTGRES_PASSWORD'),
-                database: configService.get('POSTGRES_DB'),
-                entities: [User, Trail, UserTrail, StreakLog, BlogPost],
-                synchronize: true, // desativar em produção
-            }),
+            useFactory: (configService: ConfigService) => {
+                const synchronize = configService.get('TYPEORM_SYNCHRONIZE') === 'true';
+
+                return {
+                    type: 'postgres',
+                    url: configService.get('DATABASE_URL'),
+                    host: configService.get('POSTGRES_HOST'),
+                    port: parseInt(configService.get('POSTGRES_PORT') || '5432', 10),
+                    username: configService.get('POSTGRES_USER'),
+                    password: configService.get('POSTGRES_PASSWORD'),
+                    database: configService.get('POSTGRES_DB'),
+                    entities: [User, Trail, UserTrail, StreakLog, BlogPost],
+                    synchronize,
+                };
+            },
         }),
         UsersModule,
         AuthModule,

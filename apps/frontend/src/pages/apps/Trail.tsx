@@ -5,7 +5,7 @@ import { ArrowUpRight, BookOpen, BarChart2, Clock, Users, FileText, BrainCircuit
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
 import type { LearningContentItem, LearningTrailContentResponse } from '../../components/interfaces/interfaces';
-import { fetchLearningTrailContent } from '../../lib/api';
+import { fetchLearningTrailContent, startTrail } from '../../lib/api';
 
 function contentIcon(type: LearningContentItem['type']) {
     if (type === 'lesson') return <BookOpen className="w-4 h-4 text-green-600" />;
@@ -60,8 +60,14 @@ export default function Trail() {
         () => data?.items.find((item) => item.type === 'lesson') ?? null,
         [data?.items],
     );
-    function handleContinue() {
+    async function handleContinue() {
         if (!trailId) return;
+
+        try {
+            await startTrail(trailId);
+        } catch (error) {
+            console.error(error);
+        }
 
         if (firstLesson) {
             navigate(`/trilha/${trailId}/aula/${firstLesson.id}`);

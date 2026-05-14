@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateMinhaSenha } from "../../lib/api";
 
 export default function ChangePasswordForm({ onCancel }: { onCancel: () => void }) {
     const [currentPassword, setCurrentPassword] = useState('');

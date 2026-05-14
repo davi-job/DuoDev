@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { users } from './users';
+import { legacyUsers } from './legacy-user';
 import { userInterests } from './user-interests';
 import { userLanguages } from './user-languages';
 import { userTrails } from './user-trails';
@@ -52,14 +53,14 @@ export const challengesRelations = relations(challenges, ({ one }) => ({
 }));
 
 export const userTrailsRelations = relations(userTrails, ({ one }) => ({
-    user: one(users, { fields: [userTrails.userId], references: [users.id] }),
+    user: one(legacyUsers, { fields: [userTrails.userId], references: [legacyUsers.id] }),
     trail: one(trails, { fields: [userTrails.trailId], references: [trails.id] }),
 }));
 
 export const streakLogsRelations = relations(streakLogs, ({ one }) => ({
-    user: one(users, { fields: [streakLogs.userId], references: [users.id] }),
+    user: one(legacyUsers, { fields: [streakLogs.userId], references: [legacyUsers.id] }),
 }));
 
 export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
-    author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
+    author: one(legacyUsers, { fields: [blogPosts.authorId], references: [legacyUsers.id] }),
 }));

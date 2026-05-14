@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { UserTrailService } from './user-trail.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -12,12 +12,41 @@ export class UserTrailController {
         return this.userTrailService.findByUsuario(req.user.id);
     }
 
-    @Patch(':idTrilha/progresso')
-    updateProgresso(
+    @Post(':idTrilha/iniciar')
+    startTrail(@Request() req: any, @Param('idTrilha') idTrilha: string) {
+        return this.userTrailService.startTrail(req.user.id, idTrilha);
+    }
+
+    @Post(':idTrilha/aulas/:lessonId/concluir')
+    completeLesson(
         @Request() req: any,
         @Param('idTrilha') idTrilha: string,
-        @Body('progressoPct') progressoPct: number,
+        @Param('lessonId') lessonId: string,
     ) {
-        return this.userTrailService.updateProgresso(req.user.id, idTrilha, progressoPct);
+        return this.userTrailService.completeLesson(req.user.id, idTrilha, lessonId);
+    }
+
+    @Post(':idTrilha/desafios/:challengeId/concluir')
+    completeChallenge(
+        @Request() req: any,
+        @Param('idTrilha') idTrilha: string,
+        @Param('challengeId') challengeId: string,
+    ) {
+        return this.userTrailService.completeChallenge(req.user.id, idTrilha, challengeId);
+    }
+
+    @Post(':idTrilha/quiz/finalizar')
+    submitQuiz(
+        @Request() req: any,
+        @Param('idTrilha') idTrilha: string,
+        @Body('questionIds') questionIds: string[],
+        @Body('correctAnswers') correctAnswers: number,
+        @Body('incorrectAnswers') incorrectAnswers: number,
+    ) {
+        return this.userTrailService.submitQuiz(req.user.id, idTrilha, {
+            questionIds,
+            correctAnswers,
+            incorrectAnswers,
+        });
     }
 }

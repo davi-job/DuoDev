@@ -5,7 +5,7 @@ import { ArrowLeft, Code2, Trophy } from 'lucide-react';
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
 import type { LearningChallengeItem, LearningTrailContentResponse } from '../../components/interfaces/interfaces';
-import { fetchLearningTrailContent } from '../../lib/api';
+import { completeChallenge, fetchLearningTrailContent } from '../../lib/api';
 
 export default function ChallengePage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -50,6 +50,17 @@ export default function ChallengePage() {
             ) ?? null,
         [challengeId, data?.items],
     );
+
+    async function handleCompleteChallenge() {
+        if (!trailId || !challengeId) return;
+
+        try {
+            await completeChallenge(trailId, challengeId);
+            navigate(`/trilha/${trailId}`);
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#f5f5f0] font-dm">
@@ -97,6 +108,17 @@ export default function ChallengePage() {
                                     <div className="text-base text-gray-700 whitespace-pre-line leading-7">
                                         {challenge.instructions || 'Nenhuma instrução adicional foi publicada para este desafio.'}
                                     </div>
+                                </div>
+
+                                <div className="mt-6 flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={handleCompleteChallenge}
+                                        className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition-colors"
+                                    >
+                                        Marcar desafio como concluído
+                                        <Trophy className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
