@@ -1,3 +1,5 @@
+import type { LearningTrailContentResponse, LearningTrailSummary } from '../components/interfaces/interfaces'
+
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
 function getToken(): string {
@@ -18,19 +20,19 @@ export async function fetchTrilhas() {
   return res.json()
 }
 
-export async function fetchLearningTrails() {
+export async function fetchLearningTrails(): Promise<LearningTrailSummary[]> {
   const res = await fetch(`${API_URL}/learning/trails`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar trilhas publicadas')
   return res.json()
 }
 
-export async function fetchLearningTrail(trailId: string) {
+export async function fetchLearningTrail(trailId: string): Promise<LearningTrailSummary> {
   const res = await fetch(`${API_URL}/learning/trails/${trailId}`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar detalhes da trilha')
   return res.json()
 }
 
-export async function fetchLearningTrailContent(trailId: string) {
+export async function fetchLearningTrailContent(trailId: string): Promise<LearningTrailContentResponse> {
   const res = await fetch(`${API_URL}/learning/trails/${trailId}/content`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar conteúdo da trilha')
   return res.json()

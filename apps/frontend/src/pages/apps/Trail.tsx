@@ -60,7 +60,6 @@ export default function Trail() {
         () => data?.items.find((item) => item.type === 'lesson') ?? null,
         [data?.items],
     );
-
     function handleContinue() {
         if (!trailId) return;
 
@@ -70,7 +69,12 @@ export default function Trail() {
         }
 
         if (firstItem?.type === 'question') {
-            navigate('/quiz');
+            navigate(`/trilha/${trailId}/quiz`);
+            return;
+        }
+
+        if (firstItem?.type === 'challenge') {
+            navigate(`/trilha/${trailId}/desafio/${firstItem.id}`);
         }
     }
 
@@ -83,7 +87,12 @@ export default function Trail() {
         }
 
         if (item.type === 'question') {
-            navigate('/quiz');
+            navigate(`/trilha/${trailId}/quiz`);
+            return;
+        }
+
+        if (item.type === 'challenge') {
+            navigate(`/trilha/${trailId}/desafio/${item.id}`);
         }
     }
 
@@ -134,18 +143,12 @@ export default function Trail() {
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                                         {data.items.map((item) => {
-                                            const clickable = item.type !== 'challenge';
                                             return (
                                                 <button
                                                     key={item.id}
                                                     type="button"
                                                     onClick={() => openItem(item)}
-                                                    disabled={!clickable}
-                                                    className={`text-left rounded-2xl overflow-hidden border bg-white shadow-sm transition-all ${
-                                                        clickable
-                                                            ? 'border-gray-200 hover:-translate-y-1 hover:shadow-md'
-                                                            : 'border-gray-100 opacity-80 cursor-not-allowed'
-                                                    }`}
+                                                    className="text-left rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                                                 >
                                                     <div className="h-24 bg-gray-100 flex items-center justify-center">
                                                         <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center">
@@ -157,11 +160,7 @@ export default function Trail() {
                                                             <span className="text-xs font-semibold text-green-600 uppercase tracking-[0.18em]">
                                                                 {contentLabel(item.type)}
                                                             </span>
-                                                            {clickable ? (
-                                                                <ArrowUpRight className="w-4 h-4 text-green-500" />
-                                                            ) : (
-                                                                <span className="text-[11px] text-amber-500 font-medium">Em breve</span>
-                                                            )}
+                                                            <ArrowUpRight className="w-4 h-4 text-green-500" />
                                                         </div>
                                                         <p className="text-base font-semibold text-gray-800 mb-1">{item.title}</p>
                                                         <p className="text-sm text-gray-500 leading-relaxed">
@@ -228,9 +227,15 @@ export default function Trail() {
                                     <button
                                         className="w-full bg-green-400 hover:bg-green-500 transition-colors text-white font-semibold text-sm rounded-2xl py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={handleContinue}
-                                        disabled={!firstLesson && firstItem?.type !== 'question'}
+                                        disabled={!firstLesson && firstItem?.type !== 'question' && firstItem?.type !== 'challenge'}
                                     >
-                                        {firstLesson ? 'Começar aula' : firstItem?.type === 'question' ? 'Ir para quiz' : 'Aguardando conteúdo'}
+                                        {firstLesson
+                                            ? 'Começar aula'
+                                            : firstItem?.type === 'question'
+                                              ? 'Ir para quiz'
+                                              : firstItem?.type === 'challenge'
+                                                ? 'Abrir desafio'
+                                                : 'Aguardando conteúdo'}
                                     </button>
                                 </div>
                             </div>

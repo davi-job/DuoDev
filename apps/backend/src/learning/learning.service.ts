@@ -25,6 +25,11 @@ type LearningItem =
           title: string;
           status: string;
           description: string | null;
+          questionType: 'multiple-choice' | 'code-reading' | 'fill-blank';
+          codeSnippet: string | null;
+          sentence: string | null;
+          blanks: string[];
+          correctOrder: string[];
           alternatives: typeof questions.$inferSelect.alternatives;
           answer: string;
       }
@@ -221,6 +226,11 @@ export class LearningService {
                 title: row.title,
                 status: row.status,
                 description: row.description,
+                questionType: row.questionType as 'multiple-choice' | 'code-reading' | 'fill-blank',
+                codeSnippet: row.codeSnippet,
+                sentence: row.sentence,
+                blanks: row.blanks,
+                correctOrder: row.correctOrder,
                 alternatives: row.alternatives,
                 answer: row.answer,
             })),

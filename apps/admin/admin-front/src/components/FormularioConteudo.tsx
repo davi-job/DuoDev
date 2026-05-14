@@ -13,6 +13,7 @@ import type {
     TipoConteudo,
     StatusConteudo,
     Alternative,
+    QuestionType,
     LessonElement,
     CreateAulaDto,
     CreateQuestaoDto,
@@ -32,6 +33,12 @@ const STATUS_CONTEUDO: { valor: StatusConteudo; label: string; cor: 'verde' | 'a
     { valor: 'rascunho',  label: 'Rascunho',  cor: 'amarelo' },
     { valor: 'arquivado', label: 'Arquivado',  cor: 'azul' },
 ];
+
+const QUESTION_TYPE_CONFIG: Record<QuestionType, { label: string }> = {
+    'multiple-choice': { label: 'Múltipla escolha' },
+    'code-reading': { label: 'Leitura de código' },
+    'fill-blank': { label: 'Complete a frase' },
+};
 
 interface FormularioConteudoProps {
     item?: ItemConteudo;
@@ -59,6 +66,15 @@ function FormularioConteudo({ item, trailId, nextOrder, onSalvar, onCancelar }: 
     // Questão
     const [alternatives, setAlternatives] = useState<Alternative[]>(
         (item as Questao | undefined)?.alternatives ?? [],
+    );
+    const [questionType, setQuestionType] = useState<QuestionType>(
+        (item as Questao | undefined)?.questionType ?? 'multiple-choice',
+    );
+    const [codeSnippet, setCodeSnippet] = useState((item as Questao | undefined)?.codeSnippet ?? '');
+    const [sentence, setSentence] = useState((item as Questao | undefined)?.sentence ?? '');
+    const [blanks, setBlanks] = useState((item as Questao | undefined)?.blanks?.join(', ') ?? '');
+    const [correctOrder, setCorrectOrder] = useState(
+        (item as Questao | undefined)?.correctOrder?.join(', ') ?? '',
     );
     const [answer, setAnswer] = useState((item as Questao | undefined)?.answer ?? '');
 
@@ -88,7 +104,29 @@ function FormularioConteudo({ item, trailId, nextOrder, onSalvar, onCancelar }: 
         if (tipo === 'aula') {
             onSalvar(tipo, { ...baseComum, elements: elementos });
         } else if (tipo === 'questao') {
-            onSalvar(tipo, { ...baseComum, description: description || undefined, alternatives, answer });
+            onSalvar(tipo, {
+                ...baseComum,
+                description: description || undefined,
+                questionType,
+                codeSnippet: questionType === 'code-reading' ? codeSnippet || undefined : undefined,
+                sentence: questionType === 'fill-blank' ? sentence || undefined : undefined,
+                blanks:
+                    questionType === 'fill-blank'
+                        ? blanks
+                              .split(',')
+                              .map((item) => item.trim())
+                              .filter(Boolean)
+                        : undefined,
+                correctOrder:
+                    questionType === 'fill-blank'
+                        ? correctOrder
+                              .split(',')
+                              .map((item) => item.trim())
+                              .filter(Boolean)
+                        : undefined,
+                alternatives: questionType === 'fill-blank' ? undefined : alternatives,
+                answer: questionType === 'fill-blank' ? undefined : answer || undefined,
+            });
         } else {
             onSalvar(tipo, { ...baseComum, description: description || undefined, instructions: instructions || undefined });
         }
@@ -143,46 +181,107 @@ function FormularioConteudo({ item, trailId, nextOrder, onSalvar, onCancelar }: 
             )}
 
             {tipo === 'questao' && (
-                <CampoFormulario label="Alternativas">
-                    <div className="alternativas">
-                        {alternatives.map((alt) => (
-                            <div key={alt.id} className="alternativa">
-                                <input
-                                    type="radio"
-                                    name="resposta"
-                                    className="alternativa-radio"
-                                    checked={answer === alt.id}
-                                    onChange={() => setAnswer(alt.id)}
-                                    title="Marcar como resposta correta"
+                <>
+                    <CampoFormulario label="Tipo de questão">
+                        <div className="tipo-opcoes">
+                            {(Object.entries(QUESTION_TYPE_CONFIG) as [QuestionType, { label: string }][]).map(
+                                ([value, cfg]) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        className={`tipo-opcao ${questionType === value ? 'selecionado' : ''}`}
+                                        onClick={() => setQuestionType(value)}
+                                    >
+                                        {cfg.label}
+                                    </button>
+                                ),
+                            )}
+                        </div>
+                    </CampoFormulario>
+
+                    {questionType === 'code-reading' && (
+                        <CampoFormulario label="Bloco de código">
+                            <textarea
+                                value={codeSnippet}
+                                onChange={(e) => setCodeSnippet(e.target.value)}
+                                placeholder="Cole aqui o trecho de código da questão..."
+                                rows={8}
+                            />
+                        </CampoFormulario>
+                    )}
+
+                    {questionType === 'fill-blank' ? (
+                        <>
+                            <CampoFormulario label="Frase com lacunas">
+                                <textarea
+                                    value={sentence}
+                                    onChange={(e) => setSentence(e.target.value)}
+                                    placeholder="Ex: ___ i ___ range(5):"
+                                    rows={4}
                                 />
+                            </CampoFormulario>
+
+                            <CampoFormulario label="Palavras disponíveis">
                                 <input
                                     type="text"
-                                    className="alternativa-texto"
-                                    value={alt.text}
-                                    onChange={(e) => atualizarAlternativa(alt.id, e.target.value)}
-                                    placeholder="Texto da alternativa"
-                                    required
+                                    value={blanks}
+                                    onChange={(e) => setBlanks(e.target.value)}
+                                    placeholder="Ex: for, in, while, if"
                                 />
+                            </CampoFormulario>
+
+                            <CampoFormulario label="Ordem correta">
+                                <input
+                                    type="text"
+                                    value={correctOrder}
+                                    onChange={(e) => setCorrectOrder(e.target.value)}
+                                    placeholder="Ex: for, in"
+                                />
+                            </CampoFormulario>
+                        </>
+                    ) : (
+                        <CampoFormulario label="Alternativas">
+                            <div className="alternativas">
+                                {alternatives.map((alt) => (
+                                    <div key={alt.id} className="alternativa">
+                                        <input
+                                            type="radio"
+                                            name="resposta"
+                                            className="alternativa-radio"
+                                            checked={answer === alt.id}
+                                            onChange={() => setAnswer(alt.id)}
+                                            title="Marcar como resposta correta"
+                                        />
+                                        <input
+                                            type="text"
+                                            className="alternativa-texto"
+                                            value={alt.text}
+                                            onChange={(e) => atualizarAlternativa(alt.id, e.target.value)}
+                                            placeholder="Texto da alternativa"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className="alternativa-remover"
+                                            onClick={() => removerAlternativa(alt.id)}
+                                            aria-label="Remover alternativa"
+                                        >
+                                            <XIcon size={14} />
+                                        </button>
+                                    </div>
+                                ))}
                                 <button
                                     type="button"
-                                    className="alternativa-remover"
-                                    onClick={() => removerAlternativa(alt.id)}
-                                    aria-label="Remover alternativa"
+                                    className="btn-add-alternativa"
+                                    onClick={adicionarAlternativa}
                                 >
-                                    <XIcon size={14} />
+                                    <PlusIcon size={14} />
+                                    Adicionar alternativa
                                 </button>
                             </div>
-                        ))}
-                        <button
-                            type="button"
-                            className="btn-add-alternativa"
-                            onClick={adicionarAlternativa}
-                        >
-                            <PlusIcon size={14} />
-                            Adicionar alternativa
-                        </button>
-                    </div>
-                </CampoFormulario>
+                        </CampoFormulario>
+                    )}
+                </>
             )}
 
             {tipo === 'desafio' && (

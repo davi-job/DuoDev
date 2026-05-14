@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ArrowLeft, ArrowRight, BookOpen, ImageIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, BrainCircuit, ImageIcon } from 'lucide-react';
 
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
@@ -47,6 +47,10 @@ export default function LessonPage() {
         () => (data?.items.filter((item): item is LearningLessonItem => item.type === 'lesson') ?? []),
         [data?.items],
     );
+    const firstQuestion = useMemo(
+        () => data?.items.find((item) => item.type === 'question') ?? null,
+        [data?.items],
+    );
 
     const currentLessonIndex = lessons.findIndex((lesson) => lesson.id === lessonId);
     const lesson = currentLessonIndex >= 0 ? lessons[currentLessonIndex] : null;
@@ -61,6 +65,12 @@ export default function LessonPage() {
     function goToNextLesson() {
         if (trailId && nextLesson) {
             navigate(`/trilha/${trailId}/aula/${nextLesson.id}`);
+        }
+    }
+
+    function goToQuiz() {
+        if (trailId && firstQuestion) {
+            navigate(`/trilha/${trailId}/quiz`);
         }
     }
 
@@ -137,19 +147,34 @@ export default function LessonPage() {
                                 <div>
                                     <p className="text-sm font-semibold text-gray-700">Próximo passo</p>
                                     <p className="text-sm text-gray-500">
-                                        {nextLesson ? `Continue para a próxima aula: ${nextLesson.title}` : 'Você chegou ao fim das aulas publicadas desta trilha.'}
+                                        {nextLesson
+                                            ? `Continue para a próxima aula: ${nextLesson.title}`
+                                            : firstQuestion
+                                              ? 'As aulas acabaram. Siga para o quiz desta trilha.'
+                                              : 'Você chegou ao fim das aulas publicadas desta trilha.'}
                                     </p>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={goToNextLesson}
-                                    disabled={!nextLesson}
-                                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-green-400 text-white text-sm font-semibold hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Próxima aula
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
+                                {nextLesson ? (
+                                    <button
+                                        type="button"
+                                        onClick={goToNextLesson}
+                                        className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-green-400 text-white text-sm font-semibold hover:bg-green-500 transition-colors"
+                                    >
+                                        Próxima aula
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={goToQuiz}
+                                        disabled={!firstQuestion}
+                                        className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-green-400 text-white text-sm font-semibold hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Ir para o quiz
+                                        <BrainCircuit className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     )}

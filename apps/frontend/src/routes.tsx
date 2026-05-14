@@ -14,6 +14,7 @@ import Perfil from './pages/apps/Perfil';
 import Configuracoes from './pages/apps/Configuracoes';
 import Trail from './pages/apps/Trail';
 import LessonPage from './pages/apps/LessonPage';
+import ChallengePage from './pages/apps/ChallengePage';
 import QuizGame from './pages/apps/QuizGame';
 
 
@@ -85,7 +86,7 @@ export const router = createBrowserRouter([
     },
     {
         path: '/projetos',
-        element: <Navigate to="/quiz" replace />,
+        element: <Navigate to="/home" replace />,
     },
     {
         path: '/conheca-o-projeto',
@@ -116,6 +117,14 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: '/trilha/:trailId/desafio/:challengeId',
+        element: (
+            <AuthGuard>
+                <ChallengePage />
+            </AuthGuard>
+        ),
+    },
+    {
         path: '/perfil',
         element: (
             <AuthGuard>
@@ -132,7 +141,7 @@ export const router = createBrowserRouter([
         ),
     },
     {
-        path: '/quiz',
+        path: '/trilha/:trailId/quiz',
         element: (
             <AuthGuard>
                 <QuizGame />

@@ -72,6 +72,11 @@ export interface LearningQuestionItem {
     title: string;
     status: string;
     description: string | null;
+    questionType: QuestionType;
+    codeSnippet: string | null;
+    sentence: string | null;
+    blanks: string[];
+    correctOrder: string[];
     alternatives: { id: string; text: string }[];
     answer: string;
 }
@@ -114,7 +119,7 @@ export interface UserProfile {
 }
 
 export interface BaseQuestion {
-    id: number;
+    id: string | number;
     type: QuestionType;
     question: string;
 }
