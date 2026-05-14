@@ -1,4 +1,5 @@
-import { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import Sidebar from '../../components/home/Sidebar'
 import Topbar from '../../components/home/Topbar'
@@ -6,7 +7,8 @@ import TrailCard from '../../components/home/TrailCard'
 import BlogCard from '../../components/home/BlogCard'
 import StreakWidget from '../../components/home/StreakWidget'
 import ProgressWidget from '../../components/home/ProgressWidget'
-import { fetchTrilhas, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
+import { fetchLearningTrails, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
+import type { LearningTrailSummary } from '../../components/interfaces/interfaces'
 
 /* ── Tipos JWT ── */
 interface JwtPayload {
@@ -53,17 +55,15 @@ const blogThumbMap: Record<string, string> = {
 }
 
 /* ── Tipos da API ── */
-interface TrailAPI {
-  id: string
-  nome: string
-  nivel: string
-  duracao: string
-  totalHoras: number
-  ano: number
-}
-
 interface UserTrailAPI {
-  trail: TrailAPI
+  trail: {
+    id: string
+    nome: string
+    nivel: string
+    duracao?: string
+    totalHoras: number
+    ano: number
+  }
   progressoPct: number
 }
 
@@ -88,7 +88,8 @@ interface StreakLog {
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const [userName, setUserName]       = useState<string>('Usuário')
-  const [trails, setTrails]           = useState<UserTrailAPI[]>([])
+  const [publishedTrails, setPublishedTrails] = useState<LearningTrailSummary[]>([])
+  const [progressTrails, setProgressTrails]   = useState<UserTrailAPI[]>([])
   const [blogs, setBlogs]             = useState<BlogAPI[]>([])
   const [streakStats, setStreakStats] = useState<StreakStats>({ sequenciaAtual: 0, melhorSequencia: 0 })
   const [streakLogs, setStreakLogs]   = useState<StreakLog[]>([])
@@ -107,13 +108,15 @@ export default function Home() {
     // Busca todos os dados da API
     async function loadData() {
       try {
-        const [progresso, blog, stats, logs] = await Promise.all([
+        const [learningTrails, progresso, blog, stats, logs] = await Promise.all([
+          fetchLearningTrails(),
           fetchMeuProgresso(),
           fetchBlog(),
           fetchStreakStats(),
           fetchStreakLogs(),
         ])
-        setTrails(progresso)
+        setPublishedTrails(learningTrails)
+        setProgressTrails(progresso)
         setBlogs(blog)
         setStreakStats(stats)
         setStreakLogs(logs)
@@ -148,24 +151,25 @@ export default function Home() {
                 {/* Trilhas */}
                 <section>
                   <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">
-                    Categorias em andamento
+                    Trilhas disponíveis
                   </h2>
-                  <p className="text-base text-gray-400 mb-5">Continue vendo suas categorias. Não pare de aprender</p>
+                  <p className="text-base text-gray-400 mb-5">Conteúdo publicado pelo admin e pronto para começar</p>
                   {loading ? (
                     <p className="text-base text-gray-400">Carregando trilhas...</p>
-                  ) : trails.length === 0 ? (
-                    <p className="text-base text-gray-400">Nenhuma trilha em andamento.</p>
+                  ) : publishedTrails.length === 0 ? (
+                    <p className="text-base text-gray-400">Nenhuma trilha publicada ainda.</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {trails.map((ut) => (
+                      {publishedTrails.map((trail) => (
                         <TrailCard
-                          key={ut.trail.id}
-                          name={ut.trail.nome}
-                          level={ut.trail.nivel}
-                          duration={`Conclusão em ${ut.trail.totalHoras}H · ${ut.trail.ano}`}
-                          progress={ut.progressoPct}
-                          thumbClass={thumbMap[ut.trail.nome] ?? 'bg-gradient-to-br from-gray-500 to-gray-400'}
-                          icon={iconMap[ut.trail.nome] ?? null}
+                          key={trail.id}
+                          id={trail.id}
+                          name={trail.name}
+                          level={trail.level}
+                          duration={trail.duration ?? `Conclusão em ${trail.totalHours ?? 0}H`}
+                          meta={`${trail.contentCounts.lessons} aulas · ${trail.contentCounts.questions} questões · ${trail.contentCounts.challenges} desafios`}
+                          thumbClass={thumbMap[trail.name] ?? 'bg-gradient-to-br from-gray-500 to-gray-400'}
+                          icon={iconMap[trail.name] ?? null}
                         />
                       ))}
                     </div>
@@ -204,7 +208,7 @@ export default function Home() {
                   melhorSequencia={streakStats.melhorSequencia}
                   logs={streakLogs}
                 />
-                <ProgressWidget trails={trails} />
+                <ProgressWidget trails={progressTrails} />
               </div>
 
             </div>

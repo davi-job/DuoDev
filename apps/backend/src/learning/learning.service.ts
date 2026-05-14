@@ -78,6 +78,52 @@ export class LearningService {
         }));
     }
 
+    async listPublishedTrails() {
+        const trailRows = await this.db
+            .select()
+            .from(trails)
+            .where(eq(trails.status, 'publicado'))
+            .orderBy(asc(trails.name));
+
+        const categoryIds = [...new Set(trailRows.map((row) => row.categoryId).filter(Boolean))] as string[];
+        const categoryRows = categoryIds.length
+            ? await this.db
+                  .select()
+                  .from(categories)
+                  .where(inArray(categories.id, categoryIds))
+            : [];
+
+        const categoriesById = new Map(categoryRows.map((row) => [row.id, row]));
+        const countsByTrail = await this.countPublishedContentByTrail(trailRows.map((row) => row.id));
+
+        return trailRows.map((row) => ({
+            id: row.id,
+            categoryId: row.categoryId,
+            category: row.categoryId
+                ? (() => {
+                      const category = categoriesById.get(row.categoryId);
+                      return category
+                          ? {
+                                id: category.id,
+                                name: category.name,
+                                icon: category.icon,
+                                thumbColor: category.thumbColor,
+                            }
+                          : null;
+                  })()
+                : null,
+            name: row.name,
+            level: row.level,
+            description: row.description,
+            duration: row.duration,
+            totalHours: row.totalHours,
+            year: row.year,
+            thumbColor: row.thumbColor,
+            status: row.status,
+            contentCounts: countsByTrail.get(row.id) ?? { lessons: 0, questions: 0, challenges: 0 },
+        }));
+    }
+
     async listPublishedTrailsByCategory(categoryId: string) {
         await this.findPublishedCategory(categoryId);
 

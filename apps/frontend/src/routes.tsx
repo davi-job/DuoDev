@@ -13,6 +13,7 @@ import BlogPost from './pages/apps/BlogPost';
 import Perfil from './pages/apps/Perfil';
 import Configuracoes from './pages/apps/Configuracoes';
 import Trail from './pages/apps/Trail';
+import LessonPage from './pages/apps/LessonPage';
 import QuizGame from './pages/apps/QuizGame';
 
 
@@ -99,10 +100,18 @@ export const router = createBrowserRouter([
         ),
     },
     {
-        path: '/trilha/:slug',
+        path: '/trilha/:trailId',
         element: (
             <AuthGuard>
                 <Trail />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/trilha/:trailId/aula/:lessonId',
+        element: (
+            <AuthGuard>
+                <LessonPage />
             </AuthGuard>
         ),
     },

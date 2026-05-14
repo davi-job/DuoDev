@@ -18,6 +18,24 @@ export async function fetchTrilhas() {
   return res.json()
 }
 
+export async function fetchLearningTrails() {
+  const res = await fetch(`${API_URL}/learning/trails`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar trilhas publicadas')
+  return res.json()
+}
+
+export async function fetchLearningTrail(trailId: string) {
+  const res = await fetch(`${API_URL}/learning/trails/${trailId}`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar detalhes da trilha')
+  return res.json()
+}
+
+export async function fetchLearningTrailContent(trailId: string) {
+  const res = await fetch(`${API_URL}/learning/trails/${trailId}/content`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar conteúdo da trilha')
+  return res.json()
+}
+
 // ── Progresso do usuário nas trilhas ──
 export async function fetchMeuProgresso() {
   const res = await fetch(`${API_URL}/usuario-trilhas/meu-progresso`, { headers: headers() })

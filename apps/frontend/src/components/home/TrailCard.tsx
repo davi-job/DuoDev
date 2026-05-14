@@ -1,21 +1,23 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 
 interface TrailCardProps {
+  id: string
   name: string
   level: string
   duration: string
-  progress: number
+  progress?: number
+  meta?: string
   thumbClass: string
   icon: ReactNode
 }
 
-export default function TrailCard({ name, level, duration, progress, thumbClass, icon }: TrailCardProps) {
+export default function TrailCard({ id, name, level, duration, progress, meta, thumbClass, icon }: TrailCardProps) {
 
   const navigate = useNavigate();
 
   const goToTrailDetails = () => {      
-      navigate(`/trilha/${name}`);
+      navigate(`/trilha/${id}`);
   };
 
   return (
@@ -29,12 +31,16 @@ export default function TrailCard({ name, level, duration, progress, thumbClass,
         </span>
         <p className="font-syne text-xl font-bold text-green-500 mb-1">{name}</p>
         <p className="text-xs text-gray-400 uppercase tracking-[0.18em] mb-4">{duration}</p>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-green-400 rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        {typeof progress === 'number' ? (
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-400 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 leading-relaxed">{meta}</p>
+        )}
       </div>
     </div>
   )

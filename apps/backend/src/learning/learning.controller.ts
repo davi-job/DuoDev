@@ -12,6 +12,11 @@ export class LearningController {
         return this.learningService.listPublishedCategories();
     }
 
+    @Get('trails')
+    listTrails() {
+        return this.learningService.listPublishedTrails();
+    }
+
     @Get('categories/:categoryId/trails')
     listTrailsByCategory(@Param('categoryId') categoryId: string) {
         return this.learningService.listPublishedTrailsByCategory(categoryId);
