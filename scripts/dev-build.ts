@@ -7,9 +7,14 @@ config();
 
 const ROOT = process.cwd();
 
-function run(cmd: string, args: string[], cwd = ROOT): void {
+function run(cmd: string, args: string[], cwd = ROOT, env?: NodeJS.ProcessEnv): void {
     console.log(`  > ${cmd} ${args.join(' ')}`);
-    const result = spawnSync(cmd, args, { stdio: 'inherit', shell: true, cwd });
+    const result = spawnSync(cmd, args, {
+        stdio: 'inherit',
+        shell: true,
+        cwd,
+        env: { ...process.env, ...env },
+    });
     if (result.status !== 0) {
         console.error(`Falhou com código ${result.status ?? 1}`);
         process.exit(result.status ?? 1);
@@ -18,7 +23,7 @@ function run(cmd: string, args: string[], cwd = ROOT): void {
 
 async function waitForDb(retries = 30, intervalMs = 2000): Promise<void> {
     for (let i = 1; i <= retries; i++) {
-        const client = new Client({ connectionString: process.env.DATABASE_URL });
+        const client = new Client({ connectionString: process.env.LOCAL_DATABASE_URL });
         try {
             await client.connect();
             await client.end();
@@ -42,14 +47,15 @@ async function main(): Promise<void> {
     await waitForDb();
     console.log('\n  Banco pronto.');
 
-    console.log('\n[4/5] Aplicando schema (db:push)...');
-    run('npx', ['drizzle-kit', 'push'], path.join(ROOT, 'packages/db'));
+    console.log('\n[4/5] Aplicando schema (db:migrate)...');
+    run('npx', ['drizzle-kit', 'migrate'], path.join(ROOT, 'packages/db'), { DATABASE_URL: process.env.LOCAL_DATABASE_URL });
 
     console.log('\n[5/5] Criando usuario admin (seed)...');
     run(
         'npx',
         ['ts-node', '-r', 'tsconfig-paths/register', 'scripts/seed-admin.ts'],
         path.join(ROOT, 'apps/admin/admin-back'),
+        { DATABASE_URL: process.env.LOCAL_DATABASE_URL },
     );
 
     console.log('\nAmbiente pronto. Exibindo logs (Ctrl+C para encerrar)...\n');
