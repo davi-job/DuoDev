@@ -14,6 +14,8 @@ import { TrailModule } from './trail/trail.module';
 import { UserTrailModule } from './user-trail/user-trail.module';
 import { StreakLogModule } from './streak-log/streak-log.module';
 import { BlogPostModule } from './blog-post/blog-post.module';
+import { DatabaseModule } from './database/database.module';
+import { LearningModule } from './learning/learning.module';
 
 @Module({
     imports: [
@@ -21,6 +23,7 @@ import { BlogPostModule } from './blog-post/blog-post.module';
             isGlobal: true,
             envFilePath: '.env',
         }),
+        DatabaseModule,
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -42,6 +45,7 @@ import { BlogPostModule } from './blog-post/blog-post.module';
         UserTrailModule,
         StreakLogModule,
         BlogPostModule,
+        LearningModule,
     ],
     controllers: [AppController],
     providers: [AppService],
