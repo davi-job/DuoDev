@@ -1,4 +1,5 @@
 export * from './users';
+export * from './legacy-user';
 export * from './user-interests';
 export * from './user-languages';
 export * from './categories';

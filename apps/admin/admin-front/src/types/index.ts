@@ -76,6 +76,8 @@ export interface Alternative {
     text: string;
 }
 
+export type QuestionType = 'multiple-choice' | 'code-reading' | 'fill-blank';
+
 export interface Aula {
     id: string;
     trailId: string;
@@ -94,6 +96,11 @@ export interface Questao {
     order: number;
     title: string;
     description: string | null;
+    questionType: QuestionType;
+    codeSnippet: string | null;
+    sentence: string | null;
+    blanks: string[];
+    correctOrder: string[];
     alternatives: Alternative[];
     answer: string;
     status: StatusConteudo;
@@ -130,8 +137,13 @@ export interface CreateQuestaoDto {
     order: number;
     title: string;
     description?: string;
-    alternatives: Alternative[];
-    answer: string;
+    questionType: QuestionType;
+    codeSnippet?: string;
+    sentence?: string;
+    blanks?: string[];
+    correctOrder?: string[];
+    alternatives?: Alternative[];
+    answer?: string;
     status?: StatusConteudo;
 }
 

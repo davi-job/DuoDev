@@ -1,0 +1,280 @@
+import {
+    Injectable,
+    UnauthorizedException,
+    BadRequestException,
+    NotFoundException,
+    ConflictException,
+    InternalServerErrorException,
+} from '@nestjs/common';
+import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { promises as fs } from 'fs';
+import os from 'os';
+import path from 'path';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { VerifyCodeDto } from './dto/verify-code.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+
+type PendingRegistration = {
+    code: string;
+    expiresAt: Date;
+    data: Omit<RegisterUserDto, 'turnstileToken'>;
+};
+
+// Armazena { code, expiresAt, registerData }
+const pendingRegistrations = new Map<string, PendingRegistration>();
+const pendingRegistrationsFile = path.join(os.tmpdir(), 'duodev-pending-registrations.json');
+
+@Injectable()
+export class AuthService {
+    constructor(
+        private usersService: UsersService,
+        private jwtService: JwtService,
+        private mailerService: MailerService,
+        private configService: ConfigService,
+    ) {}
+
+    private isProduction(): boolean {
+        return this.configService.get<string>('NODE_ENV') === 'production';
+    }
+
+    private async loadPendingRegistrations(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        try {
+            const raw = await fs.readFile(pendingRegistrationsFile, 'utf-8');
+            const entries = JSON.parse(raw) as Array<[string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]>;
+
+            pendingRegistrations.clear();
+            for (const [email, entry] of entries) {
+                pendingRegistrations.set(email, {
+                    ...entry,
+                    expiresAt: new Date(entry.expiresAt),
+                });
+            }
+        } catch (error: any) {
+            if (error?.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+    }
+
+    private async savePendingRegistrations(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        const entries = Array.from(pendingRegistrations.entries()).map(([email, entry]) => [
+            email,
+            {
+                ...entry,
+                expiresAt: entry.expiresAt.toISOString(),
+            },
+        ]);
+
+        await fs.writeFile(pendingRegistrationsFile, JSON.stringify(entries), 'utf-8');
+    }
+
+    private async verifyTurnstile(token?: string): Promise<void> {
+        if (token === 'dev-turnstile-bypass') {
+            return;
+        }
+
+        const secret = this.configService.get<string>('TURNSTILE_SECRET_KEY');
+        if (!secret) {
+            return;
+        }
+
+        if (!token) {
+            throw new BadRequestException('Verificação de segurança não enviada.');
+        }
+
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                secret,
+                response: token,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new InternalServerErrorException('Falha ao validar a verificação de segurança.');
+        }
+
+        const result = (await response.json()) as { success?: boolean };
+        if (!result.success) {
+            throw new BadRequestException('Verificação de segurança inválida.');
+        }
+    }
+
+    async register(registerUserDto: RegisterUserDto): Promise<{ message: string; devCode?: string }> {
+        await this.verifyTurnstile(registerUserDto.turnstileToken);
+        const { turnstileToken, ...registerData } = registerUserDto;
+        await this.loadPendingRegistrations();
+
+        const existingUser = await this.usersService.findOneByEmail(registerUserDto.email);
+        if (existingUser) {
+            throw new BadRequestException('Usuário com esse email já existe!');
+        }
+
+        const code = crypto.randomInt(1000, 9999).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        pendingRegistrations.set(registerUserDto.email, {
+            code,
+            expiresAt,
+            data: registerData,
+        });
+        await this.savePendingRegistrations();
+
+        const mailHost = this.configService.get<string>('MAIL_HOST');
+        const mailPort = this.configService.get<string>('MAIL_PORT');
+        const mailUser = this.configService.get<string>('MAIL_USER');
+        const mailPass = this.configService.get<string>('MAIL_PASS');
+        const hasMailerConfig = !!(mailHost && mailPort && mailUser && mailPass);
+
+        if (hasMailerConfig) {
+            await this.mailerService.sendMail({
+                to: registerUserDto.email,
+                subject: 'Código de verificação',
+                text: `Seu código de verificação é: ${code}. Ele expira em 10 minutos.`,
+            });
+
+            return { message: 'Código enviado para o e-mail' };
+        }
+
+        if (this.isProduction()) {
+            throw new InternalServerErrorException('SMTP não configurado para envio do código de verificação.');
+        }
+
+        console.log(`[auth/register] Modo dev sem SMTP. Código para ${registerUserDto.email}: ${code}`);
+        return {
+            message: 'Código gerado em modo de desenvolvimento',
+            devCode: code,
+        };
+    }
+
+    async verifyCode(verifyCodeDto: VerifyCodeDto) {
+        await this.loadPendingRegistrations();
+        const pending = pendingRegistrations.get(verifyCodeDto.email);
+
+        if (!pending) {
+            throw new BadRequestException('Nenhum cadastro pendente para esse e-mail');
+        }
+        if (new Date() > pending.expiresAt) {
+            pendingRegistrations.delete(verifyCodeDto.email);
+            await this.savePendingRegistrations();
+            throw new BadRequestException('Código expirado. Faça o cadastro novamente.');
+        }
+        if (pending.code !== verifyCodeDto.code) {
+            throw new BadRequestException('Código inválido');
+        }
+
+        const existingUser = await this.usersService.findOneByEmail(verifyCodeDto.email);
+        if (existingUser) {
+            pendingRegistrations.delete(verifyCodeDto.email);
+            await this.savePendingRegistrations();
+            throw new BadRequestException('Usuário com esse email já existe!');
+        }
+
+        const hashedPassword = await bcrypt.hash(pending.data.password, 10);
+        const user = await this.usersService.create({
+            ...pending.data,
+            password: hashedPassword,
+        });
+
+        pendingRegistrations.delete(verifyCodeDto.email);
+        await this.savePendingRegistrations();
+
+        const { password, ...result } = user;
+        const payload = { email: user.email, sub: user.id };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: result,
+        };
+    }
+
+    async validateUser(email: string, pass: string): Promise<any> {
+        const user = await this.usersService.findOneByEmail(email);
+        // Ensure user exists and has a password before comparing
+        if (user && user.password && (await bcrypt.compare(pass, user.password))) {
+            const { password, ...result } = user;
+            return result;
+        }
+        return null;
+    }
+
+    async login(loginUserDto: LoginUserDto) {
+        await this.verifyTurnstile(loginUserDto.turnstileToken);
+
+        const user = await this.validateUser(loginUserDto.email, loginUserDto.password);
+        if (!user) {
+            throw new UnauthorizedException('Credenciais inválidas!');
+        }
+        const payload = { email: user.email, sub: user.id };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user,
+        };
+    }
+
+    async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+        const user = await this.usersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado');
+        }
+
+        // Se estiver atualizando email, verifica se já existe
+        if (updateProfileDto.email && updateProfileDto.email !== user.email) {
+            const emailExists = await this.usersService.findByEmail(updateProfileDto.email);
+            if (emailExists) {
+                throw new ConflictException('Este email já está em uso');
+            }
+        }
+
+        // Atualiza e retorna o usuário sem a senha
+        const updatedUser = await this.usersService.update(userId, updateProfileDto);
+        const { password, ...result } = updatedUser;
+        return result;
+    }
+
+    async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+        const user = await this.usersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado');
+        }
+
+        // Ensure user has a password before comparing
+        if (!user.password) {
+            throw new BadRequestException('Usuário não possui senha definida.');
+        }
+
+        // Verifica se a senha atual está correta
+        const isPasswordValid = await bcrypt.compare(changePasswordDto.senhaAtual, user.password);
+
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Senha atual incorreta');
+        }
+
+        // Hash da nova senha
+        const hashedPassword = await bcrypt.hash(changePasswordDto.novaSenha, 10);
+
+        // Atualiza a senha
+        await this.usersService.updatePassword(userId, hashedPassword);
+
+        return { message: 'Senha alterada com sucesso' };
+    }
+}

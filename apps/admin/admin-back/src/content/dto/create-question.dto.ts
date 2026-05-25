@@ -25,14 +25,37 @@ export class CreateQuestionDto {
     @IsString()
     description?: string;
 
+    @IsIn(['multiple-choice', 'code-reading', 'fill-blank'])
+    questionType!: 'multiple-choice' | 'code-reading' | 'fill-blank';
+
+    @IsOptional()
+    @IsString()
+    codeSnippet?: string;
+
+    @IsOptional()
+    @IsString()
+    sentence?: string;
+
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    blanks?: string[];
+
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    correctOrder?: string[];
+
+    @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => AlternativeDto)
-    alternatives!: AlternativeDto[];
+    alternatives?: AlternativeDto[];
 
+    @IsOptional()
     @IsString()
     @MaxLength(255)
-    answer!: string;
+    answer?: string;
 
     @IsOptional()
     @IsIn(['publicado', 'rascunho', 'arquivado'])

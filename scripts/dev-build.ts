@@ -50,10 +50,10 @@ async function main(): Promise<void> {
     console.log('\n[4/5] Aplicando schema (db:migrate)...');
     run('npx', ['drizzle-kit', 'migrate'], path.join(ROOT, 'packages/db'), { DATABASE_URL: process.env.LOCAL_DATABASE_URL });
 
-    console.log('\n[5/5] Criando usuario admin (seed)...');
+    console.log('\n[5/5] Criando dados de demonstração (seed)...');
     run(
         'npx',
-        ['ts-node', '-r', 'tsconfig-paths/register', 'scripts/seed-admin.ts'],
+        ['ts-node', '-r', 'tsconfig-paths/register', 'scripts/seed-demo.ts'],
         path.join(ROOT, 'apps/admin/admin-back'),
         { DATABASE_URL: process.env.LOCAL_DATABASE_URL },
     );

@@ -77,8 +77,13 @@ export class ContentService {
                 order: dto.order,
                 title: dto.title,
                 description: dto.description,
-                alternatives: dto.alternatives,
-                answer: dto.answer,
+                questionType: dto.questionType,
+                codeSnippet: dto.codeSnippet,
+                sentence: dto.sentence,
+                blanks: dto.blanks ?? [],
+                correctOrder: dto.correctOrder ?? [],
+                alternatives: dto.alternatives ?? [],
+                answer: dto.answer ?? '',
                 status: dto.status ?? 'rascunho',
             })
             .returning();

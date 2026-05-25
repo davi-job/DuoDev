@@ -5,7 +5,7 @@
 }
 
 .campo-label {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 1px;
     color: var(--text-tertiary);
@@ -19,23 +19,25 @@
 
     padding: 0.75rem 1rem;
 
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-family: inherit;
 
-    background-color: var(--bg-tertiary);
+    background-color: rgba(255, 255, 255, 0.86);
     color: var(--text-primary);
 
     border: 1px solid var(--border-primary);
-    border-radius: 0.5rem;
+    border-radius: 0.9rem;
 
     outline: none;
-    transition: border-color 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
 .campo input:focus,
 .campo textarea:focus,
 .campo select:focus {
     border-color: var(--accent-mid);
+    box-shadow: 0 0 0 4px rgba(158, 234, 108, 0.14);
+    background-color: #fff;
 }
 
 .campo textarea {

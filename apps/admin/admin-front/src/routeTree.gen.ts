@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as modulesConteudoIndexRouteImport } from './routes/(modules)/conteudo/index'
 import { Route as modulesConteudoCategoriaIdRouteImport } from './routes/(modules)/conteudo/$categoriaId'
 import { Route as modulesConteudoCategoriaIdIndexRouteImport } from './routes/(modules)/conteudo/$categoriaId/index'
 import { Route as modulesConteudoCategoriaIdTrilhaIdRouteImport } from './routes/(modules)/conteudo/$categoriaId/$trilhaId'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -46,6 +52,7 @@ const modulesConteudoCategoriaIdTrilhaIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/conteudo/': typeof modulesConteudoIndexRoute
   '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
@@ -53,6 +60,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/conteudo': typeof modulesConteudoIndexRoute
   '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
   '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdIndexRoute
@@ -60,6 +68,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/(modules)/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/(modules)/conteudo/': typeof modulesConteudoIndexRoute
   '/(modules)/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/conteudo/$categoriaId'
     | '/conteudo/'
     | '/conteudo/$categoriaId/$trilhaId'
@@ -76,12 +86,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/conteudo'
     | '/conteudo/$categoriaId/$trilhaId'
     | '/conteudo/$categoriaId'
   id:
     | '__root__'
     | '/'
+    | '/login'
     | '/(modules)/conteudo/$categoriaId'
     | '/(modules)/conteudo/'
     | '/(modules)/conteudo/$categoriaId/$trilhaId'
@@ -90,12 +102,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   modulesConteudoCategoriaIdRoute: typeof modulesConteudoCategoriaIdRouteWithChildren
   modulesConteudoIndexRoute: typeof modulesConteudoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -153,6 +173,7 @@ const modulesConteudoCategoriaIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   modulesConteudoCategoriaIdRoute: modulesConteudoCategoriaIdRouteWithChildren,
   modulesConteudoIndexRoute: modulesConteudoIndexRoute,
 }
