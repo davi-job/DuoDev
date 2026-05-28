@@ -1,40 +1,59 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 
 interface TrailCardProps {
+  id: string
   name: string
   level: string
   duration: string
-  progress: number
-  thumbClass: string
-  icon: ReactNode
+  progress?: number
+  meta?: string
+  thumbColor?: string
+  icon?: ReactNode | null
 }
 
-export default function TrailCard({ name, level, duration, progress, thumbClass, icon }: TrailCardProps) {
+function getBadgeText(name: string) {
+  return name.split(' ').filter(Boolean)[0] ?? 'Trilha'
+}
+
+export default function TrailCard({ id, name, level, duration, progress, meta, thumbColor, icon }: TrailCardProps) {
 
   const navigate = useNavigate();
 
   const goToTrailDetails = () => {      
-      navigate(`/trilha/${name}`);
+      navigate(`/trilha/${id}`);
   };
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all duration-200" onClick={goToTrailDetails}>
-      <div className={`h-32 flex items-center justify-center ${thumbClass}`}>
-        {icon}
+      <div
+        className="h-40 flex items-center justify-center"
+        style={{ backgroundColor: thumbColor ?? '#9eea6c' }}
+      >
+        {icon ? (
+          icon
+        ) : (
+          <span className="font-syne text-3xl font-bold text-white tracking-tight px-4 text-center">
+            {getBadgeText(name)}
+          </span>
+        )}
       </div>
-      <div className="p-4">
-        <span className="inline-block text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-800 text-white tracking-widest uppercase mb-2">
+      <div className="p-5">
+        <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-full bg-green-800 text-white tracking-[0.18em] uppercase mb-3">
           {level}
         </span>
-        <p className="font-syne font-bold text-[15px] text-green-500 mb-0.5">{name}</p>
-        <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-3">{duration}</p>
-        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-green-400 rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <p className="font-syne text-xl font-bold text-green-500 mb-1">{name}</p>
+        <p className="text-xs text-gray-400 uppercase tracking-[0.18em] mb-4">{duration}</p>
+        {typeof progress === 'number' ? (
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-400 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 leading-relaxed">{meta}</p>
+        )}
       </div>
     </div>
   )

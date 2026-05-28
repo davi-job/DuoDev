@@ -31,6 +31,9 @@ export class User {
     @Column('simple-array', { nullable: true }) // Stores interests as a comma-separated string
     interests: string[];
 
+    @Column({ nullable: true })
+    interestReason?: string;
+
     @Column({ default: false })
     onboardingCompleted: boolean;
 
@@ -40,4 +43,3 @@ export class User {
     @UpdateDateColumn()
     updatedAt: Date;
 }
-

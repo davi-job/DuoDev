@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import { CloudflareCheck } from '../../components/utils/CloudsfareCheck';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
-import { fetchMeuPerfil } from '../../lib/api'; // Import fetchMeuPerfil
+import { API_URL, fetchMeuPerfil } from '../../lib/api';
 
 const signInForm = z.object({
     email: z.string().min(1, 'E-mail é obrigatório').email('E-mail inválido'),
@@ -57,18 +57,25 @@ export function SignIn() {
         }
 
         try {
-            const response = await axios.post('http://localhost:3000/auth/login', {
+            const response = await axios.post(`${API_URL}/auth/login`, {
                 email: data.email,
                 password: data.password,
+                turnstileToken: token,
             });
             localStorage.setItem('access_token', response.data.access_token);
             toast.success('Login feito com sucesso');
 
-            // Fetch user profile to check onboarding status
-            const user = await fetchMeuPerfil();
-            if (user && !user.onboardingCompleted) {
-                navigate('/selecionar-linguagem');
-            } else {
+            try {
+                const user = await fetchMeuPerfil();
+                if (user && !user.onboardingCompleted) {
+                    navigate('/selecionar-linguagem');
+                    return;
+                }
+            } catch (profileError) {
+                console.error('Falha ao buscar perfil após login:', profileError);
+            }
+
+            {
                 navigate('/home');
             }
         } catch (error) {

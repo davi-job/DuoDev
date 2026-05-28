@@ -1,189 +1,253 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { ArrowUpRight, BookOpen, BarChart2, Clock, Users, FileText, BrainCircuit, Code2 } from 'lucide-react';
+
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
-import { ArrowUpRight, ChevronRight, Clock, BookOpen, BarChart2, Users } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import type { LearningContentItem, LearningTrailContentResponse } from '../../components/interfaces/interfaces';
+import { fetchLearningTrailContent, startTrail } from '../../lib/api';
 
-const contents = [
-    { title: 'Título', duration: 'CONCLUSÃO EM 10H' },
-    { title: 'Título', duration: 'CONCLUSÃO EM 10H' },
-    { title: 'Título', duration: 'CONCLUSÃO EM 10H' },
-];
+function contentIcon(type: LearningContentItem['type']) {
+    if (type === 'lesson') return <BookOpen className="w-4 h-4 text-green-600" />;
+    if (type === 'question') return <BrainCircuit className="w-4 h-4 text-blue-500" />;
+    return <Code2 className="w-4 h-4 text-amber-500" />;
+}
+
+function contentLabel(type: LearningContentItem['type']) {
+    if (type === 'lesson') return 'Aula';
+    if (type === 'question') return 'Questão';
+    return 'Desafio';
+}
 
 export default function Trail() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [data, setData] = useState<LearningTrailContentResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const { trailId } = useParams();
     const navigate = useNavigate();
 
-    const goToQuiz = () => {
-        navigate('/quiz');
+    useEffect(() => {
+        if (!trailId) {
+            setError('Trilha não encontrada.');
+            setLoading(false);
+            return;
+        }
+
+        const currentTrailId = trailId;
+
+        async function loadTrail() {
+            setLoading(true);
+            setError('');
+
+            try {
+                const response = await fetchLearningTrailContent(currentTrailId);
+                setData(response);
+            } catch (err) {
+                console.error(err);
+                setError('Não foi possível carregar a trilha agora.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadTrail();
+    }, [trailId]);
+
+    const firstItem = data?.items[0] ?? null;
+    const firstLesson = useMemo(
+        () => data?.items.find((item) => item.type === 'lesson') ?? null,
+        [data?.items],
+    );
+    async function handleContinue() {
+        if (!trailId) return;
+
+        try {
+            await startTrail(trailId);
+        } catch (error) {
+            console.error(error);
+        }
+
+        if (firstLesson) {
+            navigate(`/trilha/${trailId}/aula/${firstLesson.id}`);
+            return;
+        }
+
+        if (firstItem?.type === 'question') {
+            navigate(`/trilha/${trailId}/quiz`);
+            return;
+        }
+
+        if (firstItem?.type === 'challenge') {
+            navigate(`/trilha/${trailId}/desafio/${firstItem.id}`);
+        }
+    }
+
+    function openItem(item: LearningContentItem) {
+        if (!trailId) return;
+
+        if (item.type === 'lesson') {
+            navigate(`/trilha/${trailId}/aula/${item.id}`);
+            return;
+        }
+
+        if (item.type === 'question') {
+            navigate(`/trilha/${trailId}/quiz`);
+            return;
+        }
+
+        if (item.type === 'challenge') {
+            navigate(`/trilha/${trailId}/desafio/${item.id}`);
+        }
     }
 
     return (
         <div className="min-h-screen bg-[#f5f5f0] font-dm">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-            <div className="flex flex-col min-h-screen lg:ml-48">
+            <div className="flex flex-col min-h-screen lg:ml-64">
                 <Topbar onMenuToggle={() => setSidebarOpen(true)} />
 
                 <main className="flex-1 p-4 lg:p-8">
-                    <div className="flex flex-col lg:flex-row gap-6">
-                        {/* Left / Main Content */}
-                        <div className="flex-1 min-w-0">
-                            {/* Hero Banner */}
-                            <div className="w-full h-40 lg:h-52 rounded-2xl bg-yellow-400 flex items-center justify-center mb-5">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 48 48"
-                                    className="w-16 h-16 opacity-80"
-                                    fill="none"
+                    {loading ? (
+                        <div className="max-w-6xl mx-auto text-base text-gray-400">Carregando trilha...</div>
+                    ) : error || !data ? (
+                        <div className="max-w-6xl mx-auto text-base text-red-500">{error || 'Trilha não encontrada.'}</div>
+                    ) : (
+                        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
+                            <div className="flex-1 min-w-0">
+                                <div
+                                    className="w-full h-40 lg:h-52 rounded-3xl flex items-center justify-center mb-5 shadow-sm"
+                                    style={{ backgroundColor: data.trail.thumbColor }}
                                 >
-                                    <path
-                                        d="M24 6C14.06 6 6 14.06 6 24s8.06 18 18 18 18-8.06 18-18S33.94 6 24 6z"
-                                        fill="#fff"
-                                        fillOpacity="0.3"
-                                    />
-                                    <path
-                                        d="M17 14h-3a2 2 0 00-2 2v16a2 2 0 002 2h3M31 14h3a2 2 0 012 2v16a2 2 0 01-2 2h-3"
-                                        stroke="#fff"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                    />
-                                    <path
-                                        d="M20 20l-4 4 4 4M28 20l4 4-4 4"
-                                        stroke="#fff"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-                            </div>
+                                    <div className="w-20 h-20 rounded-full bg-white/25 flex items-center justify-center">
+                                        <BookOpen className="w-10 h-10 text-white" />
+                                    </div>
+                                </div>
 
-                            {/* Tags */}
-                            <div className="flex gap-2 mb-2">
-                                <span className="text-xs font-semibold bg-green-500 text-white rounded-full px-3 py-0.5 uppercase tracking-wide">
-                                    Iniciante
-                                </span>
-                                <span className="text-xs font-semibold bg-blue-500 text-white rounded-full px-3 py-0.5 uppercase tracking-wide">
-                                    Introdução
-                                </span>
-                            </div>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    <span className="text-xs font-semibold bg-green-500 text-white rounded-full px-3 py-1 uppercase tracking-wide">
+                                        {data.trail.level}
+                                    </span>
+                                    {data.trail.category?.name ? (
+                                        <span className="text-xs font-semibold bg-blue-500 text-white rounded-full px-3 py-1 uppercase tracking-wide">
+                                            {data.trail.category.name}
+                                        </span>
+                                    ) : null}
+                                </div>
 
-                            {/* Title */}
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">Python</h1>
+                                <h1 className="text-3xl font-bold text-gray-800 mb-2">{data.trail.name}</h1>
 
-                            {/* Description */}
-                            <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                                Neste curso gratuito, você aprenderá a desenvolver uma API de tarefas usando Java e
-                                Spring Boot, criando um To-Do List do zero. O conteúdo inclui criação de rotas HTTP,
-                                validação de parâmetros, integração com banco de dados, autenticação JWT com Spring
-                                Security e deploy na plataforma Render. Um ótimo primeiro passo para quem quer aprender
-                                Spring Boot e entender como funciona o desenvolvimento e publicação de APIs
-                            </p>
+                                <p className="text-base text-gray-500 leading-relaxed mb-6">{data.trail.description}</p>
 
-                            {/* Conteúdos */}
-                            <h2 className="text-lg font-bold text-green-500 mb-3">Trilhas</h2>
-                            <div className="relative">
-                                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                                    {contents.map((item, i) => (
-                                        <div
-                                            key={i}
-                                            className="min-w-[160px] w-44 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
-                                        >
-                                            <div className="h-24 bg-gray-300 flex items-center justify-center">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="w-8 h-8 text-white"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
+                                <h2 className="text-xl font-bold text-green-500 mb-3">Conteúdo da trilha</h2>
+                                {data.items.length === 0 ? (
+                                    <div className="bg-white rounded-2xl border border-gray-100 p-5 text-sm text-gray-400">
+                                        Essa trilha ainda não possui conteúdo publicado.
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                                        {data.items.map((item) => {
+                                            return (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    onClick={() => openItem(item)}
+                                                    className="text-left rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l-3.5 2M12 20l3.5-2"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <div className="p-2">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm font-semibold text-green-500">
-                                                        {item.title}
-                                                    </span>
-                                                    <ArrowUpRight className="w-3.5 h-3.5 text-green-500" />
-                                                </div>
-                                                <p className="text-[10px] text-gray-400 uppercase tracking-wide mt-0.5">
-                                                    {item.duration}
-                                                </p>
-                                            </div>
+                                                    <div className="h-24 bg-gray-100 flex items-center justify-center">
+                                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+                                                            {contentIcon(item.type)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <div className="flex items-center justify-between gap-3 mb-2">
+                                                            <span className="text-xs font-semibold text-green-600 uppercase tracking-[0.18em]">
+                                                                {contentLabel(item.type)}
+                                                            </span>
+                                                            <ArrowUpRight className="w-4 h-4 text-green-500" />
+                                                        </div>
+                                                        <p className="text-base font-semibold text-gray-800 mb-1">{item.title}</p>
+                                                        <p className="text-sm text-gray-500 leading-relaxed">
+                                                            {item.type === 'lesson'
+                                                                ? `${item.elements.length} elemento(s) nesta aula`
+                                                                : item.type === 'question'
+                                                                  ? `${item.alternatives.length} alternativa(s) disponíveis`
+                                                                  : item.description || 'Desafio publicado para a trilha'}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
+                                <h2 className="text-xl font-bold text-green-500 mt-6 mb-3">Detalhes</h2>
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Clock className="w-4 h-4 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-700">Hora de estudo</p>
+                                            <p className="text-xs text-gray-400">{data.trail.duration || `${data.trail.totalHours ?? 0}h`}</p>
                                         </div>
-                                    ))}
-                                    {/* Arrow right */}
-                                    {/* <div className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center shadow cursor-pointer">
-                                        <ChevronRight className="w-4 h-4 text-white" />
-                                    </div> */}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <BookOpen className="w-4 h-4 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-700">Aulas</p>
+                                            <p className="text-xs text-gray-400">{data.trail.contentCounts.lessons} aulas</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <BarChart2 className="w-4 h-4 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-700">Questões</p>
+                                            <p className="text-xs text-gray-400">{data.trail.contentCounts.questions} questões</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Users className="w-4 h-4 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-700">Desafios</p>
+                                            <p className="text-xs text-gray-400">{data.trail.contentCounts.challenges} desafios</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Detalhes */}
-                            <h2 className="text-lg font-bold text-green-500 mt-6 mb-3">Detalhes</h2>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Clock className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-700">Hora de estudo</p>
-                                        <p className="text-xs text-gray-400">7h</p>
+                            <div className="w-full lg:w-72 flex-shrink-0">
+                                <div className="bg-white rounded-3xl shadow-sm p-5 sticky top-8 border border-gray-100">
+                                    <p className="text-sm font-semibold text-gray-700 mb-3">Próximo passo</p>
+                                    <div className="rounded-2xl bg-gray-50 p-4 mb-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            {firstItem ? contentIcon(firstItem.type) : <FileText className="w-4 h-4 text-gray-400" />}
+                                            <span className="text-xs uppercase tracking-[0.18em] text-gray-400">
+                                                {firstItem ? contentLabel(firstItem.type) : 'Sem conteúdo'}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-800">
+                                            {firstItem?.title ?? 'Essa trilha ainda não possui conteúdo disponível.'}
+                                        </p>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <BookOpen className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-700">Aulas</p>
-                                        <p className="text-xs text-gray-400">5 aulas</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <BarChart2 className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-700">Nível de dificuldade</p>
-                                        <p className="text-xs text-gray-400">Iniciante</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Users className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-700">Alunos desta trilha</p>
-                                        <p className="text-xs text-gray-400">3</p>
-                                    </div>
+                                    <button
+                                        className="w-full bg-green-400 hover:bg-green-500 transition-colors text-white font-semibold text-sm rounded-2xl py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        onClick={handleContinue}
+                                        disabled={!firstLesson && firstItem?.type !== 'question' && firstItem?.type !== 'challenge'}
+                                    >
+                                        {firstLesson
+                                            ? 'Começar aula'
+                                            : firstItem?.type === 'question'
+                                              ? 'Ir para quiz'
+                                              : firstItem?.type === 'challenge'
+                                                ? 'Abrir desafio'
+                                                : 'Aguardando conteúdo'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Right / Progress Card */}
-                        <div className="w-full lg:w-56 flex-shrink-0">
-                            <div className="bg-white rounded-2xl shadow-sm p-5 sticky top-8">
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Meu progresso</p>
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden mr-3">
-                                        <div className="h-full bg-green-400 rounded-full" style={{ width: '20%' }} />
-                                    </div>
-                                    <span className="text-sm font-bold text-gray-600">20%</span>
-                                </div>
-                                <button className="mt-3 w-full bg-green-400 hover:bg-green-500 transition-colors text-white font-semibold text-sm rounded-xl py-2.5" onClick={goToQuiz}>
-                                    Continuar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </main>
-            </div>
-
-            {/* Bottom left toast */}
-            <div className="fixed bottom-4 left-4 bg-gray-800 text-white text-xs rounded-xl px-4 py-3 shadow-lg max-w-[180px]">
-                <p className="mb-1">Não esqueça de avaliar o nosso projeto.</p>
-                <button className="flex items-center gap-1 text-green-400 font-semibold hover:underline">
-                    Avaliar agora <ArrowUpRight className="w-3 h-3" />
-                </button>
             </div>
         </div>
     );

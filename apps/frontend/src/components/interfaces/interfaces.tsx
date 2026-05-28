@@ -1,3 +1,5 @@
+import type { QuestionType } from '../types/types';
+
 export interface UserTrailAPI {
     trail: TrailAPI;
     progressoPct: number;
@@ -19,6 +21,86 @@ export interface TrailAPI {
     ano: number;
 }
 
+export interface LearningCategorySummary {
+    id: string;
+    name: string;
+    icon?: string | null;
+    thumbColor: string;
+}
+
+export interface LearningContentCounts {
+    lessons: number;
+    questions: number;
+    challenges: number;
+}
+
+export interface LearningTrailSummary {
+    id: string;
+    categoryId?: string | null;
+    category?: LearningCategorySummary | null;
+    name: string;
+    level: string;
+    description: string;
+    duration?: string | null;
+    totalHours?: number | null;
+    year?: number | null;
+    thumbColor: string;
+    status: string;
+    contentCounts: LearningContentCounts;
+}
+
+export interface LessonElement {
+    id: string;
+    type: 'texto' | 'imagem';
+    content: string;
+    order: number;
+}
+
+export interface LearningLessonItem {
+    id: string;
+    type: 'lesson';
+    order: number;
+    title: string;
+    status: string;
+    elements: LessonElement[];
+}
+
+export interface LearningQuestionItem {
+    id: string;
+    type: 'question';
+    order: number;
+    title: string;
+    status: string;
+    description: string | null;
+    questionType: QuestionType;
+    codeSnippet: string | null;
+    sentence: string | null;
+    blanks: string[];
+    correctOrder: string[];
+    alternatives: { id: string; text: string }[];
+    answer: string;
+}
+
+export interface LearningChallengeItem {
+    id: string;
+    type: 'challenge';
+    order: number;
+    title: string;
+    status: string;
+    description: string | null;
+    instructions: string | null;
+}
+
+export type LearningContentItem =
+    | LearningLessonItem
+    | LearningQuestionItem
+    | LearningChallengeItem;
+
+export interface LearningTrailContentResponse {
+    trail: LearningTrailSummary;
+    items: LearningContentItem[];
+}
+
 export interface StreakStats {
     sequenciaAtual: number;
     melhorSequencia: number;
@@ -37,7 +119,7 @@ export interface UserProfile {
 }
 
 export interface BaseQuestion {
-    id: number;
+    id: string | number;
     type: QuestionType;
     question: string;
 }

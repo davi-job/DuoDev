@@ -1,0 +1,50 @@
+.config-secoes {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.config-secao {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.config-secao-titulo {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-btn {
+    align-self: flex-start;
+    padding: 0.625rem 1.25rem;
+    background: var(--accent);
+    color: #0a0c10;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+    margin-top: 0.25rem;
+}
+
+.config-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.config-divisor {
+    height: 1px;
+    background: var(--border-primary);
+}

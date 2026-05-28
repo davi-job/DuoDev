@@ -38,26 +38,26 @@ export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs }: 
   }
 
   return (
-    <div className="bg-white rounded-3xl p-5">
-      <h3 className="text-sm font-semibold flex items-center gap-1.5 mb-4">
+    <div className="bg-white rounded-3xl p-6">
+      <h3 className="text-lg font-semibold flex items-center gap-2 mb-5">
         🔥 Meu Streak
       </h3>
 
       <div className="flex items-center justify-between mb-3">
-        <button onClick={() => setViewDate(new Date(ano, mes - 1, 1))} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">‹</button>
-        <span className="text-sm font-medium capitalize text-gray-700">{nomeMes}</span>
-        <button onClick={() => setViewDate(new Date(ano, mes + 1, 1))} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">›</button>
+        <button onClick={() => setViewDate(new Date(ano, mes - 1, 1))} className="w-9 h-9 flex items-center justify-center rounded-xl text-lg text-gray-400 hover:bg-gray-100 transition">‹</button>
+        <span className="text-base font-medium capitalize text-gray-700">{nomeMes}</span>
+        <button onClick={() => setViewDate(new Date(ano, mes + 1, 1))} className="w-9 h-9 flex items-center justify-center rounded-xl text-lg text-gray-400 hover:bg-gray-100 transition">›</button>
       </div>
 
-      <div className="grid grid-cols-7 gap-0.5 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-[11px] text-gray-400 font-medium py-1">{d}</div>
+          <div key={i} className="text-xs text-gray-400 font-medium py-1.5">{d}</div>
         ))}
         {cells.map((d, i) => (
           <div
             key={i}
             className={`
-              text-[12px] aspect-square flex items-center justify-center rounded-full transition
+              text-sm aspect-square flex items-center justify-center rounded-full transition
               ${d.empty ? 'pointer-events-none' : ''}
               ${d.done ? 'bg-green-400 text-white font-semibold' : ''}
               ${d.today && !d.done ? 'bg-green-700 text-white font-semibold' : ''}
@@ -69,14 +69,14 @@ export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs }: 
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div className="bg-gray-50 rounded-2xl p-3 text-center">
-          <p className="text-[24px] font-bold text-gray-900">{sequenciaAtual}</p>
-          <p className="text-[11px] text-gray-400">Streak atual</p>
+      <div className="grid grid-cols-2 gap-4 mt-5">
+        <div className="bg-gray-50 rounded-2xl p-4 text-center">
+          <p className="text-3xl font-bold text-gray-900">{sequenciaAtual}</p>
+          <p className="text-xs text-gray-400">Streak atual</p>
         </div>
-        <div className="bg-gray-50 rounded-2xl p-3 text-center">
-          <p className="text-[24px] font-bold text-gray-900">{melhorSequencia}</p>
-          <p className="text-[11px] text-gray-400">Melhor streak</p>
+        <div className="bg-gray-50 rounded-2xl p-4 text-center">
+          <p className="text-3xl font-bold text-gray-900">{melhorSequencia}</p>
+          <p className="text-xs text-gray-400">Melhor streak</p>
         </div>
       </div>
     </div>

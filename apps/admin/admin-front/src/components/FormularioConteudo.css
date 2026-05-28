@@ -1,0 +1,208 @@
+.form-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ─── Tipo ─── */
+
+.tipo-opcoes {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tipo-opcao {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+
+    background-color: var(--bg-tertiary);
+    border: 2px solid var(--border-primary);
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.tipo-opcao:hover {
+    border-color: var(--text-tertiary);
+    color: var(--text-primary);
+}
+
+.tipo-opcao.selecionado {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+}
+
+/* ─── Status ─── */
+
+.status-opcoes {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.status-opcao {
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.status-opcao:hover {
+    background-color: var(--bg-hover);
+}
+
+.status-opcao.selecionado {
+    border-color: var(--accent-mid);
+    background-color: var(--bg-tertiary);
+}
+
+/* ─── Alternativas ─── */
+
+.alternativas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.alternativa {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Sobrescreve .campo input { width: 100% } do CampoFormulario */
+.alternativa input[type='radio'] {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.alternativa .alternativa-texto {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 0.5rem 0.75rem;
+
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+    outline: none;
+
+    transition: border-color 150ms ease;
+}
+
+.alternativa .alternativa-texto:focus {
+    border-color: var(--accent-mid);
+}
+
+.alternativa-remover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+
+    color: var(--text-tertiary);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.alternativa-remover:hover {
+    color: var(--danger, #ef4444);
+    border-color: var(--danger, #ef4444);
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+.btn-add-alternativa {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.25rem;
+
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+
+    background: none;
+    border: 1px dashed var(--border-primary);
+    border-radius: 0.5rem;
+
+    cursor: pointer;
+    transition: all 150ms ease;
+    align-self: flex-start;
+}
+
+.btn-add-alternativa:hover {
+    color: var(--accent);
+    border-color: var(--accent-mid);
+    background-color: var(--bg-hover);
+}
+
+/* ─── Ações ─── */
+
+.form-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-primary);
+}
+
+.btn-cancelar {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.btn-cancelar:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.btn-salvar {
+    padding: 0.75rem 2rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.btn-salvar:hover {
+    background-color: var(--accent-mid);
+    color: var(--text-primary);
+}

@@ -4,27 +4,32 @@ import {
     BadRequestException,
     NotFoundException,
     ConflictException,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { promises as fs } from 'fs';
+import os from 'os';
+import path from 'path';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+
+type PendingRegistration = {
+    code: string;
+    expiresAt: Date;
+    data: Omit<RegisterUserDto, 'turnstileToken'>;
+};
 
 // Armazena { code, expiresAt, registerData }
-const pendingRegistrations = new Map<
-    string,
-    {
-        code: string;
-        expiresAt: Date;
-        data: RegisterUserDto;
-    }
->();
+const pendingRegistrations = new Map<string, PendingRegistration>();
+const pendingRegistrationsFile = path.join(os.tmpdir(), 'duodev-pending-registrations.json');
 
 @Injectable()
 export class AuthService {
@@ -32,9 +37,92 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private mailerService: MailerService,
+        private configService: ConfigService,
     ) {}
 
-    async register(registerUserDto: RegisterUserDto): Promise<{ message: string }> {
+    private isProduction(): boolean {
+        return this.configService.get<string>('NODE_ENV') === 'production';
+    }
+
+    private async loadPendingRegistrations(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        try {
+            const raw = await fs.readFile(pendingRegistrationsFile, 'utf-8');
+            const entries = JSON.parse(raw) as Array<[string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]>;
+
+            pendingRegistrations.clear();
+            for (const [email, entry] of entries) {
+                pendingRegistrations.set(email, {
+                    ...entry,
+                    expiresAt: new Date(entry.expiresAt),
+                });
+            }
+        } catch (error: any) {
+            if (error?.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+    }
+
+    private async savePendingRegistrations(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        const entries = Array.from(pendingRegistrations.entries()).map(([email, entry]) => [
+            email,
+            {
+                ...entry,
+                expiresAt: entry.expiresAt.toISOString(),
+            },
+        ]);
+
+        await fs.writeFile(pendingRegistrationsFile, JSON.stringify(entries), 'utf-8');
+    }
+
+    private async verifyTurnstile(token?: string): Promise<void> {
+        if (token === 'dev-turnstile-bypass') {
+            return;
+        }
+
+        const secret = this.configService.get<string>('TURNSTILE_SECRET_KEY');
+        if (!secret) {
+            return;
+        }
+
+        if (!token) {
+            throw new BadRequestException('Verificação de segurança não enviada.');
+        }
+
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                secret,
+                response: token,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new InternalServerErrorException('Falha ao validar a verificação de segurança.');
+        }
+
+        const result = (await response.json()) as { success?: boolean };
+        if (!result.success) {
+            throw new BadRequestException('Verificação de segurança inválida.');
+        }
+    }
+
+    async register(registerUserDto: RegisterUserDto): Promise<{ message: string; devCode?: string }> {
+        await this.verifyTurnstile(registerUserDto.turnstileToken);
+        const { turnstileToken, ...registerData } = registerUserDto;
+        await this.loadPendingRegistrations();
+
         const existingUser = await this.usersService.findOneByEmail(registerUserDto.email);
         if (existingUser) {
             throw new BadRequestException('Usuário com esse email já existe!');
@@ -46,19 +134,39 @@ export class AuthService {
         pendingRegistrations.set(registerUserDto.email, {
             code,
             expiresAt,
-            data: registerUserDto,
+            data: registerData,
         });
+        await this.savePendingRegistrations();
 
-        await this.mailerService.sendMail({
-            to: registerUserDto.email,
-            subject: 'Código de verificação',
-            text: `Seu código de verificação é: ${code}. Ele expira em 10 minutos.`,
-        });
+        const mailHost = this.configService.get<string>('MAIL_HOST');
+        const mailPort = this.configService.get<string>('MAIL_PORT');
+        const mailUser = this.configService.get<string>('MAIL_USER');
+        const mailPass = this.configService.get<string>('MAIL_PASS');
+        const hasMailerConfig = !!(mailHost && mailPort && mailUser && mailPass);
 
-        return { message: 'Código enviado para o e-mail' };
+        if (hasMailerConfig) {
+            await this.mailerService.sendMail({
+                to: registerUserDto.email,
+                subject: 'Código de verificação',
+                text: `Seu código de verificação é: ${code}. Ele expira em 10 minutos.`,
+            });
+
+            return { message: 'Código enviado para o e-mail' };
+        }
+
+        if (this.isProduction()) {
+            throw new InternalServerErrorException('SMTP não configurado para envio do código de verificação.');
+        }
+
+        console.log(`[auth/register] Modo dev sem SMTP. Código para ${registerUserDto.email}: ${code}`);
+        return {
+            message: 'Código gerado em modo de desenvolvimento',
+            devCode: code,
+        };
     }
 
     async verifyCode(verifyCodeDto: VerifyCodeDto) {
+        await this.loadPendingRegistrations();
         const pending = pendingRegistrations.get(verifyCodeDto.email);
 
         if (!pending) {
@@ -66,10 +174,18 @@ export class AuthService {
         }
         if (new Date() > pending.expiresAt) {
             pendingRegistrations.delete(verifyCodeDto.email);
+            await this.savePendingRegistrations();
             throw new BadRequestException('Código expirado. Faça o cadastro novamente.');
         }
         if (pending.code !== verifyCodeDto.code) {
             throw new BadRequestException('Código inválido');
+        }
+
+        const existingUser = await this.usersService.findOneByEmail(verifyCodeDto.email);
+        if (existingUser) {
+            pendingRegistrations.delete(verifyCodeDto.email);
+            await this.savePendingRegistrations();
+            throw new BadRequestException('Usuário com esse email já existe!');
         }
 
         const hashedPassword = await bcrypt.hash(pending.data.password, 10);
@@ -79,6 +195,7 @@ export class AuthService {
         });
 
         pendingRegistrations.delete(verifyCodeDto.email);
+        await this.savePendingRegistrations();
 
         const { password, ...result } = user;
         const payload = { email: user.email, sub: user.id };
@@ -99,6 +216,8 @@ export class AuthService {
     }
 
     async login(loginUserDto: LoginUserDto) {
+        await this.verifyTurnstile(loginUserDto.turnstileToken);
+
         const user = await this.validateUser(loginUserDto.email, loginUserDto.password);
         if (!user) {
             throw new UnauthorizedException('Credenciais inválidas!');

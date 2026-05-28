@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000'
+import type { LearningTrailContentResponse, LearningTrailSummary } from '../components/interfaces/interfaces'
+
+export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
 function getToken(): string {
   return localStorage.getItem('access_token') ?? ''
@@ -18,10 +20,68 @@ export async function fetchTrilhas() {
   return res.json()
 }
 
+export async function fetchLearningTrails(): Promise<LearningTrailSummary[]> {
+  const res = await fetch(`${API_URL}/learning/trails`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar trilhas publicadas')
+  return res.json()
+}
+
+export async function fetchLearningTrail(trailId: string): Promise<LearningTrailSummary> {
+  const res = await fetch(`${API_URL}/learning/trails/${trailId}`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar detalhes da trilha')
+  return res.json()
+}
+
+export async function fetchLearningTrailContent(trailId: string): Promise<LearningTrailContentResponse> {
+  const res = await fetch(`${API_URL}/learning/trails/${trailId}/content`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar conteúdo da trilha')
+  return res.json()
+}
+
 // ── Progresso do usuário nas trilhas ──
 export async function fetchMeuProgresso() {
   const res = await fetch(`${API_URL}/usuario-trilhas/meu-progresso`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar progresso')
+  return res.json()
+}
+
+export async function startTrail(trailId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/iniciar`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao iniciar trilha')
+  return res.json()
+}
+
+export async function completeLesson(trailId: string, lessonId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/aulas/${lessonId}/concluir`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao concluir aula')
+  return res.json()
+}
+
+export async function completeChallenge(trailId: string, challengeId: string) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/desafios/${challengeId}/concluir`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao concluir desafio')
+  return res.json()
+}
+
+export async function submitTrailQuiz(
+  trailId: string,
+  data: { questionIds: string[]; correctAnswers: number; incorrectAnswers: number },
+) {
+  const res = await fetch(`${API_URL}/usuario-trilhas/${trailId}/quiz/finalizar`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Erro ao salvar resultado do quiz')
   return res.json()
 }
 
@@ -90,6 +150,7 @@ export async function updateMinhaSenha(data: { senhaAtual: string; novaSenha: st
 export async function updateUserPreferences(data: {
   language?: string
   interests?: string[]
+  interestReason?: string
   onboardingCompleted?: boolean
 }) {
   const res = await fetch(`${API_URL}/users/me/preferences`, {

@@ -5,12 +5,14 @@ import { useNavigate, useLocation } from 'react-router';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../lib/api';
 
 export function TypeCode() {
     const navigate = useNavigate();
     const location = useLocation();
     
     const email = location.state?.email as string;
+    const devCode = location.state?.devCode as string | undefined;
 
     const [digits, setDigits] = useState(['', '', '', '']);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +48,7 @@ export function TypeCode() {
 
         setIsSubmitting(true);
         try {
-            const response = await axios.post('http://localhost:3000/auth/verify-code', {
+            const response = await axios.post(`${API_URL}/auth/verify-code`, {
                 email,
                 code,
             });
@@ -76,6 +78,11 @@ export function TypeCode() {
                 >
                     <h1 className="text-2xl tracking-tight text-[#244C4E]">Quase lá!</h1>
                     <p className="text-sm text-[#204749]">Digite o código enviado no seu E-mail institucional</p>
+                    {devCode && (
+                        <p className="mt-2 text-sm text-[#244C4E]">
+                            Código de desenvolvimento: <span className="font-semibold">{devCode}</span>
+                        </p>
+                    )}
                 </motion.div>
 
                 <form className="space-y-3" onSubmit={handleVerify}>
@@ -89,7 +96,9 @@ export function TypeCode() {
                             {digits.map((digit, i) => (
                                 <Input
                                     key={i}
-                                    ref={(el) => (inputRefs.current[i] = el)}
+                                    ref={(el) => {
+                                        inputRefs.current[i] = el;
+                                    }}
                                     type="text"
                                     inputMode="numeric"
                                     maxLength={1}

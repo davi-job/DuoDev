@@ -48,7 +48,10 @@ export function LanguageSelect() {
 
     setLoading(true);
     try {
-      await updateUserPreferences({ interests: selectedSkills });
+      await updateUserPreferences({
+        language: selectedSkills[0],
+        interests: selectedSkills,
+      });
       toast.success('Preferências de linguagem salvas com sucesso!');
       navigate('/formulario-interesse');
     } catch (error) {

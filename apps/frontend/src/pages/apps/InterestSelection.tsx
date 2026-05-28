@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner'; // 1. Importar o toast
+import { updateUserPreferences } from '../../lib/api';
 import { 
   ArrowRight, 
   Smartphone, 
@@ -32,10 +33,23 @@ const reasons: Reason[] = [
 export function InterestSelection() {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedId) {
-      navigate('/pagina-sucesso');
+      setLoading(true);
+      try {
+        await updateUserPreferences({ interestReason: selectedId });
+        navigate('/pagina-sucesso');
+      } catch (error) {
+        console.error('Failed to update interest reason:', error);
+        toast.error('Erro ao salvar seu motivo.', {
+          description: 'Por favor, tente novamente.',
+          duration: 3000,
+        });
+      } finally {
+        setLoading(false);
+      }
     } else {
       // 2. Notificação caso o usuário tente prosseguir sem selecionar um motivo
       toast.error('Por favor, selecione um motivo.', {
@@ -94,16 +108,17 @@ export function InterestSelection() {
           onClick={handleContinue}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          // Removido 'disabled' para que o Sonner possa avisar o erro no clique
+          disabled={loading}
           className={`
             mt-12 flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all
             ${selectedId 
               ? 'bg-[#9EEA6C] text-[#244C4E]' 
               : 'bg-gray-100 text-gray-400'}
+            ${loading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
-          Continuar
-          <ArrowRight size={18} />
+          {loading ? 'Salvando...' : 'Continuar'}
+          {!loading && <ArrowRight size={18} />}
         </motion.button>
       </div>
     </div>

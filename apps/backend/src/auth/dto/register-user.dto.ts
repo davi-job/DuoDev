@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, Matches } from 'class-validator';
 
 export class RegisterUserDto {
     @IsString()
@@ -15,4 +15,8 @@ export class RegisterUserDto {
             'A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial',
     })
     password: string;
+
+    @IsOptional()
+    @IsString()
+    turnstileToken?: string;
 }

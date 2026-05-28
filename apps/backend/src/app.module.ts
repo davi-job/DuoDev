@@ -14,6 +14,8 @@ import { TrailModule } from './trail/trail.module';
 import { UserTrailModule } from './user-trail/user-trail.module';
 import { StreakLogModule } from './streak-log/streak-log.module';
 import { BlogPostModule } from './blog-post/blog-post.module';
+import { DatabaseModule } from './database/database.module';
+import { LearningModule } from './learning/learning.module';
 
 @Module({
     imports: [
@@ -21,19 +23,25 @@ import { BlogPostModule } from './blog-post/blog-post.module';
             isGlobal: true,
             envFilePath: '.env',
         }),
+        DatabaseModule,
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                type: 'postgres',
-                host: configService.get('POSTGRES_HOST'),
-                port: parseInt(configService.get('POSTGRES_PORT') || '5432', 10),
-                username: configService.get('POSTGRES_USER'),
-                password: configService.get('POSTGRES_PASSWORD'),
-                database: configService.get('POSTGRES_DB'),
-                entities: [User, Trail, UserTrail, StreakLog, BlogPost],
-                synchronize: true, // desativar em produção
-            }),
+            useFactory: (configService: ConfigService) => {
+                const synchronize = configService.get('TYPEORM_SYNCHRONIZE') === 'true';
+
+                return {
+                    type: 'postgres',
+                    url: configService.get('DATABASE_URL'),
+                    host: configService.get('POSTGRES_HOST'),
+                    port: parseInt(configService.get('POSTGRES_PORT') || '5432', 10),
+                    username: configService.get('POSTGRES_USER'),
+                    password: configService.get('POSTGRES_PASSWORD'),
+                    database: configService.get('POSTGRES_DB'),
+                    entities: [User, Trail, UserTrail, StreakLog, BlogPost],
+                    synchronize,
+                };
+            },
         }),
         UsersModule,
         AuthModule,
@@ -41,6 +49,7 @@ import { BlogPostModule } from './blog-post/blog-post.module';
         UserTrailModule,
         StreakLogModule,
         BlogPostModule,
+        LearningModule,
     ],
     controllers: [AppController],
     providers: [AppService],

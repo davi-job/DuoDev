@@ -1,4 +1,5 @@
-import { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import Sidebar from '../../components/home/Sidebar'
 import Topbar from '../../components/home/Topbar'
@@ -6,7 +7,8 @@ import TrailCard from '../../components/home/TrailCard'
 import BlogCard from '../../components/home/BlogCard'
 import StreakWidget from '../../components/home/StreakWidget'
 import ProgressWidget from '../../components/home/ProgressWidget'
-import { fetchTrilhas, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
+import { fetchLearningTrails, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
+import type { LearningTrailSummary } from '../../components/interfaces/interfaces'
 
 /* ── Tipos JWT ── */
 interface JwtPayload {
@@ -40,12 +42,6 @@ const iconMap: Record<string, ReactNode> = {
   ),
 }
 
-const thumbMap: Record<string, string> = {
-  Java:   'bg-gradient-to-br from-orange-500 to-amber-500',
-  Python: 'bg-gradient-to-br from-yellow-500 to-yellow-300',
-  Docker: 'bg-gradient-to-br from-blue-600 to-sky-400',
-}
-
 const blogThumbMap: Record<string, string> = {
   Segurança: 'bg-gradient-to-br from-green-600 to-green-400',
   'Back-end': 'bg-gradient-to-br from-green-500 to-emerald-400',
@@ -53,17 +49,15 @@ const blogThumbMap: Record<string, string> = {
 }
 
 /* ── Tipos da API ── */
-interface TrailAPI {
-  id: string
-  nome: string
-  nivel: string
-  duracao: string
-  totalHoras: number
-  ano: number
-}
-
 interface UserTrailAPI {
-  trail: TrailAPI
+  trail: {
+    id: string
+    nome: string
+    nivel: string
+    duracao?: string
+    totalHoras: number
+    ano: number
+  }
   progressoPct: number
 }
 
@@ -88,7 +82,8 @@ interface StreakLog {
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const [userName, setUserName]       = useState<string>('Usuário')
-  const [trails, setTrails]           = useState<UserTrailAPI[]>([])
+  const [publishedTrails, setPublishedTrails] = useState<LearningTrailSummary[]>([])
+  const [progressTrails, setProgressTrails]   = useState<UserTrailAPI[]>([])
   const [blogs, setBlogs]             = useState<BlogAPI[]>([])
   const [streakStats, setStreakStats] = useState<StreakStats>({ sequenciaAtual: 0, melhorSequencia: 0 })
   const [streakLogs, setStreakLogs]   = useState<StreakLog[]>([])
@@ -107,13 +102,15 @@ export default function Home() {
     // Busca todos os dados da API
     async function loadData() {
       try {
-        const [progresso, blog, stats, logs] = await Promise.all([
+        const [learningTrails, progresso, blog, stats, logs] = await Promise.all([
+          fetchLearningTrails(),
           fetchMeuProgresso(),
           fetchBlog(),
           fetchStreakStats(),
           fetchStreakLogs(),
         ])
-        setTrails(progresso)
+        setPublishedTrails(learningTrails)
+        setProgressTrails(progresso)
         setBlogs(blog)
         setStreakStats(stats)
         setStreakLogs(logs)
@@ -131,41 +128,42 @@ export default function Home() {
     <div className="min-h-screen bg-[#f5f5f0] font-dm">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex flex-col min-h-screen lg:ml-48">
+      <div className="flex flex-col min-h-screen lg:ml-64">
         <Topbar onMenuToggle={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 lg:p-8">
-          <div className="max-w-screen-xl mx-auto">
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
+        <main className="flex-1 p-5 lg:p-8 xl:p-10">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-8">
 
               {/* Coluna esquerda */}
               <div className="flex flex-col gap-8">
 
-                <h1 className="font-syne text-2xl lg:text-[26px] font-semibold text-gray-900">
+                <h1 className="font-syne text-3xl lg:text-4xl font-semibold text-gray-900">
                   Olá {userName}, pronto para aprender? 👋
                 </h1>
 
                 {/* Trilhas */}
                 <section>
-                  <h2 className="font-syne text-lg font-semibold text-green-400 mb-1">
-                    Categorias em andamento
+                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">
+                    Trilhas disponíveis
                   </h2>
-                  <p className="text-sm text-gray-400 mb-4">Continue vendo suas categorias. Não pare de aprender</p>
+                  <p className="text-base text-gray-400 mb-5">Conteúdo publicado pelo admin e pronto para começar</p>
                   {loading ? (
-                    <p className="text-sm text-gray-400">Carregando trilhas...</p>
-                  ) : trails.length === 0 ? (
-                    <p className="text-sm text-gray-400">Nenhuma trilha em andamento.</p>
+                    <p className="text-base text-gray-400">Carregando trilhas...</p>
+                  ) : publishedTrails.length === 0 ? (
+                    <p className="text-base text-gray-400">Nenhuma trilha publicada ainda.</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {trails.map((ut) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {publishedTrails.map((trail) => (
                         <TrailCard
-                          key={ut.trail.id}
-                          name={ut.trail.nome}
-                          level={ut.trail.nivel}
-                          duration={`Conclusão em ${ut.trail.totalHoras}H · ${ut.trail.ano}`}
-                          progress={ut.progressoPct}
-                          thumbClass={thumbMap[ut.trail.nome] ?? 'bg-gradient-to-br from-gray-500 to-gray-400'}
-                          icon={iconMap[ut.trail.nome] ?? null}
+                          key={trail.id}
+                          id={trail.id}
+                          name={trail.name}
+                          level={trail.level}
+                          duration={trail.duration ?? `Conclusão em ${trail.totalHours ?? 0}H`}
+                          meta={`${trail.contentCounts.lessons} aulas · ${trail.contentCounts.questions} questões · ${trail.contentCounts.challenges} desafios`}
+                          thumbColor={trail.thumbColor}
+                          icon={iconMap[trail.name] ?? null}
                         />
                       ))}
                     </div>
@@ -174,14 +172,14 @@ export default function Home() {
 
                 {/* Blog */}
                 <section>
-                  <h2 className="font-syne text-lg font-semibold text-green-400 mb-1">Blog</h2>
-                  <p className="text-sm text-gray-400 mb-4">Dicas sobre programação, segurança e muito mais</p>
+                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">Blog</h2>
+                  <p className="text-base text-gray-400 mb-5">Dicas sobre programação, segurança e muito mais</p>
                   {loading ? (
-                    <p className="text-sm text-gray-400">Carregando posts...</p>
+                    <p className="text-base text-gray-400">Carregando posts...</p>
                   ) : blogs.length === 0 ? (
-                    <p className="text-sm text-gray-400">Nenhum post publicado ainda.</p>
+                    <p className="text-base text-gray-400">Nenhum post publicado ainda.</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                       {blogs.map((b) => (
                         <BlogCard
                           key={b.id}
@@ -204,7 +202,7 @@ export default function Home() {
                   melhorSequencia={streakStats.melhorSequencia}
                   logs={streakLogs}
                 />
-                <ProgressWidget trails={trails} />
+                <ProgressWidget trails={progressTrails} />
               </div>
 
             </div>

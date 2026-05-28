@@ -1,0 +1,564 @@
+.home {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background:
+        radial-gradient(circle at top right, rgba(158, 234, 108, 0.18), transparent 22rem);
+}
+
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.home-header h2 {
+    margin-top: 0.25rem;
+}
+
+.home-header .data-hoje {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+/* ─── Stat cards ─── */
+
+.home-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 250, 245, 0.86));
+    border: 1px solid var(--border-primary);
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 18px 40px rgba(55, 64, 42, 0.06);
+}
+
+.stat-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    border-radius: 0.75rem;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.75px;
+    color: var(--text-secondary);
+}
+
+.stat-valor {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.stat-sub {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* ─── Grid principal ─── */
+
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.home-grid-esquerda {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ─── Card genérico ─── */
+
+.card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 249, 241, 0.88));
+    border: 1px solid var(--border-primary);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 18px 40px rgba(55, 64, 42, 0.05);
+}
+
+.card-titulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vazio {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+/* ─── Donut ─── */
+
+.donut-conteudo {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.donut-svg {
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+}
+
+.donut-legenda {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.legenda-num {
+    color: var(--text-tertiary);
+}
+
+.legenda-cor {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ─── Status barras (trilhas) ─── */
+
+.status-barras {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.status-barra-stacked {
+    display: flex;
+    height: 8px;
+    border-radius: 50rem;
+    overflow: hidden;
+    gap: 2px;
+}
+
+.status-barra-segmento {
+    border-radius: 50rem;
+    transition: width 300ms ease;
+}
+
+.status-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.status-item-esq {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.status-item-num {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ─── Conteúdo por categoria ─── */
+
+.cat-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.cat-header {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    padding: 0 0 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.75px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.cat-item {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    align-items: center;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.cat-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.cat-nome {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+}
+
+.cat-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 150ms ease;
+}
+
+.cat-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.cat-cor {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cat-barra-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding-right: 1rem;
+}
+
+.cat-barra-bg {
+    flex: 1;
+    height: 6px;
+    background-color: var(--bg-hover);
+    border-radius: 50rem;
+    overflow: hidden;
+}
+
+.cat-barra-stacked {
+    display: flex;
+    gap: 2px;
+    background-color: transparent;
+}
+
+.cat-barra-segmento {
+    height: 100%;
+    border-radius: 50rem;
+    transition: width 300ms ease;
+    min-width: 4px;
+}
+
+.cat-num {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-width: 1.5rem;
+    text-align: right;
+}
+
+/* ─── Ranking de trilhas ─── */
+
+.card-buscando {
+    opacity: 0.7;
+    transition: opacity 150ms ease;
+}
+
+.ranking-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-ordem {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-primary);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.btn-ordem:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.ranking-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.ranking-header {
+    display: grid;
+    grid-template-columns: 2rem 2fr 1.5fr 5rem;
+    padding: 0 0.75rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.75px;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.ranking-item {
+    display: grid;
+    grid-template-columns: 2rem 2fr 1.5fr 5rem;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.9rem;
+    transition: background-color 150ms ease;
+}
+
+.ranking-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.ranking-pos {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-tertiary);
+}
+
+.ranking-nome {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.ranking-nome-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.ranking-nome-info > span:first-child {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ranking-categoria {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+}
+
+.ranking-progresso {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding-right: 1rem;
+}
+
+.ranking-pct {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+.ranking-usuarios {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.ranking-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border-primary);
+}
+
+.btn-pag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-primary);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.btn-pag:hover:not(:disabled) {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.btn-pag:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pag-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* ─── Feed últimos conteúdos ─── */
+
+.feed-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.feed-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    padding: 0 0.75rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.75px;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.feed-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.9rem;
+    transition: background-color 150ms ease;
+}
+
+.feed-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.feed-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    min-width: 0;
+}
+
+.feed-titulo > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tipo-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.feed-trilha {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.feed-tempo {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    text-align: right;
+}
+
+@media (max-width: 1100px) {
+    .home-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .home {
+        padding: 1.25rem;
+    }
+
+    .home-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.9rem;
+    }
+
+    .home-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .cat-header,
+    .cat-item,
+    .ranking-header,
+    .ranking-item,
+    .feed-header,
+    .feed-item {
+        grid-template-columns: 1fr;
+    }
+}

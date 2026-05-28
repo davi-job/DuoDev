@@ -21,6 +21,7 @@ FROM base AS builder
 COPY packages/db/ ./packages/db/
 COPY apps/admin/admin-back/ ./apps/admin/admin-back/
 
+RUN npm run build -w @duodev/db
 RUN npm run build -w admin-back
 
 # Stage 4: Runner
