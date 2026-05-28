@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateMinhaSenha } from "../../lib/api";
 
 export default function ChangePasswordForm({ onCancel }: { onCancel: () => void }) {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -55,7 +56,7 @@ export default function ChangePasswordForm({ onCancel }: { onCancel: () => void 
 
             {success && (
                 <div className="bg-green-50 border border-green-100 text-green-600 text-sm px-4 py-3 rounded-2xl">
-                    ✅ Senha alterada com sucesso!
+                    Senha alterada com sucesso!
                 </div>
             )}
 

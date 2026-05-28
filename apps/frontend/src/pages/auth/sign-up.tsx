@@ -14,7 +14,7 @@ import axios from 'axios';
 
 const signUpForm = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-    email: z.string().email('Email inválido'),
+    email: z.email('Email inválido'),
     password: z
         .string()
         .min(8, 'Senha deve ter pelo menos 8 caracteres')
@@ -65,7 +65,7 @@ export function SignUp() {
         }
 
         try {
-            await axios.post('http://localhost:3000/auth/register', {
+            await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
                 name: data.name,
                 email: data.email,
                 password: data.password,
@@ -151,7 +151,7 @@ export function SignUp() {
                             <Input
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder="Digite sua senha (mínimo 6 caracteres)"
+                                placeholder="Digite sua senha (mínimo 8 caracteres)"
                                 className="pl-10 pr-10 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('password')}
                             />
@@ -196,7 +196,7 @@ export function SignUp() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting || !allRulesPassed}>
+                        <Button className="w-full" disabled={isSubmitting || !allRulesPassed || !cfVerified} type="submit">
                             Criar conta agora
                         </Button>
                     </motion.div>
