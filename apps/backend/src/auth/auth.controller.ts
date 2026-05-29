@@ -6,10 +6,35 @@ import { VerifyCodeDto } from './dto/verify-code.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
+
+    @Post('forgot-password')
+    @HttpCode(HttpStatus.OK)
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+        return this.authService.forgotPassword(forgotPasswordDto.email);
+    }
+
+    @Post('verify-reset-code')
+    @HttpCode(HttpStatus.OK)
+    async verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto) {
+        return this.authService.verifyResetCode(verifyResetCodeDto.email, verifyResetCodeDto.code);
+    }
+
+    @Post('reset-password')
+    @HttpCode(HttpStatus.OK)
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+        return this.authService.resetPassword(
+            resetPasswordDto.email,
+            resetPasswordDto.token,
+            resetPasswordDto.newPassword,
+        );
+    }
 
     @Post('register')
     @HttpCode(HttpStatus.OK)

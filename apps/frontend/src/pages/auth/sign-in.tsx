@@ -127,7 +127,7 @@ export function SignIn() {
                             <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                             <Input
                                 id="email"
-                                type="email"
+                                type="text"
                                 placeholder="email@aluno.unifapce.edu.br"
                                 className="pl-10 pr-4 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('email')}

@@ -17,6 +17,9 @@ import Trail from './pages/apps/Trail';
 import LessonPage from './pages/apps/LessonPage';
 import ChallengePage from './pages/apps/ChallengePage';
 import QuizGame from './pages/apps/QuizGame';
+import { ForgetMyPassword } from './pages/auth/forget-my-password';
+import { VerifyCodeResetPassword } from './pages/auth/verify-code-reset-password';
+import { ResetPassword } from './pages/auth/reset-password';
 
 
 export const router = createBrowserRouter([
@@ -40,6 +43,18 @@ export const router = createBrowserRouter([
                 path: '/digitar-codigo',
                 element: <TypeCode />,
             },
+            {
+                path: '/esqueci-minha-senha',
+                element: <ForgetMyPassword />,
+            },
+            {
+                path: '/verificar-codigo-redefinicao',
+                element: <VerifyCodeResetPassword />,
+            },
+            {
+                path: '/redefinir-senha',
+                element: <ResetPassword />,
+            }
         ],
     },
     {

@@ -69,9 +69,9 @@ export class UsersService {
         if (updateUserPreferencesDto.interests !== undefined) {
             user.interests = updateUserPreferencesDto.interests;
         }
-        if (updateUserPreferencesDto.interestReason !== undefined) {
-            user.interestReason = updateUserPreferencesDto.interestReason;
-        }
+        // if (updateUserPreferencesDto.interestReason !== undefined) {
+        //     user.interestReason = updateUserPreferencesDto.interestReason;
+        // }
         if (updateUserPreferencesDto.onboardingCompleted !== undefined) {
             user.onboardingCompleted = updateUserPreferencesDto.onboardingCompleted;
         }

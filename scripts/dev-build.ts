@@ -28,7 +28,8 @@ async function waitForDb(retries = 30, intervalMs = 2000): Promise<void> {
             await client.connect();
             await client.end();
             return;
-        } catch {
+        } catch (err) {
+            console.error(err);
             process.stdout.write(`\r  Tentativa ${i}/${retries}...`);
             await new Promise((r) => setTimeout(r, intervalMs));
         }

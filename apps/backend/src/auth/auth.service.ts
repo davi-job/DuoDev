@@ -27,9 +27,19 @@ type PendingRegistration = {
     data: Omit<RegisterUserDto, 'turnstileToken'>;
 };
 
+type PendingPasswordReset = {
+    code: string;
+    expiresAt: Date;
+    email: string;
+};
+
+
 // Armazena { code, expiresAt, registerData }
 const pendingRegistrations = new Map<string, PendingRegistration>();
 const pendingRegistrationsFile = path.join(os.tmpdir(), 'duodev-pending-registrations.json');
+
+const pendingResets = new Map<string, PendingPasswordReset>();
+const pendingResetsFile = path.join(os.tmpdir(), 'duodev-pending-resets.json');
 
 @Injectable()
 export class AuthService {
@@ -51,7 +61,9 @@ export class AuthService {
 
         try {
             const raw = await fs.readFile(pendingRegistrationsFile, 'utf-8');
-            const entries = JSON.parse(raw) as Array<[string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]>;
+            const entries = JSON.parse(raw) as Array<
+                [string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]
+            >;
 
             pendingRegistrations.clear();
             for (const [email, entry] of entries) {
@@ -66,6 +78,154 @@ export class AuthService {
             }
         }
     }
+
+    private async loadPendingResets(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        try {
+            const raw = await fs.readFile(pendingResetsFile, 'utf-8');
+            const entries = JSON.parse(raw) as Array<
+                [string, Omit<PendingPasswordReset, 'expiresAt'> & { expiresAt: string }]
+            >;
+
+            pendingResets.clear();
+            for (const [email, entry] of entries) {
+                pendingResets.set(email, {
+                    ...entry,
+                    expiresAt: new Date(entry.expiresAt),
+                });
+            }
+        } catch (error: any) {
+            if (error?.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+    }
+
+    private async savePendingResets(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        const entries = Array.from(pendingResets.entries()).map(([email, entry]) => [
+            email,
+            {
+                ...entry,
+                expiresAt: entry.expiresAt.toISOString(),
+            },
+        ]);
+
+        await fs.writeFile(pendingResetsFile, JSON.stringify(entries), 'utf-8');
+    }
+
+    async forgotPassword(email: string): Promise<{ message: string; devCode?: string }> {
+        await this.loadPendingResets();
+
+        // Verifica se o usuário existe
+        const user = await this.usersService.findOneByEmail(email);
+        if (!user) {
+            // Por segurança, não revelamos se o email existe ou não
+            return { message: 'Se o email estiver cadastrado, você receberá um código de recuperação' };
+        }
+
+        const code = crypto.randomInt(1000, 9999).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        pendingResets.set(email, {
+            code,
+            expiresAt,
+            email,
+        });
+        await this.savePendingResets();
+
+        const mailHost = this.configService.get<string>('MAIL_HOST');
+        const mailPort = this.configService.get<string>('MAIL_PORT');
+        const mailUser = this.configService.get<string>('MAIL_USER');
+        const mailPass = this.configService.get<string>('MAIL_PASS');
+        const hasMailerConfig = !!(mailHost && mailPort && mailUser && mailPass);
+
+        if (hasMailerConfig) {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'Código de recuperação de senha',
+                text: `Seu código de recuperação de senha é: ${code}. Ele expira em 10 minutos.`,
+            });
+
+            return { message: 'Código enviado para o e-mail' };
+        }
+
+        if (this.isProduction()) {
+            throw new InternalServerErrorException('SMTP não configurado para envio do código de recuperação.');
+        }
+
+        console.log(`[auth/forgot-password] Modo dev sem SMTP. Código para ${email}: ${code}`);
+        return {
+            message: 'Código gerado em modo de desenvolvimento',
+            devCode: code,
+        };
+    }
+
+    async verifyResetCode(email: string, code: string): Promise<{ message: string }> {
+        await this.loadPendingResets();
+
+        const pending = pendingResets.get(email);
+
+        if (!pending) {
+            throw new BadRequestException('Nenhuma solicitação de recuperação encontrada para esse e-mail');
+        }
+
+        if (new Date() > pending.expiresAt) {
+            pendingResets.delete(email);
+            await this.savePendingResets();
+            throw new BadRequestException('Código expirado. Solicite uma nova recuperação.');
+        }
+
+        if (pending.code !== code) {
+            throw new BadRequestException('Código inválido');
+        }
+
+        return { message: 'Código verificado com sucesso' };
+    }    
+
+    async resetPassword(email: string, token: string, newPassword: string): Promise<{ message: string }> {
+        await this.loadPendingResets();
+
+        const pending = pendingResets.get(email);
+
+        if (!pending) {
+            throw new BadRequestException('Nenhuma solicitação de recuperação encontrada para esse e-mail');
+        }
+
+        if (new Date() > pending.expiresAt) {
+            pendingResets.delete(email);
+            await this.savePendingResets();
+            throw new BadRequestException('Código expirado. Solicite uma nova recuperação.');
+        }
+
+        if (pending.code !== token) {
+            throw new BadRequestException('Código inválido');
+        }
+
+        // Usar o UsersService para atualizar a senha
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Primeiro encontra o usuário pelo email
+        const user = await this.usersService.findOneByEmail(email);
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado');
+        }
+
+        // Atualiza a senha usando o UsersService
+        await this.usersService.updatePassword(user.id, hashedPassword);
+
+        // Remove a solicitação pendente
+        pendingResets.delete(email);
+        await this.savePendingResets();
+
+        return { message: 'Senha redefinida com sucesso' };
+    }   
 
     private async savePendingRegistrations(): Promise<void> {
         if (this.isProduction()) {
@@ -238,7 +398,7 @@ export class AuthService {
 
         // Se estiver atualizando email, verifica se já existe
         if (updateProfileDto.email && updateProfileDto.email !== user.email) {
-            const emailExists = await this.usersService.findByEmail(updateProfileDto.email);
+            const emailExists = await this.usersService.findOneByEmail(updateProfileDto.email);
             if (emailExists) {
                 throw new ConflictException('Este email já está em uso');
             }
