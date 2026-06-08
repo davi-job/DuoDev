@@ -111,11 +111,44 @@ export interface StreakLog {
     concluido: boolean;
 }
 
+export interface GamificationBadge {
+    id: string;
+    label: string;
+    description: string;
+    icon: string;
+    tone: 'green' | 'blue' | 'amber' | 'orange';
+}
+
+export interface CosmeticReward {
+    id: string;
+    label: string;
+    description: string;
+    type: 'title' | 'frame' | 'theme';
+}
+
+export interface GamificationSnapshot {
+    xp: number;
+    level: number;
+    title: string;
+    currentLevelXp: number;
+    nextLevelXp: number;
+    xpIntoLevel: number;
+    xpForNextLevel: number;
+    progressPct: number;
+    unlockedBadges: GamificationBadge[];
+    unlockedCosmetics: CosmeticReward[];
+}
+
 export interface UserProfile {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
+    avatarUrl?: string;
+    onboardingCompleted?: boolean;
+    xp?: number;
+    streakCurrent?: number;
+    streakBest?: number;
+    gamification?: GamificationSnapshot;
 }
 
 export interface BaseQuestion {

@@ -1,12 +1,17 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { challenges, lessons, questions, trails, type DB, userTrails } from '@duodev/db';
+import { UsersService } from '../users/users.service';
+import { XP_REWARDS } from '../users/gamification.util';
 
 @Injectable()
 export class UserTrailService {
     private userTrailSupportsExtendedProgress?: boolean;
 
-    constructor(@Inject('DB') private readonly db: DB) {}
+    constructor(
+        @Inject('DB') private readonly db: DB,
+        private readonly usersService: UsersService,
+    ) {}
 
     async findByUsuario(userId: string) {
         const progressRows = await this.listProgressRows(userId);
@@ -46,11 +51,14 @@ export class UserTrailService {
 
     async completeLesson(userId: string, trailId: string, lessonId: string) {
         const item = await this.findPublishedLesson(trailId, lessonId);
-        return this.upsertProgress({
+        const previous = await this.findProgressRow(userId, trailId);
+        const progress = await this.upsertProgress({
             userId,
             trailId,
             completedItemIds: [item.id],
         });
+        await this.rewardProgress(userId, previous, progress, XP_REWARDS.lessonCompleted);
+        return progress;
     }
 
     async startTrail(userId: string, trailId: string) {
@@ -64,16 +72,21 @@ export class UserTrailService {
             return existing;
         }
 
-        return this.updateProgresso(userId, trail.id, 0);
+        const progress = await this.updateProgresso(userId, trail.id, 0);
+        await this.usersService.incrementXp(userId, XP_REWARDS.trailStarted);
+        return progress;
     }
 
     async completeChallenge(userId: string, trailId: string, challengeId: string) {
         const item = await this.findPublishedChallenge(trailId, challengeId);
-        return this.upsertProgress({
+        const previous = await this.findProgressRow(userId, trailId);
+        const progress = await this.upsertProgress({
             userId,
             trailId,
             completedItemIds: [item.id],
         });
+        await this.rewardProgress(userId, previous, progress, XP_REWARDS.challengeCompleted);
+        return progress;
     }
 
     async submitQuiz(
@@ -81,6 +94,7 @@ export class UserTrailService {
         trailId: string,
         payload: { questionIds: string[]; correctAnswers: number; incorrectAnswers: number },
     ) {
+        const previous = await this.findProgressRow(userId, trailId);
         const publishedQuestions = await this.db
             .select({ id: questions.id })
             .from(questions)
@@ -93,13 +107,15 @@ export class UserTrailService {
             throw new BadRequestException('Nenhuma questão válida foi enviada para esta trilha.');
         }
 
-        return this.upsertProgress({
+        const progress = await this.upsertProgress({
             userId,
             trailId,
             completedItemIds: validQuestionIds,
             correctAnswers: payload.correctAnswers,
             incorrectAnswers: payload.incorrectAnswers,
         });
+        await this.rewardQuiz(userId, previous, progress, payload);
+        return progress;
     }
 
     async updateProgresso(userId: string, trailId: string, progressoPct: number) {
@@ -260,6 +276,63 @@ export class UserTrailService {
             startedAt: row.iniciadoEm instanceof Date ? row.iniciadoEm : new Date(String(row.iniciadoEm)),
             updatedAt: row.atualizadoEm instanceof Date ? row.atualizadoEm : new Date(String(row.atualizadoEm)),
         }));
+    }
+
+    private async findProgressRow(userId: string, trailId: string) {
+        const rows = await this.listProgressRows(userId);
+        return rows.find((row) => row.trailId === trailId);
+    }
+
+    private async rewardProgress(
+        userId: string,
+        previous:
+            | {
+                  progressPct: number;
+              }
+            | undefined,
+        current: {
+            progressPct: number;
+        },
+        baseXp: number,
+    ) {
+        const previousProgress = previous?.progressPct ?? 0;
+        const currentProgress = current.progressPct ?? 0;
+
+        if (currentProgress <= previousProgress) {
+            return;
+        }
+
+        let xp = baseXp;
+        if (previousProgress < 100 && currentProgress >= 100) {
+            xp += XP_REWARDS.trailCompleted;
+        }
+
+        await this.usersService.incrementXp(userId, xp);
+    }
+
+    private async rewardQuiz(
+        userId: string,
+        previous:
+            | {
+                  progressPct: number;
+                  correctAnswers?: number;
+                  incorrectAnswers?: number;
+              }
+            | undefined,
+        current: {
+            progressPct: number;
+        },
+        payload: { correctAnswers: number; incorrectAnswers: number },
+    ) {
+        const previousAttempts = (previous?.correctAnswers ?? 0) + (previous?.incorrectAnswers ?? 0);
+        const currentAttempts = Math.max(0, payload.correctAnswers) + Math.max(0, payload.incorrectAnswers);
+        const hasNewQuizResult = currentAttempts > previousAttempts || current.progressPct > (previous?.progressPct ?? 0);
+
+        await this.rewardProgress(userId, previous, current, hasNewQuizResult ? XP_REWARDS.quizCompleted : 0);
+
+        if (previousAttempts === 0 && payload.incorrectAnswers === 0 && payload.correctAnswers > 0) {
+            await this.usersService.incrementXp(userId, XP_REWARDS.quizPerfectBonus);
+        }
     }
 
     private async supportsExtendedProgress() {

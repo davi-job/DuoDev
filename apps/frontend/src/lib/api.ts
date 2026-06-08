@@ -1,4 +1,4 @@
-import type { LearningTrailContentResponse, LearningTrailSummary } from '../components/interfaces/interfaces'
+import type { LearningTrailContentResponse, LearningTrailSummary, UserProfile } from '../components/interfaces/interfaces'
 
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
@@ -115,7 +115,7 @@ export async function registrarStreakHoje() {
 }
 
 // ── Usuário / Perfil ──
-export async function fetchMeuPerfil() {
+export async function fetchMeuPerfil(): Promise<UserProfile> {
   const res = await fetch(`${API_URL}/auth/me`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar perfil')
   return res.json()

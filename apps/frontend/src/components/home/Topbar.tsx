@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router'
+import { fetchMeuPerfil } from '../../lib/api'
+import type { UserProfile } from '../interfaces/interfaces'
 
 interface TopbarProps {
   onMenuToggle: () => void
@@ -8,6 +10,7 @@ interface TopbarProps {
 export default function Topbar({ onMenuToggle }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
@@ -21,10 +24,41 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    let active = true
+
+    async function loadProfile() {
+      try {
+        const data = await fetchMeuPerfil()
+        if (active) {
+          setProfile(data)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar resumo do perfil:', error)
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   function handleLogout() {
     localStorage.removeItem('access_token')
     navigate('/login')
   }
+
+  const xp = profile?.gamification?.xp ?? profile?.xp ?? 0
+  const streak = profile?.streakCurrent ?? 0
+  const displayName = profile?.name?.trim() || 'Aluno'
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 
   return (
     <>
@@ -59,11 +93,11 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
             <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
-            1200 exp
+            {xp} XP
           </div>
 
           <div className="flex items-center gap-1.5 bg-orange-50 text-orange-500 border border-orange-200 px-4 py-2 rounded-full text-sm font-semibold">
-            🔥 0
+            🔥 {streak}
           </div>
 
           <div className="relative" ref={dropdownRef}>
@@ -71,7 +105,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
               onClick={() => setDropdownOpen(prev => !prev)}
               className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-base font-semibold text-gray-600 hover:bg-gray-300 transition"
             >
-              A
+              {initials || 'A'}
             </button>
 
             {dropdownOpen && (

@@ -7,11 +7,39 @@ O Duodev é uma plataforma web responsiva projetada para atuar como uma ferramen
 ## Principais Funcionalidades
 
 - **Trilhas de Aprendizado:** O sistema lista e detalha trilhas de conhecimento, exibindo o progresso individual de conclusão do usuário.
-- **Quizzes e Gamificação:** Interface interativa de perguntas com feedback instantâneo, onde o usuário acumula pontos de experiência (XP) e participa de um ranking.
+- **Quizzes e Gamificação:** Interface interativa de perguntas com feedback instantâneo, onde o usuário acumula pontos de experiência (XP), níveis, streaks, badges e recompensas cosméticas.
 - **Gestão de Conteúdo (Admin):** Painel administrativo com controle de acesso para realizar o CRUD (Criar, Ler, Atualizar, Deletar) de trilhas, categorias e aulas.
 - **Interação do Usuário:** Funcionalidade que permite aos usuários logados avaliar o conteúdo com notas (estrelas) e deixar comentários.
 - **Calendário de Boots:** Interface para que o usuário navegue e visualize os dias em que assistiu aos cursos.
 - **Segurança e Autenticação:** Sistema de login e cadastro com senhas armazenadas com hash forte, além de proteção em formulários utilizando o Cloudflare Turnstile.
+
+## Gamificação
+
+O loop de gamificação do DuoDev foi desenhado para reforçar o hábito de estudo sem competir com a experiência pedagógica principal. Em vez de criar um jogo isolado, o sistema premia ações que já fazem parte da jornada de aprendizagem.
+
+### Loop principal
+
+1. O usuário inicia uma trilha ou conclui uma aula/desafio.
+2. O sistema registra progresso real e concede XP.
+3. A streak diária é atualizada conforme a consistência de estudo.
+4. O perfil recalcula nível, badges e recompensas cosméticas desbloqueadas.
+5. A interface passa a exibir esse progresso no topo da navegação, no perfil e nas telas de entrada.
+
+### Fase 1 implementada
+
+- **XP por ação:** iniciar trilha, concluir aula, concluir desafio, registrar streak e finalizar quiz.
+- **Níveis progressivos:** calculados automaticamente a partir do XP acumulado.
+- **Streak persistida:** a sequência atual e a melhor sequência passam a ser sincronizadas com o usuário.
+- **Badges derivados:** conquistas como primeiros 100 XP, streak de 3/7 dias, trilha concluída e alta taxa de acerto.
+- **Recompensas cosméticas:** títulos, molduras e temas liberados sem dar vantagem funcional.
+- **Perfil enriquecido:** o endpoint `GET /auth/me` agora retorna um snapshot de gamificação pronto para consumo no frontend.
+
+### Próximas fases sugeridas
+
+- **Missões diárias e semanais:** metas recorrentes para aumentar retenção.
+- **Ranking semanal:** competição curta e saudável entre usuários.
+- **Desafios adaptativos:** foco automático em tópicos com maior taxa de erro.
+- **Loja cosmética interna:** itens desbloqueados com moeda ganha estudando.
 
 ## Arquitetura do Repositório (Monorepo)
 
@@ -151,6 +179,21 @@ const result = await db.query.trails.findMany({
 ```
 
 > **Atenção:** o pacote precisa ser compilado (`npm run build -w @duodev/db`) antes de o backend conseguir importá-lo. Em produção, o Dockerfile do backend já executa o build automaticamente.
+
+### Campos de gamificação já previstos
+
+O schema de `users` já contempla parte da base de gamificação:
+
+- `xp`: experiência acumulada do aluno.
+- `streak_current`: sequência atual de estudo.
+- `streak_best`: melhor sequência registrada.
+
+O backend complementa esses dados com métricas derivadas no perfil autenticado, como:
+
+- nível atual;
+- progresso até o próximo nível;
+- badges desbloqueados;
+- recompensas cosméticas liberadas.
 
 ---
 

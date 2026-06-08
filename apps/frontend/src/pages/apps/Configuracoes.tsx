@@ -112,7 +112,16 @@ export default function Configuracoes() {
                                                 {profile.name}
                                             </h2>
                                             <p className="text-sm text-gray-400 mt-0.5 truncate">{profile.email}</p>
-                                            
+                                            {profile.gamification && (
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    <span className="text-xs bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full font-medium border border-emerald-100">
+                                                        ✨ Nível {profile.gamification.level}
+                                                    </span>
+                                                    <span className="text-xs bg-amber-50 text-amber-600 px-3 py-1 rounded-full font-medium border border-amber-100">
+                                                        {profile.gamification.title}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         <button
                                             onClick={() => setSection('edit-profile')}

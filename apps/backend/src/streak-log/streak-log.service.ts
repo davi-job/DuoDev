@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StreakLog } from './streak-log.entity';
+import { UsersService } from '../users/users.service';
+import { XP_REWARDS } from '../users/gamification.util';
 
 @Injectable()
 export class StreakLogService {
     constructor(
         @InjectRepository(StreakLog)
         private streakLogRepository: Repository<StreakLog>,
+        private usersService: UsersService,
     ) {}
 
     findByUsuario(idUsuario: string): Promise<StreakLog[]> {
@@ -26,6 +29,7 @@ export class StreakLogService {
                 dataRegistro: hoje,
             },
         });
+        const shouldReward = !log || !log.concluido;
 
         if (!log) {
             log = this.streakLogRepository.create({
@@ -37,7 +41,15 @@ export class StreakLogService {
             log.concluido = true;
         }
 
-        return this.streakLogRepository.save(log);
+        const savedLog = await this.streakLogRepository.save(log);
+        const streak = await this.calcularStreaks(idUsuario);
+        await this.usersService.syncStreak(idUsuario, streak);
+
+        if (shouldReward) {
+            await this.usersService.incrementXp(idUsuario, XP_REWARDS.streakLogged);
+        }
+
+        return savedLog;
     }
 
     async calcularStreaks(idUsuario: string): Promise<{ sequenciaAtual: number; melhorSequencia: number }> {

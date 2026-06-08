@@ -100,7 +100,7 @@ export function SignUp() {
                         Crie sua conta na <span className="text-[#9EEA6C]">duodev</span>
                     </h1>
                     <p className="text-sm text-[#204749]">
-                        Crie sua conta para aprender programação de maneira simples e de forma barata.
+                        Crie sua conta para evoluir em trilhas, ganhar XP, manter streak e liberar recompensas visuais.
                     </p>
                 </motion.div>
 

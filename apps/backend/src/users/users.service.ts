@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserPreferencesDto } from './dto/update-user-preferences.dto'; // Import the new DTO
+import { UpdateUserPreferencesDto } from './dto/update-user-preferences.dto';
 
 @Injectable()
 export class UsersService {
@@ -48,6 +48,25 @@ export class UsersService {
         if (data.name) user.name = data.name;
         if (data.email) user.email = data.email;
 
+        return this.usersRepository.save(user);
+    }
+
+    async incrementXp(id: string, amount: number): Promise<User> {
+        const safeAmount = Math.max(0, Math.round(amount));
+        const user = await this.findById(id);
+
+        if (safeAmount === 0) {
+            return user;
+        }
+
+        user.xp = Math.max(0, (user.xp ?? 0) + safeAmount);
+        return this.usersRepository.save(user);
+    }
+
+    async syncStreak(id: string, streak: { sequenciaAtual: number; melhorSequencia: number }): Promise<User> {
+        const user = await this.findById(id);
+        user.streakCurrent = Math.max(0, streak.sequenciaAtual);
+        user.streakBest = Math.max(user.streakBest ?? 0, streak.melhorSequencia);
         return this.usersRepository.save(user);
     }
 

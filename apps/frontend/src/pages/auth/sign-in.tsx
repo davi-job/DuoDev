@@ -110,7 +110,7 @@ export function SignIn() {
                         Boas vindas a <span className="text-[#9EEA6C]">duodev</span>
                     </h1>
                     <p className="text-sm text-[#204749]">
-                        Entre na sua conta para continuar aprendendo programação de maneira simples e de forma barata.
+                        Entre na sua conta para continuar suas trilhas, manter sua streak e desbloquear novas conquistas.
                     </p>
                 </motion.div>
 

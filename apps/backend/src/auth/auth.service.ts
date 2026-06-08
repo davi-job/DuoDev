@@ -20,6 +20,9 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { UserTrailService } from '../user-trail/user-trail.service';
+import { StreakLogService } from '../streak-log/streak-log.service';
+import { buildGamificationSnapshot } from '../users/gamification.util';
 
 type PendingRegistration = {
     code: string;
@@ -48,6 +51,8 @@ export class AuthService {
         private jwtService: JwtService,
         private mailerService: MailerService,
         private configService: ConfigService,
+        private userTrailService: UserTrailService,
+        private streakLogService: StreakLogService,
     ) {}
 
     private isProduction(): boolean {
@@ -357,11 +362,10 @@ export class AuthService {
         pendingRegistrations.delete(verifyCodeDto.email);
         await this.savePendingRegistrations();
 
-        const { password, ...result } = user;
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
-            user: result,
+            user: await this.getProfile(user.id),
         };
     }
 
@@ -385,7 +389,7 @@ export class AuthService {
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
-            user,
+            user: await this.getProfile(user.id),
         };
     }
 
@@ -404,10 +408,8 @@ export class AuthService {
             }
         }
 
-        // Atualiza e retorna o usuário sem a senha
-        const updatedUser = await this.usersService.update(userId, updateProfileDto);
-        const { password, ...result } = updatedUser;
-        return result;
+        await this.usersService.update(userId, updateProfileDto);
+        return this.getProfile(userId);
     }
 
     async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
@@ -436,5 +438,48 @@ export class AuthService {
         await this.usersService.updatePassword(userId, hashedPassword);
 
         return { message: 'Senha alterada com sucesso' };
+    }
+
+    async getProfile(userId: string) {
+        const user = await this.usersService.findById(userId);
+        const [trails, liveStreak] = await Promise.all([
+            this.userTrailService.findByUsuario(userId),
+            this.streakLogService.calcularStreaks(userId),
+        ]);
+
+        if (
+            user.streakCurrent !== liveStreak.sequenciaAtual ||
+            user.streakBest !== liveStreak.melhorSequencia
+        ) {
+            await this.usersService.syncStreak(userId, liveStreak);
+            user.streakCurrent = liveStreak.sequenciaAtual;
+            user.streakBest = Math.max(user.streakBest ?? 0, liveStreak.melhorSequencia);
+        }
+
+        const totalCorrect = trails.reduce((sum, trail) => sum + (trail.acertos ?? 0), 0);
+        const totalIncorrect = trails.reduce((sum, trail) => sum + (trail.erros ?? 0), 0);
+        const totalAnswers = totalCorrect + totalIncorrect;
+        const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
+            language: user.language,
+            interests: user.interests,
+            onboardingCompleted: user.onboardingCompleted,
+            xp: user.xp ?? 0,
+            streakCurrent: user.streakCurrent ?? 0,
+            streakBest: user.streakBest ?? 0,
+            gamification: buildGamificationSnapshot({
+                xp: user.xp ?? 0,
+                streakCurrent: user.streakCurrent ?? 0,
+                streakBest: user.streakBest ?? 0,
+                startedTrails: trails.length,
+                completedTrails: trails.filter((trail) => trail.progressoPct >= 100).length,
+                accuracy,
+            }),
+        };
     }
 }

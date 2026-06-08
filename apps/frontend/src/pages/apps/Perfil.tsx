@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import Sidebar from '../../components/home/Sidebar';
 import Topbar from '../../components/home/Topbar';
-import { fetchMeuProgresso, fetchStreakStats, fetchStreakLogs } from '../../lib/api';
-import type { JwtPayload, StreakLog, StreakStats, UserTrailAPI } from '../../components/interfaces/interfaces';
+import { fetchMeuPerfil, fetchMeuProgresso, fetchStreakStats, fetchStreakLogs } from '../../lib/api';
+import type { StreakLog, StreakStats, UserProfile, UserTrailAPI } from '../../components/interfaces/interfaces';
 import ModuleCard from '../../components/perfil/moduleCard';
 import DesempenhoSection from '../../components/perfil/desempenhoSection';
 import StreakSection from '../../components/perfil/streakSection';
@@ -14,30 +13,22 @@ type Tab = 'modulos' | 'desempenho' | 'streaks';
 export default function Perfil() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [tab, setTab] = useState<Tab>('modulos');
-    const [userName, setUserName] = useState('Usuário');
-    const [userEmail, setUserEmail] = useState('');
+    const [profile, setProfile] = useState<UserProfile | null>(null);
     const [trails, setTrails] = useState<UserTrailAPI[]>([]);
     const [streakStats, setStreakStats] = useState<StreakStats>({ sequenciaAtual: 0, melhorSequencia: 0 });
     const [streakLogs, setStreakLogs] = useState<StreakLog[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            try {
-                const decoded = jwtDecode<JwtPayload>(token);
-                if (decoded.name) setUserName(decoded.name);
-                if (decoded.email) setUserEmail(decoded.email);
-            } catch {}
-        }
-
         async function load() {
             try {
-                const [progresso, stats, logs] = await Promise.all([
+                const [userProfile, progresso, stats, logs] = await Promise.all([
+                    fetchMeuPerfil(),
                     fetchMeuProgresso(),
                     fetchStreakStats(),
                     fetchStreakLogs(),
                 ]);
+                setProfile(userProfile);
                 setTrails(progresso);
                 setStreakStats(stats);
                 setStreakLogs(logs);
@@ -55,6 +46,16 @@ export default function Perfil() {
     const totalErros = trails.reduce((s, t) => s + (t.erros ?? Math.round(t.progressoPct * 0.3)), 0);
     const totalQ = totalAcertos + totalErros;
     const media = totalQ > 0 ? Math.round((totalAcertos / totalQ) * 100) : 0;
+    const xp = profile?.gamification?.xp ?? profile?.xp ?? 0;
+    const level = profile?.gamification?.level ?? 1;
+    const levelTitle = profile?.gamification?.title ?? 'Aprendiz';
+    const levelProgress = profile?.gamification?.progressPct ?? 0;
+    const xpForNextLevel = profile?.gamification?.xpForNextLevel ?? 100;
+    const xpIntoLevel = profile?.gamification?.xpIntoLevel ?? 0;
+    const userName = profile?.name ?? 'Usuário';
+    const userEmail = profile?.email ?? '';
+    const badges = profile?.gamification?.unlockedBadges ?? [];
+    const cosmetics = profile?.gamification?.unlockedCosmetics ?? [];
 
     const TABS: { key: Tab; label: string; icon: string }[] = [
         { key: 'modulos', label: 'Módulos', icon: '📚' },
@@ -81,6 +82,22 @@ export default function Perfil() {
                                         {userName}
                                     </h1>
                                     <p className="text-sm text-gray-400 mt-0.5 truncate">{userEmail}</p>
+                                    <div className="mt-3 flex flex-col gap-2 max-w-md">
+                                        <div className="flex items-center justify-between text-xs text-gray-500">
+                                            <span className="font-medium text-green-700">
+                                                Nível {level} • {levelTitle}
+                                            </span>
+                                            <span>
+                                                {xpIntoLevel}/{xpForNextLevel} XP no nível atual
+                                            </span>
+                                        </div>
+                                        <div className="h-2.5 overflow-hidden rounded-full bg-[#eef4e8]">
+                                            <div
+                                                className="h-full rounded-full bg-gradient-to-r from-[#6ECC30] to-[#244C4E] transition-all duration-700"
+                                                style={{ width: `${levelProgress}%` }}
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="flex flex-wrap gap-2 mt-3">
                                         <span className="text-xs bg-orange-50 text-orange-500 px-3 py-1 rounded-full font-medium border border-orange-100">
                                             🔥 {streakStats.sequenciaAtual} dias seguidos
@@ -97,9 +114,10 @@ export default function Perfil() {
                                 
                                 <div className="flex gap-3 flex-wrap sm:flex-nowrap">
                                     {[
+                                        { value: xp, label: 'XP total', color: 'text-emerald-600' },
                                         { value: `${media}%`, label: 'Média acertos', color: 'text-green-500' },
                                         { value: trails.length, label: 'Trilhas', color: 'text-blue-500' },
-                                        { value: totalErros, label: 'Erros totais', color: 'text-red-400' },
+                                        { value: badges.length, label: 'Badges', color: 'text-amber-500' },
                                     ].map((s) => (
                                         <div
                                             key={s.label}
@@ -114,6 +132,71 @@ export default function Perfil() {
                                 </div>
                             </div>
                         </div>
+
+                        <section className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4">
+                            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <h2 className="font-syne text-base font-semibold text-gray-900">
+                                            Badges desbloqueados
+                                        </h2>
+                                        <p className="text-sm text-gray-400">
+                                            Marcos que mostram sua constância e domínio.
+                                        </p>
+                                    </div>
+                                    <span className="text-xs text-green-600 bg-green-50 border border-green-100 px-3 py-1 rounded-full font-medium">
+                                        {badges.length} conquista{badges.length !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+
+                                {badges.length === 0 ? (
+                                    <p className="text-sm text-gray-400">
+                                        Seus primeiros badges aparecem conforme você estuda e mantém streak.
+                                    </p>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {badges.map((badge) => (
+                                            <div
+                                                key={badge.id}
+                                                className="rounded-2xl border border-gray-100 bg-[#f9fbf5] p-4 flex items-start gap-3"
+                                            >
+                                                <span className="text-2xl">{badge.icon}</span>
+                                                <div>
+                                                    <p className="font-medium text-gray-800">{badge.label}</p>
+                                                    <p className="text-xs text-gray-500 mt-1">{badge.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+                                <div>
+                                    <h2 className="font-syne text-base font-semibold text-gray-900">
+                                        Recompensas cosméticas
+                                    </h2>
+                                    <p className="text-sm text-gray-400">
+                                        Itens visuais liberados sem impactar a aprendizagem.
+                                    </p>
+                                </div>
+
+                                {cosmetics.length === 0 ? (
+                                    <p className="text-sm text-gray-400">
+                                        Continue avançando para liberar títulos, molduras e temas.
+                                    </p>
+                                ) : (
+                                    <div className="flex flex-col gap-3">
+                                        {cosmetics.map((reward) => (
+                                            <div key={reward.id} className="rounded-2xl bg-[#f5f5f0] px-4 py-3">
+                                                <p className="text-sm font-medium text-gray-800">{reward.label}</p>
+                                                <p className="text-xs text-gray-500 mt-1">{reward.description}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </section>
 
                         {/* Tabs */}
                         <div className="flex gap-1 bg-white rounded-2xl p-1.5 shadow-sm border border-gray-100 w-fit">
