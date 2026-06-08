@@ -36,6 +36,8 @@ export class UserTrailService {
                     progressoPct: row.progressPct,
                     acertos: row.correctAnswers ?? 0,
                     erros: row.incorrectAnswers ?? 0,
+                    startedAt: row.startedAt,
+                    updatedAt: row.updatedAt,
                     trail: {
                         id: trail.id,
                         nome: trail.name,

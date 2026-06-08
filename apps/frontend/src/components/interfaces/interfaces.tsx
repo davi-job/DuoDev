@@ -5,6 +5,8 @@ export interface UserTrailAPI {
     progressoPct: number;
     acertos?: number;
     erros?: number;
+    startedAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
 export interface JwtPayload {
@@ -137,6 +139,21 @@ export interface GamificationSnapshot {
     progressPct: number;
     unlockedBadges: GamificationBadge[];
     unlockedCosmetics: CosmeticReward[];
+    missions: {
+        daily: GamificationMission[];
+        weekly: GamificationMission[];
+    };
+}
+
+export interface GamificationMission {
+    id: string;
+    label: string;
+    description: string;
+    icon: string;
+    period: 'daily' | 'weekly';
+    progress: number;
+    target: number;
+    status: 'pending' | 'completed';
 }
 
 export interface UserProfile {

@@ -33,6 +33,22 @@ export type CosmeticReward = {
     type: 'title' | 'frame' | 'theme';
 };
 
+export type GamificationMission = {
+    id: string;
+    label: string;
+    description: string;
+    icon: string;
+    period: 'daily' | 'weekly';
+    progress: number;
+    target: number;
+    status: 'pending' | 'completed';
+};
+
+export type GamificationMissionSnapshot = {
+    daily: GamificationMission[];
+    weekly: GamificationMission[];
+};
+
 export type GamificationSnapshot = {
     xp: number;
     level: number;
@@ -44,6 +60,7 @@ export type GamificationSnapshot = {
     progressPct: number;
     unlockedBadges: GamificationBadge[];
     unlockedCosmetics: CosmeticReward[];
+    missions: GamificationMissionSnapshot;
 };
 
 function xpRequiredForLevel(level: number): number {
@@ -92,17 +109,123 @@ export function buildGamificationSnapshot(params: {
     startedTrails: number;
     completedTrails: number;
     accuracy: number;
+    streakLogs: Array<{ dataRegistro: string; concluido: boolean }>;
+    progressTrails: Array<{ startedAt?: Date; updatedAt?: Date }>;
 }) {
     const level = buildLevelSnapshot(params.xp);
     const unlockedBadges = buildUnlockedBadges(params);
     const unlockedCosmetics = buildUnlockedCosmetics(params);
+    const missions = buildMissionSnapshot(params);
 
     return {
         xp: params.xp,
         ...level,
         unlockedBadges,
         unlockedCosmetics,
+        missions,
     } satisfies GamificationSnapshot;
+}
+
+function buildMissionSnapshot(params: {
+    streakCurrent: number;
+    streakLogs: Array<{ dataRegistro: string; concluido: boolean }>;
+    progressTrails: Array<{ startedAt?: Date; updatedAt?: Date }>;
+}) {
+    const now = new Date();
+    const todayIso = now.toISOString().slice(0, 10);
+    const weekThreshold = new Date(now);
+    weekThreshold.setDate(now.getDate() - 6);
+
+    const concludedLogs = params.streakLogs.filter((log) => log.concluido);
+    const studiedToday = concludedLogs.some((log) => log.dataRegistro?.slice(0, 10) === todayIso) ? 1 : 0;
+    const studiedDaysThisWeek = concludedLogs.filter((log) => {
+        const logDate = new Date(log.dataRegistro);
+        return logDate >= weekThreshold && logDate <= now;
+    }).length;
+
+    const updatedTrailsToday = params.progressTrails.filter((trail) => {
+        if (!trail.updatedAt) return false;
+        return trail.updatedAt.toISOString().slice(0, 10) === todayIso;
+    }).length;
+
+    const updatedTrailsThisWeek = params.progressTrails.filter((trail) => {
+        if (!trail.updatedAt) return false;
+        return trail.updatedAt >= weekThreshold && trail.updatedAt <= now;
+    }).length;
+
+    const startedTrailsThisWeek = params.progressTrails.filter((trail) => {
+        if (!trail.startedAt) return false;
+        return trail.startedAt >= weekThreshold && trail.startedAt <= now;
+    }).length;
+
+    const daily: GamificationMission[] = [
+        createMission({
+            id: 'study-today',
+            label: 'Registrar estudo hoje',
+            description: 'Marque pelo menos uma sessão de estudo no dia.',
+            icon: '🗓️',
+            period: 'daily',
+            progress: studiedToday,
+            target: 1,
+        }),
+        createMission({
+            id: 'trail-today',
+            label: 'Avançar em uma trilha',
+            description: 'Mantenha uma trilha em movimento hoje.',
+            icon: '📚',
+            period: 'daily',
+            progress: Math.min(updatedTrailsToday, 1),
+            target: 1,
+        }),
+        createMission({
+            id: 'streak-three',
+            label: 'Proteger streak de 3 dias',
+            description: 'Construa consistência até o terceiro dia seguido.',
+            icon: '🔥',
+            period: 'daily',
+            progress: Math.min(params.streakCurrent, 3),
+            target: 3,
+        }),
+    ];
+
+    const weekly: GamificationMission[] = [
+        createMission({
+            id: 'study-three-days',
+            label: 'Estudar em 3 dias da semana',
+            description: 'Espalhe o ritmo de estudo pela semana.',
+            icon: '📅',
+            period: 'weekly',
+            progress: Math.min(studiedDaysThisWeek, 3),
+            target: 3,
+        }),
+        createMission({
+            id: 'start-trail-week',
+            label: 'Iniciar uma nova trilha',
+            description: 'Abra uma frente nova de aprendizado na semana.',
+            icon: '🧭',
+            period: 'weekly',
+            progress: Math.min(startedTrailsThisWeek, 1),
+            target: 1,
+        }),
+        createMission({
+            id: 'touch-two-trails',
+            label: 'Movimentar 2 trilhas',
+            description: 'Mostre progresso em pelo menos duas trilhas nesta semana.',
+            icon: '🚀',
+            period: 'weekly',
+            progress: Math.min(updatedTrailsThisWeek, 2),
+            target: 2,
+        }),
+    ];
+
+    return { daily, weekly } satisfies GamificationMissionSnapshot;
+}
+
+function createMission(input: Omit<GamificationMission, 'status'>) {
+    return {
+        ...input,
+        status: input.progress >= input.target ? 'completed' : 'pending',
+    } satisfies GamificationMission;
 }
 
 function buildUnlockedBadges(params: {

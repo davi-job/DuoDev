@@ -442,8 +442,9 @@ export class AuthService {
 
     async getProfile(userId: string) {
         const user = await this.usersService.findById(userId);
-        const [trails, liveStreak] = await Promise.all([
+        const [trails, logs, liveStreak] = await Promise.all([
             this.userTrailService.findByUsuario(userId),
+            this.streakLogService.findByUsuario(userId),
             this.streakLogService.calcularStreaks(userId),
         ]);
 
@@ -479,6 +480,11 @@ export class AuthService {
                 startedTrails: trails.length,
                 completedTrails: trails.filter((trail) => trail.progressoPct >= 100).length,
                 accuracy,
+                streakLogs: logs,
+                progressTrails: trails.map((trail) => ({
+                    startedAt: trail.startedAt ? new Date(trail.startedAt) : undefined,
+                    updatedAt: trail.updatedAt ? new Date(trail.updatedAt) : undefined,
+                })),
             }),
         };
     }

@@ -34,9 +34,14 @@ O loop de gamificação do DuoDev foi desenhado para reforçar o hábito de estu
 - **Recompensas cosméticas:** títulos, molduras e temas liberados sem dar vantagem funcional.
 - **Perfil enriquecido:** o endpoint `GET /auth/me` agora retorna um snapshot de gamificação pronto para consumo no frontend.
 
+### Fase 2 inicial implementada
+
+- **Missões diárias:** metas de curto prazo como registrar estudo no dia, avançar em uma trilha e proteger streak.
+- **Missões semanais:** metas derivadas de atividade real, como estudar em 3 dias, iniciar nova trilha e movimentar mais de uma trilha.
+- **Widget de missões na home:** a coluna lateral agora exibe objetivos ativos com progresso visual e status concluído/pendente.
+
 ### Próximas fases sugeridas
 
-- **Missões diárias e semanais:** metas recorrentes para aumentar retenção.
 - **Ranking semanal:** competição curta e saudável entre usuários.
 - **Desafios adaptativos:** foco automático em tópicos com maior taxa de erro.
 - **Loja cosmética interna:** itens desbloqueados com moeda ganha estudando.

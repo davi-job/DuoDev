@@ -1,21 +1,14 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { jwtDecode } from 'jwt-decode'
 import Sidebar from '../../components/home/Sidebar'
 import Topbar from '../../components/home/Topbar'
 import TrailCard from '../../components/home/TrailCard'
 import BlogCard from '../../components/home/BlogCard'
 import StreakWidget from '../../components/home/StreakWidget'
 import ProgressWidget from '../../components/home/ProgressWidget'
-import { fetchLearningTrails, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
-import type { LearningTrailSummary } from '../../components/interfaces/interfaces'
-
-/* ── Tipos JWT ── */
-interface JwtPayload {
-  sub: string
-  email: string
-  name?: string
-}
+import MissionWidget from '../../components/home/MissionWidget'
+import { fetchLearningTrails, fetchMeuPerfil, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
+import type { LearningTrailSummary, StreakLog, StreakStats, UserProfile, UserTrailAPI } from '../../components/interfaces/interfaces'
 
 /* ── SVG icons ── */
 const iconMap: Record<string, ReactNode> = {
@@ -49,18 +42,6 @@ const blogThumbMap: Record<string, string> = {
 }
 
 /* ── Tipos da API ── */
-interface UserTrailAPI {
-  trail: {
-    id: string
-    nome: string
-    nivel: string
-    duracao?: string
-    totalHoras: number
-    ano: number
-  }
-  progressoPct: number
-}
-
 interface BlogAPI {
   id: string
   tag: string
@@ -69,19 +50,10 @@ interface BlogAPI {
   autor: { name: string }
 }
 
-interface StreakStats {
-  sequenciaAtual: number
-  melhorSequencia: number
-}
-
-interface StreakLog {
-  dataRegistro: string
-  concluido: boolean
-}
-
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const [userName, setUserName]       = useState<string>('Usuário')
+  const [profile, setProfile]         = useState<UserProfile | null>(null)
   const [publishedTrails, setPublishedTrails] = useState<LearningTrailSummary[]>([])
   const [progressTrails, setProgressTrails]   = useState<UserTrailAPI[]>([])
   const [blogs, setBlogs]             = useState<BlogAPI[]>([])
@@ -90,25 +62,18 @@ export default function Home() {
   const [loading, setLoading]         = useState<boolean>(true)
 
   useEffect(() => {
-    // Pega o nome do usuário do JWT
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token)
-        if (decoded.name) setUserName(decoded.name)
-      } catch {}
-    }
-
-    // Busca todos os dados da API
     async function loadData() {
       try {
-        const [learningTrails, progresso, blog, stats, logs] = await Promise.all([
+        const [userProfile, learningTrails, progresso, blog, stats, logs] = await Promise.all([
+          fetchMeuPerfil(),
           fetchLearningTrails(),
           fetchMeuProgresso(),
           fetchBlog(),
           fetchStreakStats(),
           fetchStreakLogs(),
         ])
+        setProfile(userProfile)
+        setUserName(userProfile.name || 'Usuário')
         setPublishedTrails(learningTrails)
         setProgressTrails(progresso)
         setBlogs(blog)
@@ -197,6 +162,10 @@ export default function Home() {
 
               {/* Coluna direita */}
               <div className="flex flex-col gap-4">
+                <MissionWidget
+                  daily={profile?.gamification?.missions.daily ?? []}
+                  weekly={profile?.gamification?.missions.weekly ?? []}
+                />
                 <StreakWidget
                   sequenciaAtual={streakStats.sequenciaAtual}
                   melhorSequencia={streakStats.melhorSequencia}
