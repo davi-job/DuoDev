@@ -23,7 +23,6 @@ type SignInForm = z.infer<typeof signInForm>;
 export function SignIn() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
@@ -167,12 +166,16 @@ export function SignIn() {
                         {errors.password && <span className="text-xs text-red-500">{errors.password.message}</span>}
                     </motion.div>
 
+                    <a href="/esqueci-minha-senha" className="text-xs text-[#6ECC30] underline hover:text-[#244C4E] transition-colors">
+                        Esqueceu sua senha?
+                    </a>
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting || !cfVerified}>
+                        <Button className="w-full" disabled={isSubmitting}>
                             Entrar agora
                         </Button>
                     </motion.div>
@@ -190,7 +193,7 @@ export function SignIn() {
                             Criar conta agora
                         </Link>
                     </motion.div>
-                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
+                    <CloudflareCheck onVerified={() => undefined} />
                 </form>
             </div>
         </div>

@@ -15,7 +15,7 @@ import { API_URL } from '../../lib/api';
 
 const signUpForm = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-    email: z.email('Email inválido'),
+    email: z.string().email('Email inválido'),
     password: z
         .string()
         .min(8, 'Senha deve ter pelo menos 8 caracteres')
@@ -38,7 +38,6 @@ const passwordRules = [
 export function SignUp() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
@@ -66,7 +65,7 @@ export function SignUp() {
         }
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
+            const response = await axios.post(`${API_URL}/auth/register`, {
                 name: data.name,
                 email: data.email,
                 password: data.password,
@@ -203,7 +202,7 @@ export function SignUp() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting || !allRulesPassed || !cfVerified} type="submit">
+                        <Button className="w-full" disabled={isSubmitting || !allRulesPassed} type="submit">
                             Criar conta agora
                         </Button>
                     </motion.div>
@@ -223,7 +222,7 @@ export function SignUp() {
                         <span className="text-xs text-[#244C4E]">Suas informações estão protegidas</span>
                     </motion.div>
 
-                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
+                    <CloudflareCheck onVerified={() => undefined} />
                 </form>
             </div>
         </div>

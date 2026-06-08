@@ -49,7 +49,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         validateAndCheckOnboarding();
     }, [navigate, location.pathname]); // Add location.pathname to dependencies
 
-    if (checking) return null; // ou um spinner
+    if (checking) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-[#f5f5f0] px-6 text-center text-sm text-[#244C4E]">
+                Validando sua sessão...
+            </div>
+        );
+    }
 
     return <>{children}</>;
 };
