@@ -7,8 +7,9 @@ import BlogCard from '../../components/home/BlogCard'
 import StreakWidget from '../../components/home/StreakWidget'
 import ProgressWidget from '../../components/home/ProgressWidget'
 import MissionWidget from '../../components/home/MissionWidget'
-import { fetchLearningTrails, fetchMeuPerfil, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
-import type { LearningTrailSummary, StreakLog, StreakStats, UserProfile, UserTrailAPI } from '../../components/interfaces/interfaces'
+import LeaderboardWidget from '../../components/home/LeaderboardWidget'
+import { fetchLearningTrails, fetchMeuPerfil, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs, fetchWeeklyLeaderboard } from '../../lib/api'
+import type { LearningTrailSummary, StreakLog, StreakStats, UserProfile, UserTrailAPI, WeeklyLeaderboardResponse } from '../../components/interfaces/interfaces'
 
 /* ── SVG icons ── */
 const iconMap: Record<string, ReactNode> = {
@@ -59,18 +60,20 @@ export default function Home() {
   const [blogs, setBlogs]             = useState<BlogAPI[]>([])
   const [streakStats, setStreakStats] = useState<StreakStats>({ sequenciaAtual: 0, melhorSequencia: 0 })
   const [streakLogs, setStreakLogs]   = useState<StreakLog[]>([])
+  const [leaderboard, setLeaderboard] = useState<WeeklyLeaderboardResponse | null>(null)
   const [loading, setLoading]         = useState<boolean>(true)
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [userProfile, learningTrails, progresso, blog, stats, logs] = await Promise.all([
+        const [userProfile, learningTrails, progresso, blog, stats, logs, weeklyLeaderboard] = await Promise.all([
           fetchMeuPerfil(),
           fetchLearningTrails(),
           fetchMeuProgresso(),
           fetchBlog(),
           fetchStreakStats(),
           fetchStreakLogs(),
+          fetchWeeklyLeaderboard(),
         ])
         setProfile(userProfile)
         setUserName(userProfile.name || 'Usuário')
@@ -79,6 +82,7 @@ export default function Home() {
         setBlogs(blog)
         setStreakStats(stats)
         setStreakLogs(logs)
+        setLeaderboard(weeklyLeaderboard)
       } catch (err) {
         console.error('Erro ao carregar dados da home:', err)
       } finally {
@@ -165,6 +169,11 @@ export default function Home() {
                 <MissionWidget
                   daily={profile?.gamification?.missions.daily ?? []}
                   weekly={profile?.gamification?.missions.weekly ?? []}
+                />
+                <LeaderboardWidget
+                  entries={leaderboard?.top ?? []}
+                  currentUser={leaderboard?.currentUser ?? null}
+                  periodLabel={leaderboard?.period.label ?? 'Últimos 7 dias'}
                 />
                 <StreakWidget
                   sequenciaAtual={streakStats.sequenciaAtual}

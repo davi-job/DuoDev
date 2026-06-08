@@ -39,12 +39,13 @@ O loop de gamificação do DuoDev foi desenhado para reforçar o hábito de estu
 - **Missões diárias:** metas de curto prazo como registrar estudo no dia, avançar em uma trilha e proteger streak.
 - **Missões semanais:** metas derivadas de atividade real, como estudar em 3 dias, iniciar nova trilha e movimentar mais de uma trilha.
 - **Widget de missões na home:** a coluna lateral agora exibe objetivos ativos com progresso visual e status concluído/pendente.
+- **Ranking semanal:** a home agora mostra um placar dos últimos 7 dias, calculado por consistência de estudo, movimento em trilhas, streak e trilhas concluídas.
 
 ### Próximas fases sugeridas
 
-- **Ranking semanal:** competição curta e saudável entre usuários.
 - **Desafios adaptativos:** foco automático em tópicos com maior taxa de erro.
 - **Loja cosmética interna:** itens desbloqueados com moeda ganha estudando.
+- **Snapshot persistido de temporada:** consolidar ranking e recompensas semanais fechadas por período.
 
 ## Arquitetura do Repositório (Monorepo)
 

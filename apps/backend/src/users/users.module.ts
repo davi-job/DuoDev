@@ -3,11 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { UserTrail } from '../user-trail/user-trail.entity';
+import { StreakLog } from '../streak-log/streak-log.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User])],
+    imports: [TypeOrmModule.forFeature([User, UserTrail, StreakLog])],
     providers: [UsersService],
     controllers: [UsersController],
-    exports: [UsersService], // Export UsersService to be used in AuthModule
+    exports: [UsersService],
 })
 export class UsersModule {}

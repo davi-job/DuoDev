@@ -156,6 +156,30 @@ export interface GamificationMission {
     status: 'pending' | 'completed';
 }
 
+export interface WeeklyLeaderboardEntry {
+    rank: number;
+    userId: string;
+    name: string;
+    xp: number;
+    streakCurrent: number;
+    weeklyScore: number;
+    studyDays: number;
+    trailMoves: number;
+    trailStarts: number;
+    completedTrails: number;
+    isCurrentUser: boolean;
+}
+
+export interface WeeklyLeaderboardResponse {
+    period: {
+        label: string;
+        startsAt: string;
+        endsAt: string;
+    };
+    top: WeeklyLeaderboardEntry[];
+    currentUser: WeeklyLeaderboardEntry | null;
+}
+
 export interface UserProfile {
     id: string;
     name: string;

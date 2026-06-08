@@ -1,4 +1,9 @@
-import type { LearningTrailContentResponse, LearningTrailSummary, UserProfile } from '../components/interfaces/interfaces'
+import type {
+  LearningTrailContentResponse,
+  LearningTrailSummary,
+  UserProfile,
+  WeeklyLeaderboardResponse,
+} from '../components/interfaces/interfaces'
 
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
@@ -162,5 +167,11 @@ export async function updateUserPreferences(data: {
     const error = await res.json()
     throw new Error(error.message || 'Erro ao atualizar preferências do usuário')
   }
+  return res.json()
+}
+
+export async function fetchWeeklyLeaderboard(): Promise<WeeklyLeaderboardResponse> {
+  const res = await fetch(`${API_URL}/users/leaderboard/weekly`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar ranking semanal')
   return res.json()
 }
