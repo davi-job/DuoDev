@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HomeIcon, LayersIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
+import { HomeIcon, LayersIcon, LogOutIcon, SettingsIcon, TrophyIcon } from 'lucide-react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '../auth/AuthContext';
 import PainelConfiguracoes from './PainelConfiguracoes';
@@ -15,6 +15,11 @@ const modules = [
         title: 'Conteúdo',
         icon: <LayersIcon size={16} />,
         path: '/conteudo',
+    },
+    {
+        title: 'Gamificação',
+        icon: <TrophyIcon size={16} />,
+        path: '/gamificacao',
     },
 ];
 

@@ -3,14 +3,20 @@ import type { GamificationMission } from '../interfaces/interfaces'
 interface MissionWidgetProps {
   daily: GamificationMission[]
   weekly: GamificationMission[]
+  onClaim?: (missionId: string) => void | Promise<void>
+  claimingMissionId?: string | null
 }
 
 function MissionList({
   title,
   missions,
+  onClaim,
+  claimingMissionId,
 }: {
   title: string
   missions: GamificationMission[]
+  onClaim?: (missionId: string) => void | Promise<void>
+  claimingMissionId?: string | null
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -48,11 +54,18 @@ function MissionList({
                     <div>
                       <p className="text-sm font-semibold text-gray-900">{mission.label}</p>
                       <p className="mt-1 text-xs leading-relaxed text-gray-500">{mission.description}</p>
+                      {mission.reward && (
+                        <p className="mt-2 text-[11px] font-medium text-emerald-700">
+                          Recompensa: {mission.reward}
+                        </p>
+                      )}
                     </div>
                     <span
                       className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
                         mission.status === 'completed'
                           ? 'bg-green-100 text-green-700'
+                          : mission.status === 'claimed'
+                            ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-white text-gray-500'
                       }`}
                     >
@@ -70,6 +83,23 @@ function MissionList({
                       style={{ width: `${progressPct}%` }}
                     />
                   </div>
+
+                  {mission.claimable && onClaim && (
+                    <button
+                      type="button"
+                      onClick={() => void onClaim(mission.id)}
+                      disabled={claimingMissionId === mission.id}
+                      className="mt-3 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {claimingMissionId === mission.id ? 'Resgatando...' : 'Resgatar'}
+                    </button>
+                  )}
+
+                  {mission.status === 'claimed' && (
+                    <p className="mt-3 text-[11px] font-medium text-emerald-700">
+                      Recompensa resgatada
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -80,7 +110,7 @@ function MissionList({
   )
 }
 
-export default function MissionWidget({ daily, weekly }: MissionWidgetProps) {
+export default function MissionWidget({ daily, weekly, onClaim, claimingMissionId }: MissionWidgetProps) {
   const hasMissions = daily.length > 0 || weekly.length > 0
 
   return (
@@ -100,8 +130,18 @@ export default function MissionWidget({ daily, weekly }: MissionWidgetProps) {
         <p className="text-sm text-gray-400">Carregando missões personalizadas...</p>
       ) : (
         <div className="flex flex-col gap-5">
-          <MissionList title="Hoje" missions={daily} />
-          <MissionList title="Semana" missions={weekly} />
+          <MissionList
+            title="Hoje"
+            missions={daily}
+            onClaim={onClaim}
+            claimingMissionId={claimingMissionId}
+          />
+          <MissionList
+            title="Semana"
+            missions={weekly}
+            onClaim={onClaim}
+            claimingMissionId={claimingMissionId}
+          />
         </div>
       )}
     </div>

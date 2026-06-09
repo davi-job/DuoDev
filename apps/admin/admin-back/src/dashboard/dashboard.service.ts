@@ -172,10 +172,10 @@ export class DashboardService {
                         c.name as categoria_nome,
                         t.thumb_color,
                         count(ut.id)::int as total_usuarios,
-                        coalesce(round(avg(ut.progress_pct))::int, 0) as progresso_medio
+                        coalesce(round(avg(ut."progressoPct"))::int, 0) as progresso_medio
                     from "trails" t
                     left join "categories" c on t.category_id = c.id
-                    left join "user_trail" ut on ut.trail_id = t.id
+                    left join "user_trail" ut on ut."idTrilha" = t.id
                     group by t.id, t.name, c.name, t.thumb_color
                     order by total_usuarios asc, t.name asc
                     limit ${POR_PAGINA} offset ${offset}
@@ -187,10 +187,10 @@ export class DashboardService {
                         c.name as categoria_nome,
                         t.thumb_color,
                         count(ut.id)::int as total_usuarios,
-                        coalesce(round(avg(ut.progress_pct))::int, 0) as progresso_medio
+                        coalesce(round(avg(ut."progressoPct"))::int, 0) as progresso_medio
                     from "trails" t
                     left join "categories" c on t.category_id = c.id
-                    left join "user_trail" ut on ut.trail_id = t.id
+                    left join "user_trail" ut on ut."idTrilha" = t.id
                     group by t.id, t.name, c.name, t.thumb_color
                     order by total_usuarios desc, t.name asc
                     limit ${POR_PAGINA} offset ${offset}

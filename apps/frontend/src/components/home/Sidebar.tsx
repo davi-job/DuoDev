@@ -1,17 +1,16 @@
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import type { ReactNode } from 'react'
 
 interface NavItem {
   label: string
   url: string
-  active?: boolean
   icon: ReactNode
 }
 
 const navItems: NavItem[] = [
   {
     label: 'Home',
-    active: true,
     icon: (
       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
@@ -20,13 +19,23 @@ const navItems: NavItem[] = [
     url: '/home'
   },
   {
-    label: 'Categorias',
+    label: 'Ranking',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a1.5 1.5 0 01-1.5-1.5v-10.5a1.5 1.5 0 011.5-1.5h9a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 14.25l1.5-1.5 1.5 1.5 3-3" />
+      </svg>
+    ),
+    url: '/ranking'
+  },
+  {
+    label: 'Trilhas',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
       </svg>
     ),
-    url: '/categorias'
+    url: '/trilhas'
   },
   {
     label: 'Meus conteúdos',
@@ -36,15 +45,6 @@ const navItems: NavItem[] = [
       </svg>
     ),
     url: '/meus-conteudos'
-  },
-  {
-    label: 'Projetos',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-      </svg>
-    ),
-    url: '/projetos'
   },
 ]
 
@@ -67,6 +67,11 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const [toastVisible, setToastVisible] = useState(true)
+  const location = useLocation()
+
+  function isActive(url: string) {
+    return location.pathname === url
+  }
 
   return (
     <>
@@ -92,33 +97,35 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           Aprendizado <span className="flex-1 h-px bg-gray-100"></span>
         </p>
         {navItems.map((item) => (
-          <a
+          <Link
             key={item.label}
-            href={item.url}
+            to={item.url}
+            onClick={onClose}
             className={`
               flex items-center gap-3 px-3 py-2.5 rounded-xl text-base mb-1 transition-all
-              ${item.active
+              ${isActive(item.url)
                 ? 'bg-green-50 text-green-600 font-medium'
                 : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}
             `}
           >
             <span>{item.icon}</span>
             {item.label}
-          </a>
+          </Link>
         ))}
 
         <p className="text-xs font-bold tracking-[0.18em] text-gray-300 uppercase mb-2 px-3 mt-6 flex items-center gap-2">
           Outros <span className="flex-1 h-px bg-gray-100"></span>
         </p>
         {otherItems.map((item) => (
-          <a
+          <Link
             key={item.label}
-            href={item.url}
+            to={item.url}
+            onClick={onClose}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all mb-1"
           >
             <span>{item.icon}</span>
             {item.label}
-          </a>
+          </Link>
         ))}
 
         {/* Toast */}
@@ -129,10 +136,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 onClick={() => setToastVisible(false)}
                 className="absolute top-3 right-3 text-green-400 hover:text-green-600 text-sm"
               >✕</button>
-              <p className="pr-5 mb-2 text-gray-500 leading-relaxed">Não esqueça de avaliar o nosso projeto.</p>
-              <a href="#" className="font-semibold text-green-500 hover:underline text-sm">
-                Avaliar agora ↗
-              </a>
+              <p className="pr-5 mb-2 text-gray-500 leading-relaxed">Acompanhe sua posição e a recompensa semanal projetada.</p>
+              <Link to="/ranking" onClick={onClose} className="font-semibold text-green-500 hover:underline text-sm">
+                Ver ranking ↗
+              </Link>
             </div>
           </div>
         )}

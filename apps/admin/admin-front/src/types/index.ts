@@ -2,6 +2,15 @@ export type StatusCategoria = 'publicado' | 'rascunho' | 'revisao' | 'arquivado'
 export type StatusTrilha = 'publicado' | 'rascunho' | 'revisao' | 'arquivado';
 export type NivelTrilha = 'iniciante' | 'intermediário' | 'avançado';
 
+export interface TrilhaMetadata {
+    heroTagline?: string;
+    estimatedXp?: number;
+    recommendedDays?: number;
+    missionPrompt?: string;
+    completionBadgeLabel?: string;
+    focusTags?: string[];
+}
+
 export interface Categoria {
     id: string;
     name: string;
@@ -29,6 +38,7 @@ export interface Trilha {
     duration: string | null;
     totalHours: number | null;
     year: number | null;
+    metadata: TrilhaMetadata;
     status: StatusTrilha;
     totalLessons: number;
     totalQuestions: number;
@@ -46,6 +56,7 @@ export interface CreateTrilhaDto {
     duration?: string;
     totalHours?: number;
     year?: number;
+    metadata?: TrilhaMetadata;
     status?: StatusTrilha;
 }
 
@@ -221,6 +232,22 @@ export interface DashboardData {
     conteudoPorStatus: StatusCount;
     trilhasPorCategoria: CategoriaDashboard[];
     ultimoConteudo: UltimoConteudoItem[];
+}
+
+export type GamificationRecord = {
+    id: string;
+    [key: string]: unknown;
+};
+
+export interface GamificationOverview {
+    configs: GamificationRecord[];
+    xpRules: GamificationRecord[];
+    achievements: GamificationRecord[];
+    cosmetics: GamificationRecord[];
+    missions: GamificationRecord[];
+    seasons: GamificationRecord[];
+    rewardTiers: GamificationRecord[];
+    adaptiveReviewRules: GamificationRecord[];
 }
 
 export const STATUS_CONFIG: Record<

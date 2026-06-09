@@ -1,4 +1,48 @@
-import { IsString, IsOptional, IsIn, IsUUID, MaxLength, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+    ArrayMaxSize,
+    IsArray,
+    IsIn,
+    IsInt,
+    IsOptional,
+    IsString,
+    IsUUID,
+    MaxLength,
+    Min,
+    ValidateNested,
+} from 'class-validator';
+
+export class TrailMetadataDto {
+    @IsOptional()
+    @IsString()
+    @MaxLength(140)
+    heroTagline?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    estimatedXp?: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(1)
+    recommendedDays?: number;
+
+    @IsOptional()
+    @IsString()
+    missionPrompt?: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(80)
+    completionBadgeLabel?: string;
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(8)
+    @IsString({ each: true })
+    focusTags?: string[];
+}
 
 export class CreateTrailDto {
     @IsUUID()
@@ -36,4 +80,9 @@ export class CreateTrailDto {
     @IsOptional()
     @IsIn(['publicado', 'rascunho', 'revisao', 'arquivado'])
     status?: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => TrailMetadataDto)
+    metadata?: TrailMetadataDto;
 }

@@ -113,6 +113,17 @@ export class ImportTrailDto {
     @IsIn(['publicado', 'rascunho', 'revisao', 'arquivado'])
     status?: string;
 
+    @IsOptional()
+    @IsObject()
+    metadata?: {
+        heroTagline?: string;
+        estimatedXp?: number;
+        recommendedDays?: number;
+        missionPrompt?: string;
+        completionBadgeLabel?: string;
+        focusTags?: string[];
+    };
+
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => ImportLessonDto)

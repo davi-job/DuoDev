@@ -62,6 +62,12 @@ export function InterestSelection() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
       <div className="w-full max-w-xl flex flex-col items-center">
+        <div className="mb-6 w-full rounded-3xl border border-[#E7F2E1] bg-[#F7FBF4] px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6ECC30]">Jornada inicial 2/3</p>
+          <p className="mt-2 text-sm text-[#3D5A5C]">
+            Agora diga por que quer entrar. Isso ajusta sua primeira missão e a trilha sugerida.
+          </p>
+        </div>
       
         <h1 className="text-xl md:text-2xl font-medium text-[#3D5A5C] mb-12 text-center leading-snug">
           Por quais motivos você se interessou <br className="hidden md:block" /> pela área?

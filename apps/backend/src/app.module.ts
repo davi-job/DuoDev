@@ -16,6 +16,7 @@ import { StreakLogModule } from './streak-log/streak-log.module';
 import { BlogPostModule } from './blog-post/blog-post.module';
 import { DatabaseModule } from './database/database.module';
 import { LearningModule } from './learning/learning.module';
+import { GamificationModule } from './gamification/gamification.module';
 
 @Module({
     imports: [
@@ -50,6 +51,7 @@ import { LearningModule } from './learning/learning.module';
         StreakLogModule,
         BlogPostModule,
         LearningModule,
+        GamificationModule,
     ],
     controllers: [AppController],
     providers: [AppService],

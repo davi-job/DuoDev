@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as modulesGamificacaoRouteImport } from './routes/(modules)/gamificacao'
 import { Route as modulesConteudoIndexRouteImport } from './routes/(modules)/conteudo/index'
 import { Route as modulesConteudoCategoriaIdRouteImport } from './routes/(modules)/conteudo/$categoriaId'
 import { Route as modulesConteudoCategoriaIdIndexRouteImport } from './routes/(modules)/conteudo/$categoriaId/index'
@@ -24,6 +25,11 @@ const LoginRoute = LoginRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const modulesGamificacaoRoute = modulesGamificacaoRouteImport.update({
+  id: '/(modules)/gamificacao',
+  path: '/gamificacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const modulesConteudoIndexRoute = modulesConteudoIndexRouteImport.update({
@@ -53,6 +59,7 @@ const modulesConteudoCategoriaIdTrilhaIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/gamificacao': typeof modulesGamificacaoRoute
   '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/conteudo/': typeof modulesConteudoIndexRoute
   '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/gamificacao': typeof modulesGamificacaoRoute
   '/conteudo': typeof modulesConteudoIndexRoute
   '/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
   '/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdIndexRoute
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/(modules)/gamificacao': typeof modulesGamificacaoRoute
   '/(modules)/conteudo/$categoriaId': typeof modulesConteudoCategoriaIdRouteWithChildren
   '/(modules)/conteudo/': typeof modulesConteudoIndexRoute
   '/(modules)/conteudo/$categoriaId/$trilhaId': typeof modulesConteudoCategoriaIdTrilhaIdRoute
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/gamificacao'
     | '/conteudo/$categoriaId'
     | '/conteudo/'
     | '/conteudo/$categoriaId/$trilhaId'
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/gamificacao'
     | '/conteudo'
     | '/conteudo/$categoriaId/$trilhaId'
     | '/conteudo/$categoriaId'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/(modules)/gamificacao'
     | '/(modules)/conteudo/$categoriaId'
     | '/(modules)/conteudo/'
     | '/(modules)/conteudo/$categoriaId/$trilhaId'
@@ -103,6 +115,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  modulesGamificacaoRoute: typeof modulesGamificacaoRoute
   modulesConteudoCategoriaIdRoute: typeof modulesConteudoCategoriaIdRouteWithChildren
   modulesConteudoIndexRoute: typeof modulesConteudoIndexRoute
 }
@@ -121,6 +134,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(modules)/gamificacao': {
+      id: '/(modules)/gamificacao'
+      path: '/gamificacao'
+      fullPath: '/gamificacao'
+      preLoaderRoute: typeof modulesGamificacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(modules)/conteudo/': {
@@ -174,6 +194,7 @@ const modulesConteudoCategoriaIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  modulesGamificacaoRoute: modulesGamificacaoRoute,
   modulesConteudoCategoriaIdRoute: modulesConteudoCategoriaIdRouteWithChildren,
   modulesConteudoIndexRoute: modulesConteudoIndexRoute,
 }

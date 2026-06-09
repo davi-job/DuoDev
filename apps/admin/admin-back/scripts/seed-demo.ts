@@ -19,10 +19,18 @@ import {
     categories,
     challenges,
     db,
+    inAppNotifications,
     lessons,
     legacyUsers,
+    leaderboardSnapshots,
     questions,
+    streakFreezes,
     streakLogs,
+    userAchievements,
+    userCosmetics,
+    userEquippedCosmetics,
+    userMissions,
+    weeklyRewards,
     trails,
     userTrails,
     users,
@@ -31,11 +39,201 @@ import { and, eq, sql } from 'drizzle-orm';
 
 const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@duodev.com';
 const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'admin123';
-const adminName = process.env.SEED_ADMIN_NAME ?? 'Administrador';
+const adminName = process.env.SEED_ADMIN_NAME ?? 'Douglas Martins';
 
 const studentEmail = process.env.SEED_USER_EMAIL ?? 'aluno@duodev.com';
 const studentPassword = process.env.SEED_USER_PASSWORD ?? 'aluno123';
-const studentName = process.env.SEED_USER_NAME ?? 'Aluno Demo';
+const studentName = process.env.SEED_USER_NAME ?? 'Lucas Almeida';
+
+const cleanUsers = [
+    {
+        email: process.env.SEED_CLEAN_USER_1_EMAIL ?? 'visitante1@duodev.com',
+        password: process.env.SEED_CLEAN_USER_1_PASSWORD ?? 'demo123!',
+        name: process.env.SEED_CLEAN_USER_1_NAME ?? 'Mariana Costa',
+    },
+    {
+        email: process.env.SEED_CLEAN_USER_2_EMAIL ?? 'visitante2@duodev.com',
+        password: process.env.SEED_CLEAN_USER_2_PASSWORD ?? 'demo123!',
+        name: process.env.SEED_CLEAN_USER_2_NAME ?? 'Rafael Santos',
+    },
+    {
+        email: process.env.SEED_CLEAN_USER_3_EMAIL ?? 'visitante3@duodev.com',
+        password: process.env.SEED_CLEAN_USER_3_PASSWORD ?? 'demo123!',
+        name: process.env.SEED_CLEAN_USER_3_NAME ?? 'Juliana Lima',
+    },
+    {
+        email: process.env.SEED_CLEAN_USER_4_EMAIL ?? 'visitante4@duodev.com',
+        password: process.env.SEED_CLEAN_USER_4_PASSWORD ?? 'demo123!',
+        name: process.env.SEED_CLEAN_USER_4_NAME ?? 'Pedro Rocha',
+    },
+] as const;
+
+const activeUsers = [
+    {
+        email: 'douglas.ratts@duodev.com',
+        password: 'ratts123!',
+        name: 'Douglas Ratts',
+        xp: 1650,
+        streakCurrent: 14,
+        streakBest: 20,
+        onboardingCompleted: true,
+        studyDays: 7,
+        trailProgress: [
+            { trailIndex: 0, progressPct: 100 },
+            { trailIndex: 1, progressPct: 100 },
+            { trailIndex: 2, progressPct: 100 },
+            { trailIndex: 3, progressPct: 95 },
+            { trailIndex: 4, progressPct: 88 },
+            { trailIndex: 5, progressPct: 76 },
+        ],
+    },
+    {
+        email: 'vivo01@duodev.com',
+        password: 'live123!',
+        name: 'Camila Ferreira',
+        xp: 860,
+        streakCurrent: 11,
+        streakBest: 14,
+        onboardingCompleted: true,
+        studyDays: 7,
+        trailProgress: [
+            { trailIndex: 0, progressPct: 100 },
+            { trailIndex: 1, progressPct: 85 },
+            { trailIndex: 2, progressPct: 60 },
+            { trailIndex: 3, progressPct: 35 },
+        ],
+    },
+    {
+        email: 'vivo02@duodev.com',
+        password: 'live123!',
+        name: 'Bruno Oliveira',
+        xp: 720,
+        streakCurrent: 9,
+        streakBest: 12,
+        onboardingCompleted: true,
+        studyDays: 6,
+        trailProgress: [
+            { trailIndex: 0, progressPct: 92 },
+            { trailIndex: 1, progressPct: 72 },
+            { trailIndex: 4, progressPct: 48 },
+        ],
+    },
+    {
+        email: 'vivo03@duodev.com',
+        password: 'live123!',
+        name: 'Fernanda Alves',
+        xp: 640,
+        streakCurrent: 8,
+        streakBest: 10,
+        onboardingCompleted: true,
+        studyDays: 5,
+        trailProgress: [
+            { trailIndex: 1, progressPct: 80 },
+            { trailIndex: 2, progressPct: 50 },
+            { trailIndex: 5, progressPct: 40 },
+        ],
+    },
+    {
+        email: 'vivo04@duodev.com',
+        password: 'live123!',
+        name: 'Thiago Pereira',
+        xp: 580,
+        streakCurrent: 7,
+        streakBest: 9,
+        onboardingCompleted: true,
+        studyDays: 5,
+        trailProgress: [
+            { trailIndex: 0, progressPct: 78 },
+            { trailIndex: 3, progressPct: 64 },
+            { trailIndex: 6, progressPct: 30 },
+        ],
+    },
+    {
+        email: 'vivo05@duodev.com',
+        password: 'live123!',
+        name: 'Aline Barbosa',
+        xp: 540,
+        streakCurrent: 6,
+        streakBest: 8,
+        onboardingCompleted: true,
+        studyDays: 4,
+        trailProgress: [
+            { trailIndex: 2, progressPct: 68 },
+            { trailIndex: 4, progressPct: 54 },
+            { trailIndex: 7, progressPct: 25 },
+        ],
+    },
+    {
+        email: 'vivo06@duodev.com',
+        password: 'live123!',
+        name: 'Gustavo Martins',
+        xp: 470,
+        streakCurrent: 5,
+        streakBest: 7,
+        onboardingCompleted: true,
+        studyDays: 4,
+        trailProgress: [
+            { trailIndex: 1, progressPct: 62 },
+            { trailIndex: 5, progressPct: 44 },
+        ],
+    },
+    {
+        email: 'vivo07@duodev.com',
+        password: 'live123!',
+        name: 'Patricia Gomes',
+        xp: 420,
+        streakCurrent: 4,
+        streakBest: 6,
+        onboardingCompleted: true,
+        studyDays: 3,
+        trailProgress: [
+            { trailIndex: 0, progressPct: 55 },
+            { trailIndex: 8, progressPct: 38 },
+        ],
+    },
+    {
+        email: 'vivo08@duodev.com',
+        password: 'live123!',
+        name: 'Marcos Vinicius',
+        xp: 360,
+        streakCurrent: 4,
+        streakBest: 5,
+        onboardingCompleted: true,
+        studyDays: 3,
+        trailProgress: [
+            { trailIndex: 3, progressPct: 50 },
+            { trailIndex: 6, progressPct: 32 },
+        ],
+    },
+    {
+        email: 'vivo09@duodev.com',
+        password: 'live123!',
+        name: 'Larissa Souza',
+        xp: 280,
+        streakCurrent: 3,
+        streakBest: 4,
+        onboardingCompleted: true,
+        studyDays: 2,
+        trailProgress: [
+            { trailIndex: 4, progressPct: 36 },
+            { trailIndex: 9, progressPct: 28 },
+        ],
+    },
+    {
+        email: 'vivo10@duodev.com',
+        password: 'live123!',
+        name: 'Daniel Moreira',
+        xp: 210,
+        streakCurrent: 2,
+        streakBest: 3,
+        onboardingCompleted: true,
+        studyDays: 2,
+        trailProgress: [
+            { trailIndex: 2, progressPct: 24 },
+            { trailIndex: 7, progressPct: 18 },
+        ],
+    },
+] as const;
 
 type LessonSeed = {
     title: string;
@@ -651,6 +849,182 @@ async function upsertStudent() {
     return created;
 }
 
+async function purgeCleanUserData(userId: string) {
+    await Promise.all([
+        db.delete(userTrails).where(eq(userTrails.userId, userId)),
+        db.delete(streakLogs).where(eq(streakLogs.userId, userId)),
+        db.delete(userMissions).where(eq(userMissions.userId, userId)),
+        db.delete(userCosmetics).where(eq(userCosmetics.userId, userId)),
+        db.delete(userEquippedCosmetics).where(eq(userEquippedCosmetics.userId, userId)),
+        db.delete(userAchievements).where(eq(userAchievements.userId, userId)),
+        db.delete(weeklyRewards).where(eq(weeklyRewards.userId, userId)),
+        db.delete(leaderboardSnapshots).where(eq(leaderboardSnapshots.userId, userId)),
+        db.delete(streakFreezes).where(eq(streakFreezes.userId, userId)),
+        db.delete(inAppNotifications).where(eq(inAppNotifications.userId, userId)),
+    ]);
+}
+
+async function upsertCleanUser(seed: { email: string; password: string; name: string }) {
+    const hash = await bcrypt.hash(seed.password, 10);
+    const [existing] = await db.select().from(legacyUsers).where(eq(legacyUsers.email, seed.email)).limit(1);
+
+    const payload = {
+        name: seed.name,
+        email: seed.email,
+        password: hash,
+        language: 'en',
+        interests: null,
+        interestReason: null,
+        onboardingCompleted: false,
+        xp: 0,
+        streakCurrent: 0,
+        streakBest: 0,
+        updatedAt: new Date(),
+    };
+
+    if (existing) {
+        const [updated] = await db
+            .update(legacyUsers)
+            .set(payload)
+            .where(eq(legacyUsers.id, existing.id))
+            .returning();
+        await purgeCleanUserData(updated.id);
+        return updated;
+    }
+
+    const [created] = await db.insert(legacyUsers).values(payload).returning();
+    await purgeCleanUserData(created.id);
+    return created;
+}
+
+async function upsertActiveUser(seed: (typeof activeUsers)[number]) {
+    const hash = await bcrypt.hash(seed.password, 10);
+    const [existing] = await db.select().from(legacyUsers).where(eq(legacyUsers.email, seed.email)).limit(1);
+
+    const payload = {
+        name: seed.name,
+        email: seed.email,
+        password: hash,
+        language: 'javascript',
+        interests: 'frontend,backend,sql',
+        interestReason: 'Demo ativa para apresentar ranking e progresso.',
+        onboardingCompleted: seed.onboardingCompleted,
+        xp: seed.xp,
+        streakCurrent: seed.streakCurrent,
+        streakBest: seed.streakBest,
+        updatedAt: new Date(),
+    };
+
+    if (existing) {
+        const [updated] = await db
+            .update(legacyUsers)
+            .set(payload)
+            .where(eq(legacyUsers.id, existing.id))
+            .returning();
+        await purgeCleanUserData(updated.id);
+        return updated;
+    }
+
+    const [created] = await db.insert(legacyUsers).values(payload).returning();
+    await purgeCleanUserData(created.id);
+    return created;
+}
+
+async function equipCosmeticsForUser(
+    userId: string,
+    cosmetics: Array<{ type: 'titulo' | 'moldura' | 'tema' | 'selo'; code: string }>,
+    shouldEquip = true,
+) {
+    if (!cosmetics.length) return;
+
+    const items = await db
+        .select({
+            id: userCosmetics.cosmeticItemId,
+            code: userCosmetics.id,
+        })
+        .from(userCosmetics)
+        .innerJoin(legacyUsers, eq(userCosmetics.userId, legacyUsers.id))
+        .where(eq(userCosmetics.userId, userId));
+
+    const cosmeticRows = await db
+        .select()
+        .from(userCosmetics)
+        .innerJoin(legacyUsers, eq(userCosmetics.userId, legacyUsers.id));
+
+    const available = await db
+        .select({
+            id: userCosmetics.cosmeticItemId,
+        })
+        .from(userCosmetics)
+        .where(eq(userCosmetics.userId, userId));
+
+    const cosmeticItems = await db
+        .select()
+        .from(userCosmetics)
+        .where(eq(userCosmetics.userId, userId));
+
+    void items;
+    void cosmeticRows;
+    void available;
+    void cosmeticItems;
+
+    const slots = {
+        titleItemId: null as string | null,
+        frameItemId: null as string | null,
+        themeItemId: null as string | null,
+        badgeItemId: null as string | null,
+    };
+
+    for (const cosmetic of cosmetics) {
+        const [found] = await db
+            .select({
+                id: userCosmetics.cosmeticItemId,
+                itemId: userCosmetics.cosmeticItemId,
+            })
+            .from(userCosmetics)
+            .where(eq(userCosmetics.userId, userId));
+
+        if (!found) continue;
+
+        const slotKey =
+            cosmetic.type === 'titulo'
+                ? 'titleItemId'
+                : cosmetic.type === 'moldura'
+                  ? 'frameItemId'
+                  : cosmetic.type === 'tema'
+                    ? 'themeItemId'
+                    : 'badgeItemId';
+
+        if (shouldEquip) {
+            slots[slotKey] = found.itemId;
+        }
+    }
+
+    if (!shouldEquip) return;
+
+    const [existingEquipped] = await db
+        .select()
+        .from(userEquippedCosmetics)
+        .where(eq(userEquippedCosmetics.userId, userId))
+        .limit(1);
+
+    if (existingEquipped) {
+        await db
+            .update(userEquippedCosmetics)
+            .set({
+                ...slots,
+                updatedAt: new Date(),
+            })
+            .where(eq(userEquippedCosmetics.userId, userId));
+        return;
+    }
+
+    await db.insert(userEquippedCosmetics).values({
+        userId,
+        ...slots,
+    });
+}
+
 async function upsertCategory(seed: CategorySeed) {
     const [existing] = await db.select().from(categories).where(eq(categories.name, seed.name)).limit(1);
 
@@ -933,8 +1307,11 @@ async function run() {
 
     await upsertAdmin();
     const student = await upsertStudent();
+    const activeDemoUsers = await Promise.all(activeUsers.map((seed) => upsertActiveUser(seed)));
 
     const trailProgress = new Map<string, { progressPct: number; completedItemIds: string[] }>();
+    const trailContentByTrailId = new Map<string, string[]>();
+    const trailsCreated: Array<{ id: string; name: string }> = [];
     let trailIndex = 0;
 
     for (const categorySeed of DEMO_CATEGORIES) {
@@ -942,6 +1319,7 @@ async function run() {
 
         for (const trailSeed of categorySeed.trails) {
             const trail = await upsertTrail(category.id, trailSeed);
+            trailsCreated.push({ id: trail.id, name: trail.name });
             const completedItemIds: string[] = [];
 
             for (const [index, lesson] of trailSeed.lessons.entries()) {
@@ -962,6 +1340,8 @@ async function run() {
                 );
                 completedItemIds.push(id);
             }
+
+            trailContentByTrailId.set(trail.id, completedItemIds);
 
             if (trailIndex === 0) {
                 trailProgress.set(trail.id, { progressPct: 100, completedItemIds });
@@ -1004,9 +1384,57 @@ async function run() {
         await upsertProgress(student.id, trailId, state.progressPct, state.completedItemIds);
     }
 
+    const todayDay = new Date(today);
+    const trailIds = trailsCreated.map((trail) => trail.id);
+    console.log('\n🔥 Criando usuários ativos de demonstração...\n');
+
+    for (const [index, user] of activeDemoUsers.entries()) {
+        const seed = activeUsers[index];
+        const activeTrailPlans = seed.trailProgress
+            .map((entry) => ({
+                trailId: trailIds[entry.trailIndex % trailIds.length],
+                progressPct: entry.progressPct,
+            }))
+            .filter((entry): entry is { trailId: string; progressPct: number } => Boolean(entry.trailId));
+
+        for (const trailPlan of activeTrailPlans) {
+            const completedItemIds = trailContentByTrailId.get(trailPlan.trailId) ?? [];
+            const takenCount = Math.max(1, Math.ceil(completedItemIds.length * (trailPlan.progressPct / 100)));
+            await upsertProgress(
+                user.id,
+                trailPlan.trailId,
+                trailPlan.progressPct,
+                completedItemIds.slice(0, takenCount),
+            );
+        }
+
+        for (let dayOffset = 0; dayOffset < seed.studyDays; dayOffset += 1) {
+            const logDate = new Date(todayDay);
+            logDate.setDate(todayDay.getDate() - dayOffset);
+            await upsertStreakLog(user.id, logDate.toISOString().split('T')[0], true);
+        }
+
+        console.log(
+            `   ${seed.name}: ${seed.email} / ${seed.password} | XP ${seed.xp} | streak ${seed.streakCurrent}`,
+        );
+    }
+
+    console.log('\n🧼 Usuários limpos de primeiro acesso:');
+    for (const cleanUser of cleanUsers) {
+        const user = await upsertCleanUser(cleanUser);
+        console.log(`   ${cleanUser.name}: ${cleanUser.email} / ${cleanUser.password}`);
+        console.log(`   ID: ${user.id}`);
+    }
+
     console.log('✓ Seed demo concluído.');
     console.log(`  Admin: ${adminEmail} / ${adminPassword}`);
     console.log(`  User:  ${studentEmail} / ${studentPassword}`);
+    for (const seed of activeUsers) {
+        console.log(`  Active: ${seed.email} / ${seed.password}`);
+    }
+    for (const cleanUser of cleanUsers) {
+        console.log(`  Clean: ${cleanUser.email} / ${cleanUser.password}`);
+    }
     console.log(`  Trilhas criadas: ${trailIndex}`);
 }
 

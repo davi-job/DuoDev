@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { challenges, lessons, questions, trails, type DB, userTrails } from '@duodev/db';
-import { UsersService } from '../users/users.service';
-import { XP_REWARDS } from '../users/gamification.util';
+import { GamificationService } from '../gamification/gamification.service';
+import { XP_RULE_CODES } from '../users/gamification.util';
 
 @Injectable()
 export class UserTrailService {
@@ -10,7 +10,7 @@ export class UserTrailService {
 
     constructor(
         @Inject('DB') private readonly db: DB,
-        private readonly usersService: UsersService,
+        private readonly gamificationService: GamificationService,
     ) {}
 
     async findByUsuario(userId: string) {
@@ -59,7 +59,8 @@ export class UserTrailService {
             trailId,
             completedItemIds: [item.id],
         });
-        await this.rewardProgress(userId, previous, progress, XP_REWARDS.lessonCompleted);
+        const baseXp = await this.gamificationService.getXpPoints(XP_RULE_CODES.lessonCompleted);
+        await this.rewardProgress(userId, previous, progress, baseXp);
         return progress;
     }
 
@@ -75,7 +76,11 @@ export class UserTrailService {
         }
 
         const progress = await this.updateProgresso(userId, trail.id, 0);
-        await this.usersService.incrementXp(userId, XP_REWARDS.trailStarted);
+        const points = await this.gamificationService.getXpPoints(XP_RULE_CODES.trailStarted);
+        await this.gamificationService.grantXp(userId, points, {
+            source: 'trail_started',
+            reason: `Você iniciou a trilha ${trail.name}.`,
+        });
         return progress;
     }
 
@@ -87,7 +92,8 @@ export class UserTrailService {
             trailId,
             completedItemIds: [item.id],
         });
-        await this.rewardProgress(userId, previous, progress, XP_REWARDS.challengeCompleted);
+        const baseXp = await this.gamificationService.getXpPoints(XP_RULE_CODES.challengeCompleted);
+        await this.rewardProgress(userId, previous, progress, baseXp);
         return progress;
     }
 
@@ -306,10 +312,13 @@ export class UserTrailService {
 
         let xp = baseXp;
         if (previousProgress < 100 && currentProgress >= 100) {
-            xp += XP_REWARDS.trailCompleted;
+            xp += await this.gamificationService.getXpPoints(XP_RULE_CODES.trailCompleted);
         }
 
-        await this.usersService.incrementXp(userId, xp);
+        await this.gamificationService.grantXp(userId, xp, {
+            source: 'trail_progress',
+            reason: 'Você avançou em uma trilha.',
+        });
     }
 
     private async rewardQuiz(
@@ -329,11 +338,18 @@ export class UserTrailService {
         const previousAttempts = (previous?.correctAnswers ?? 0) + (previous?.incorrectAnswers ?? 0);
         const currentAttempts = Math.max(0, payload.correctAnswers) + Math.max(0, payload.incorrectAnswers);
         const hasNewQuizResult = currentAttempts > previousAttempts || current.progressPct > (previous?.progressPct ?? 0);
+        const quizCompletedXp = hasNewQuizResult
+            ? await this.gamificationService.getXpPoints(XP_RULE_CODES.quizCompleted)
+            : 0;
 
-        await this.rewardProgress(userId, previous, current, hasNewQuizResult ? XP_REWARDS.quizCompleted : 0);
+        await this.rewardProgress(userId, previous, current, quizCompletedXp);
 
         if (previousAttempts === 0 && payload.incorrectAnswers === 0 && payload.correctAnswers > 0) {
-            await this.usersService.incrementXp(userId, XP_REWARDS.quizPerfectBonus);
+            const perfectBonus = await this.gamificationService.getXpPoints(XP_RULE_CODES.quizPerfectBonus);
+            await this.gamificationService.grantXp(userId, perfectBonus, {
+                source: 'quiz_perfect',
+                reason: 'Bônus por acertar todas as questões do quiz.',
+            });
         }
     }
 

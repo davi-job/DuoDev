@@ -9,11 +9,12 @@ interface StreakWidgetProps {
   sequenciaAtual: number
   melhorSequencia: number
   logs: StreakLog[]
+  freezeBalance?: number
 }
 
 const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
-export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs }: StreakWidgetProps) {
+export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs, freezeBalance = 0 }: StreakWidgetProps) {
   const hoje = new Date()
   const [viewDate, setViewDate] = useState(new Date(hoje.getFullYear(), hoje.getMonth(), 1))
 
@@ -78,6 +79,10 @@ export default function StreakWidget({ sequenciaAtual, melhorSequencia, logs }: 
           <p className="text-3xl font-bold text-gray-900">{melhorSequencia}</p>
           <p className="text-xs text-gray-400">Melhor streak</p>
         </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700">
+        Proteções disponíveis: <span className="font-semibold">{freezeBalance}</span>
       </div>
     </div>
   )

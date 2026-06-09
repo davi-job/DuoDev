@@ -22,7 +22,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { UserTrailService } from '../user-trail/user-trail.service';
 import { StreakLogService } from '../streak-log/streak-log.service';
-import { buildGamificationSnapshot } from '../users/gamification.util';
+import { GamificationService } from '../gamification/gamification.service';
 
 type PendingRegistration = {
     code: string;
@@ -53,6 +53,7 @@ export class AuthService {
         private configService: ConfigService,
         private userTrailService: UserTrailService,
         private streakLogService: StreakLogService,
+        private gamificationService: GamificationService,
     ) {}
 
     private isProduction(): boolean {
@@ -462,6 +463,28 @@ export class AuthService {
         const totalAnswers = totalCorrect + totalIncorrect;
         const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
 
+        const metrics = {
+            xp: user.xp ?? 0,
+            streakCurrent: user.streakCurrent ?? 0,
+            streakBest: user.streakBest ?? 0,
+            startedTrails: trails.length,
+            completedTrails: trails.filter((trail) => trail.progressoPct >= 100).length,
+            accuracy,
+            streakLogs: logs,
+            progressTrails: trails.map((trail) => ({
+                startedAt: trail.startedAt ? new Date(trail.startedAt) : undefined,
+                updatedAt: trail.updatedAt ? new Date(trail.updatedAt) : undefined,
+            })),
+        };
+
+        const [gamification, cosmeticsState, freezeState, notificationsState] = await Promise.all([
+            this.gamificationService.buildProfileSnapshot(metrics),
+            this.gamificationService.getUserCosmeticsState(userId, metrics),
+            this.gamificationService.getStreakFreezeState(userId),
+            this.gamificationService.getNotifications(userId, 5),
+        ]);
+        const missions = await this.gamificationService.getUserMissionState(userId, metrics);
+
         return {
             id: user.id,
             name: user.name,
@@ -473,19 +496,15 @@ export class AuthService {
             xp: user.xp ?? 0,
             streakCurrent: user.streakCurrent ?? 0,
             streakBest: user.streakBest ?? 0,
-            gamification: buildGamificationSnapshot({
-                xp: user.xp ?? 0,
-                streakCurrent: user.streakCurrent ?? 0,
-                streakBest: user.streakBest ?? 0,
-                startedTrails: trails.length,
-                completedTrails: trails.filter((trail) => trail.progressoPct >= 100).length,
-                accuracy,
-                streakLogs: logs,
-                progressTrails: trails.map((trail) => ({
-                    startedAt: trail.startedAt ? new Date(trail.startedAt) : undefined,
-                    updatedAt: trail.updatedAt ? new Date(trail.updatedAt) : undefined,
-                })),
-            }),
+            gamification: {
+                ...gamification,
+                missions,
+                unlockedCosmetics: cosmeticsState.inventory,
+                inventory: cosmeticsState.inventory,
+                equippedCosmetics: cosmeticsState.equippedCosmetics,
+                streakFreeze: freezeState,
+                notifications: notificationsState,
+            },
         };
     }
 }

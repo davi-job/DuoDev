@@ -1,9 +1,12 @@
-import type { WeeklyLeaderboardEntry } from '../interfaces/interfaces'
+import type { WeeklyLeaderboardEntry, WeeklyRewardProjection } from '../interfaces/interfaces'
 
 interface LeaderboardWidgetProps {
   entries: WeeklyLeaderboardEntry[]
   currentUser: WeeklyLeaderboardEntry | null
   periodLabel: string
+  projectedReward?: WeeklyRewardProjection | null
+  selectedUserId?: string | null
+  onSelectUser?: (userId: string) => void
 }
 
 function PodiumBadge({ rank }: { rank: number }) {
@@ -17,6 +20,9 @@ export default function LeaderboardWidget({
   entries,
   currentUser,
   periodLabel,
+  projectedReward,
+  selectedUserId,
+  onSelectUser,
 }: LeaderboardWidgetProps) {
   return (
     <div className="rounded-3xl bg-white p-6">
@@ -36,15 +42,37 @@ export default function LeaderboardWidget({
       ) : (
         <div className="flex flex-col gap-3">
           {entries.map((entry) => (
-            <div
+            <button
               key={entry.userId}
-              className={`rounded-2xl border px-4 py-3 ${
-                entry.isCurrentUser ? 'border-green-200 bg-green-50/80' : 'border-gray-100 bg-[#f8f8f3]'
+              type="button"
+              onClick={() => onSelectUser?.(entry.userId)}
+              className={`rounded-2xl border px-4 py-3 text-left transition ${
+                selectedUserId === entry.userId
+                  ? 'border-green-400 bg-green-50 ring-2 ring-green-200'
+                  : entry.equippedTheme
+                    ? 'border-emerald-200 bg-emerald-50/60 hover:border-emerald-300 hover:bg-emerald-50'
+                    : entry.isCurrentUser
+                      ? 'border-green-200 bg-green-50/80 hover:border-green-300 hover:bg-green-50'
+                      : 'border-gray-100 bg-[#f8f8f3] hover:border-gray-200 hover:bg-white'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white">
-                  <PodiumBadge rank={entry.rank} />
+                <div
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white ${
+                    entry.equippedFrame ? 'ring-2 ring-amber-300 ring-offset-2 ring-offset-white' : ''
+                  }`}
+                >
+                  <span className="text-xs font-semibold text-gray-700">
+                    {entry.name
+                      .split(' ')
+                      .slice(0, 2)
+                      .map((part) => part[0])
+                      .join('')
+                      .toUpperCase()}
+                  </span>
+                  <div className="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm">
+                    <PodiumBadge rank={entry.rank} />
+                  </div>
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -54,6 +82,11 @@ export default function LeaderboardWidget({
                         {entry.name}
                         {entry.isCurrentUser ? ' • você' : ''}
                       </p>
+                      {entry.equippedTitle && (
+                        <p className="mt-1 text-[11px] font-medium text-emerald-700">
+                          {entry.equippedTitle}
+                        </p>
+                      )}
                       <p className="mt-1 text-xs text-gray-500">
                         {entry.studyDays} dia(s) de estudo • {entry.trailMoves} movimento(s) em trilha
                       </p>
@@ -78,10 +111,20 @@ export default function LeaderboardWidget({
                     <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
                       ✅ {entry.completedTrails} concluída(s)
                     </span>
+                    {entry.equippedBadge && (
+                      <span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700">
+                        🏷️ {entry.equippedBadge}
+                      </span>
+                    )}
+                    {entry.equippedFrame && (
+                      <span className="rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700">
+                        🖼️ {entry.equippedFrame}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -96,12 +139,27 @@ export default function LeaderboardWidget({
               <p className="text-sm font-semibold text-gray-900">
                 #{currentUser.rank} • {currentUser.name}
               </p>
+              {currentUser.equippedTitle && (
+                <p className="mt-1 text-[11px] font-medium text-emerald-700">{currentUser.equippedTitle}</p>
+              )}
               <p className="text-xs text-gray-500">
                 {currentUser.studyDays} dia(s) de estudo • {currentUser.trailMoves} movimento(s)
               </p>
             </div>
             <p className="font-syne text-lg font-bold text-[#244C4E]">{currentUser.weeklyScore}</p>
           </div>
+        </div>
+      )}
+
+      {projectedReward && (
+        <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+            Recompensa projetada
+          </p>
+          <p className="mt-2 text-sm font-semibold text-gray-900">{projectedReward.label}</p>
+          <p className="mt-1 text-xs text-gray-600">
+            {projectedReward.reward} • {projectedReward.cosmetic}
+          </p>
         </div>
       )}
     </div>

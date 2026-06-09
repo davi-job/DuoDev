@@ -21,6 +21,21 @@ type LeaderboardEntry = {
     isCurrentUser: boolean;
 };
 
+type WeeklyRewardTier = {
+    id: string;
+    label: string;
+    placement: string;
+    reward: string;
+    cosmetic: string;
+};
+
+type WeeklyRewardProjection = {
+    tierId: string;
+    label: string;
+    reward: string;
+    cosmetic: string;
+};
+
 @Injectable()
 export class UsersService {
     constructor(
@@ -118,10 +133,40 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
+    async getGamificationMetrics(id: string) {
+        const [trailRows, streakRows] = await Promise.all([
+            this.userTrailRepository.find({ where: { usuario: { id } } }),
+            this.streakLogRepository.find({
+                where: { usuario: { id } },
+                order: { dataRegistro: 'DESC' },
+            }),
+        ]);
+
+        const totalCorrect = trailRows.reduce((sum, trail) => sum + ((trail as any).correctAnswers ?? 0), 0);
+        const totalIncorrect = trailRows.reduce((sum, trail) => sum + ((trail as any).incorrectAnswers ?? 0), 0);
+        const totalAnswers = totalCorrect + totalIncorrect;
+
+        return {
+            startedTrails: trailRows.length,
+            completedTrails: trailRows.filter((trail) => trail.progressoPct >= 100).length,
+            accuracy: totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0,
+            streakLogs: streakRows.map((row) => ({
+                dataRegistro: row.dataRegistro,
+                concluido: row.concluido,
+            })),
+            progressTrails: trailRows.map((trail) => ({
+                startedAt: (trail as any).iniciadoEm ? new Date((trail as any).iniciadoEm) : undefined,
+                updatedAt: (trail as any).atualizadoEm ? new Date((trail as any).atualizadoEm) : undefined,
+            })),
+        };
+    }
+
     async getWeeklyLeaderboard(currentUserId: string): Promise<{
         period: { label: string; startsAt: string; endsAt: string };
         top: LeaderboardEntry[];
         currentUser: LeaderboardEntry | null;
+        rewardTiers: WeeklyRewardTier[];
+        currentUserReward: WeeklyRewardProjection | null;
     }> {
         const now = new Date();
         const startsAt = new Date(now);
@@ -211,6 +256,7 @@ export class UsersService {
 
         const top = ranked.slice(0, 10);
         const currentUser = ranked.find((entry) => entry.userId === currentUserId) ?? null;
+        const rewardTiers = this.getWeeklyRewardTiers();
 
         return {
             period: {
@@ -220,6 +266,81 @@ export class UsersService {
             },
             top,
             currentUser,
+            rewardTiers,
+            currentUserReward: this.getRewardProjection(currentUser?.rank ?? null),
+        };
+    }
+
+    private getWeeklyRewardTiers(): WeeklyRewardTier[] {
+        return [
+            {
+                id: 'top-1',
+                label: 'Campeão da semana',
+                placement: '1º lugar',
+                reward: '450 XP bônus',
+                cosmetic: 'Título sazonal + moldura aurora',
+            },
+            {
+                id: 'top-3',
+                label: 'Pódio da semana',
+                placement: '2º ao 3º',
+                reward: '250 XP bônus',
+                cosmetic: 'Selo de pódio',
+            },
+            {
+                id: 'top-10',
+                label: 'Elite da semana',
+                placement: '4º ao 10º',
+                reward: '120 XP bônus',
+                cosmetic: 'Badge semanal',
+            },
+            {
+                id: 'participant',
+                label: 'Participação ativa',
+                placement: 'Demais posições com atividade',
+                reward: '40 XP bônus',
+                cosmetic: 'Registro de participação',
+            },
+        ];
+    }
+
+    private getRewardProjection(rank: number | null): WeeklyRewardProjection | null {
+        if (!rank) {
+            return null;
+        }
+
+        if (rank === 1) {
+            return {
+                tierId: 'top-1',
+                label: 'Campeão da semana',
+                reward: '450 XP bônus',
+                cosmetic: 'Título sazonal + moldura aurora',
+            };
+        }
+
+        if (rank <= 3) {
+            return {
+                tierId: 'top-3',
+                label: 'Pódio da semana',
+                reward: '250 XP bônus',
+                cosmetic: 'Selo de pódio',
+            };
+        }
+
+        if (rank <= 10) {
+            return {
+                tierId: 'top-10',
+                label: 'Elite da semana',
+                reward: '120 XP bônus',
+                cosmetic: 'Badge semanal',
+            };
+        }
+
+        return {
+            tierId: 'participant',
+            label: 'Participação ativa',
+            reward: '40 XP bônus',
+            cosmetic: 'Registro de participação',
         };
     }
 }

@@ -4,6 +4,33 @@
     gap: 1.5rem;
 }
 
+.form-trilha-bloco {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+}
+
+.form-trilha-bloco-destaque {
+    border-color: rgba(60, 239, 176, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(60, 239, 176, 0.08);
+}
+
+.form-trilha-topo h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.form-trilha-topo p {
+    margin: 0.35rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
 /* ─── Nível ─── */
 
 .nivel-opcoes {
@@ -103,6 +130,12 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+}
+
+@media (max-width: 960px) {
+    .form-trilha-extras {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ─── Ações ─── */

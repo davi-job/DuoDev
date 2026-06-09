@@ -18,7 +18,7 @@ export class ExportImportService {
             ]);
 
         return {
-            version: 1,
+            version: 2,
             exportedAt: new Date().toISOString(),
             categories: allCategories.map((cat) => ({
                 name: cat.name,
@@ -39,6 +39,7 @@ export class ExportImportService {
                         duration: trail.duration,
                         totalHours: trail.totalHours,
                         year: trail.year,
+                        metadata: trail.metadata,
                         status: trail.status,
                         lessons: allLessons
                             .filter((l) => l.trailId === trail.id)
@@ -117,6 +118,7 @@ export class ExportImportService {
                         duration: trailDto.duration,
                         totalHours: trailDto.totalHours,
                         year: trailDto.year,
+                        metadata: trailDto.metadata ?? {},
                         status: trailDto.status ?? 'rascunho',
                     })
                     .returning();

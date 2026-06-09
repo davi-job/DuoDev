@@ -124,6 +124,7 @@ export class LearningService {
             totalHours: row.totalHours,
             year: row.year,
             thumbColor: row.thumbColor,
+            metadata: row.metadata,
             status: row.status,
             contentCounts: countsByTrail.get(row.id) ?? { lessons: 0, questions: 0, challenges: 0 },
         }));
@@ -151,6 +152,7 @@ export class LearningService {
             totalHours: row.totalHours,
             year: row.year,
             thumbColor: row.thumbColor,
+            metadata: row.metadata,
             status: row.status,
             contentCounts: countsByTrail.get(row.id) ?? { lessons: 0, questions: 0, challenges: 0 },
         }));
@@ -184,6 +186,7 @@ export class LearningService {
             totalHours: trailRow.totalHours,
             year: trailRow.year,
             thumbColor: trailRow.thumbColor,
+            metadata: trailRow.metadata,
             status: trailRow.status,
             contentCounts: countsByTrail.get(trailId) ?? { lessons: 0, questions: 0, challenges: 0 },
         };
