@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router'
+import { Bell } from 'lucide-react'
+import { fetchMeuPerfil, markNotificationAsRead } from '../../lib/api'
+import type { UserProfile } from '../interfaces/interfaces'
 
 interface TopbarProps {
   onMenuToggle: () => void
@@ -7,8 +10,11 @@ interface TopbarProps {
 
 export default function Topbar({ onMenuToggle }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -16,15 +22,51 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false)
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
+        setNotificationsOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadProfile() {
+      try {
+        const data = await fetchMeuPerfil()
+        if (active) {
+          setProfile(data)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar resumo do perfil:', error)
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      active = false
+    }
   }, [])
 
   function handleLogout() {
     localStorage.removeItem('access_token')
     navigate('/login')
   }
+
+  const xp = profile?.gamification?.xp ?? profile?.xp ?? 0
+  const streak = profile?.streakCurrent ?? 0
+  const notifications = profile?.gamification?.notifications?.items ?? []
+  const unreadCount = profile?.gamification?.notifications?.unreadCount ?? 0
+  const displayName = profile?.name?.trim() || 'Aluno'
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 
   return (
     <>
@@ -55,23 +97,83 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
 
         {/* Right badges */}
         <div className="flex items-center gap-2 shrink-0">
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => {
+                setNotificationsOpen((prev) => !prev)
+                setDropdownOpen(false)
+              }}
+              className="relative w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {notificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-gray-100 bg-white shadow-lg z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-sm font-semibold text-gray-900">Notificações</p>
+                  <p className="text-xs text-gray-500">{unreadCount} não lidas</p>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-5 text-sm text-gray-500">Sem notificações recentes.</div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        onClick={async () => {
+                          try {
+                            if (!notification.readAt) {
+                              await markNotificationAsRead(notification.id)
+                              const refreshed = await fetchMeuPerfil()
+                              setProfile(refreshed)
+                            }
+                          } catch (error) {
+                            console.error('Falha ao ler notificação:', error)
+                          }
+                        }}
+                        className={`w-full px-4 py-3 text-left border-b border-gray-50 hover:bg-gray-50 transition ${
+                          notification.readAt ? 'bg-white' : 'bg-green-50/60'
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-gray-900">{notification.title}</p>
+                        <p className="mt-1 text-xs text-gray-500 line-clamp-2">{notification.body}</p>
+                        <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-gray-400">
+                          {notification.type}
+                        </p>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="hidden sm:flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-medium">
             <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
-            1200 exp
+            {xp} XP
           </div>
 
           <div className="flex items-center gap-1.5 bg-orange-50 text-orange-500 border border-orange-200 px-4 py-2 rounded-full text-sm font-semibold">
-            🔥 0
+            🔥 {streak}
           </div>
 
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setDropdownOpen(prev => !prev)}
+              onClick={() => {
+                setDropdownOpen((prev) => !prev)
+                setNotificationsOpen(false)
+              }}
               className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-base font-semibold text-gray-600 hover:bg-gray-300 transition"
             >
-              A
+              {initials || 'A'}
             </button>
 
             {dropdownOpen && (

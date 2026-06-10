@@ -1,18 +1,24 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { updateUserPreferences } from '../../lib/api'; // Import the API function
+import { completeOnboarding } from '../../lib/api';
 import { toast } from 'sonner';
-import { useState } from 'react'; // Import useState
+import { useState } from 'react';
+
+const onboardingSteps = [
+  'Escolha sua linguagem',
+  'Diga o que quer aprender',
+  'Conclua o onboarding e receba a recompensa',
+];
 
 export function SuccessPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
     setLoading(true);
     try {
-      await updateUserPreferences({ onboardingCompleted: true });
+      await completeOnboarding();
       toast.success('Onboarding concluído com sucesso!');
       navigate('/home');
     } catch (error) {
@@ -29,6 +35,24 @@ export function SuccessPage() {
   return (
       <div className="flex items-center justify-center min-h-screen bg-white p-6 font-sans">
           <div className="w-full max-w-2xl flex flex-col items-center text-center">
+              <div className="mb-8 w-full rounded-3xl border border-[#E7F2E1] bg-[#F7FBF4] px-5 py-4 text-left">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6ECC30]">Jornada inicial</p>
+                  <div className="mt-3 grid gap-2 md:grid-cols-3">
+                      {onboardingSteps.map((step, index) => (
+                          <div key={step} className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+                              <p className="text-[11px] font-semibold text-[#6ECC30]">Passo {index + 1}</p>
+                              <p className="mt-1 text-sm text-[#3D5A5C]">{step}</p>
+                          </div>
+                      ))}
+                  </div>
+                  <p className="mt-3 text-sm text-[#5A7173]">
+                      Recompensa de boas-vindas: 1 proteção de streak para o seu início.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#3D5A5C]">
+                      Primeira missão: concluir sua primeira trilha publicada e resgatar sua missão diária.
+                  </p>
+              </div>
+
               {/* TÍTULO PRINCIPAL */}
               <motion.h1
                   initial={{ opacity: 0, y: -20 }}

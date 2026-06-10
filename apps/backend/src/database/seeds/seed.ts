@@ -6,6 +6,13 @@ import { UserTrailService } from '../../user-trail/user-trail.service';
 import { Trail } from '../../trail/trail.entity';
 import * as bcrypt from 'bcrypt';
 
+const CLEAN_USERS = [
+    { email: 'visitante1@duodev.com', password: 'demo123!', name: 'Mariana Costa' },
+    { email: 'visitante2@duodev.com', password: 'demo123!', name: 'Rafael Santos' },
+    { email: 'visitante3@duodev.com', password: 'demo123!', name: 'Juliana Lima' },
+    { email: 'visitante4@duodev.com', password: 'demo123!', name: 'Pedro Rocha' },
+] as const;
+
 async function bootstrap() {
     const app = await NestFactory.createApplicationContext(AppModule);
 
@@ -22,7 +29,7 @@ async function bootstrap() {
 
     if (!adminUser) {
         adminUser = await usersService.create({
-            name: 'Administrador',
+            name: 'Douglas Martins',
             email: 'admin@trilhas.com',
             password: hashedPassword,
         });
@@ -32,6 +39,36 @@ async function bootstrap() {
         console.log(`   ID: ${adminUser.id}\n`);
     } else {
         console.log('⚠️  Usuário admin já existe\n');
+    }
+
+    // ─── 1.1 Criar usuários limpos para demonstração ───
+    console.log('🧼 Criando usuários limpos de primeiro acesso...\n');
+    for (const seed of CLEAN_USERS) {
+        const hashed = await bcrypt.hash(seed.password, 10);
+        const existing = await usersService.findOneByEmail(seed.email);
+
+        if (existing) {
+            await usersService.update(existing.id, {
+                name: seed.name,
+                email: seed.email,
+            });
+            await usersService.updatePassword(existing.id, hashed);
+            await usersService.updateUserPreferences(existing.id, {
+                onboardingCompleted: false,
+                language: 'en',
+            });
+            console.log(`   ⚠️  Já existia: ${seed.email} / ${seed.password}`);
+            continue;
+        }
+
+        const user = await usersService.create({
+            name: seed.name,
+            email: seed.email,
+            password: hashed,
+        });
+
+        console.log(`   ✅ ${seed.name}: ${seed.email} / ${seed.password}`);
+        console.log(`      ID: ${user.id}`);
     }
 
     // ─── 2. Criar trilhas ───

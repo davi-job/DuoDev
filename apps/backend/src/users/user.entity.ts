@@ -25,14 +25,23 @@ export class User {
     @Column({ nullable: true })
     avatarUrl?: string;
 
+    @Column({ default: 0 })
+    xp: number;
+
+    @Column({ default: 0 })
+    streakCurrent: number;
+
+    @Column({ default: 0 })
+    streakBest: number;
+
     @Column({ default: 'en' }) // Default language
     language: string;
 
     @Column('simple-array', { nullable: true }) // Stores interests as a comma-separated string
     interests: string[];
 
-    @Column({ nullable: true })
-    interestReason?: string;
+    // @Column({ nullable: true })
+    // interestReason?: string;
 
     @Column({ default: false })
     onboardingCompleted: boolean;

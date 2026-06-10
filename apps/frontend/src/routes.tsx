@@ -13,10 +13,15 @@ import BlogPost from './pages/apps/BlogPost';
 import Perfil from './pages/apps/Perfil';
 import MeusConteudos from './pages/apps/MeusConteudos';
 import Configuracoes from './pages/apps/Configuracoes';
+import Categorias from './pages/apps/Categorias';
 import Trail from './pages/apps/Trail';
 import LessonPage from './pages/apps/LessonPage';
 import ChallengePage from './pages/apps/ChallengePage';
 import QuizGame from './pages/apps/QuizGame';
+import Ranking from './pages/apps/Ranking';
+import { ForgetMyPassword } from './pages/auth/forget-my-password';
+import { VerifyCodeResetPassword } from './pages/auth/verify-code-reset-password';
+import { ResetPassword } from './pages/auth/reset-password';
 
 
 export const router = createBrowserRouter([
@@ -40,6 +45,18 @@ export const router = createBrowserRouter([
                 path: '/digitar-codigo',
                 element: <TypeCode />,
             },
+            {
+                path: '/esqueci-minha-senha',
+                element: <ForgetMyPassword />,
+            },
+            {
+                path: '/verificar-codigo-redefinicao',
+                element: <VerifyCodeResetPassword />,
+            },
+            {
+                path: '/redefinir-senha',
+                element: <ResetPassword />,
+            }
         ],
     },
     {
@@ -78,8 +95,24 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: '/ranking',
+        element: (
+            <AuthGuard>
+                <Ranking />
+            </AuthGuard>
+        ),
+    },
+    {
+        path: '/trilhas',
+        element: (
+            <AuthGuard>
+                <Categorias />
+            </AuthGuard>
+        ),
+    },
+    {
         path: '/categorias',
-        element: <Navigate to="/home" replace />,
+        element: <Navigate to="/trilhas" replace />,
     },
     {
         path: '/meus-conteudos',
@@ -88,10 +121,6 @@ export const router = createBrowserRouter([
                 <MeusConteudos />
             </AuthGuard>
         ),
-    },
-    {
-        path: '/projetos',
-        element: <Navigate to="/home" replace />,
     },
     {
         path: '/conheca-o-projeto',

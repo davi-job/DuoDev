@@ -21,6 +21,7 @@ export class TrailsService {
                 duration: trails.duration,
                 totalHours: trails.totalHours,
                 year: trails.year,
+                metadata: trails.metadata,
                 status: trails.status,
                 createdAt: trails.createdAt,
                 updatedAt: trails.updatedAt,
@@ -67,6 +68,7 @@ export class TrailsService {
                 duration: dto.duration,
                 totalHours: dto.totalHours,
                 year: dto.year,
+                metadata: dto.metadata ?? {},
                 status: dto.status ?? 'rascunho',
             })
             .returning();

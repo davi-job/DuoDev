@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8011/api';
+const BASE_URL = import.meta.env.VITE_ADMIN_API_URL ?? 'http://localhost:8011/api';
 
 function authHeader(): Record<string, string> {
     const token = localStorage.getItem('admin_token');

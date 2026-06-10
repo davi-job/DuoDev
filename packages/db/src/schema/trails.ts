@@ -1,5 +1,14 @@
-import { pgTable, uuid, varchar, integer, timestamp, text } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, timestamp, text, jsonb } from 'drizzle-orm/pg-core';
 import { categories } from './categories';
+
+export type TrailMetadata = {
+    heroTagline?: string;
+    estimatedXp?: number;
+    recommendedDays?: number;
+    missionPrompt?: string;
+    completionBadgeLabel?: string;
+    focusTags?: string[];
+};
 
 export const trails = pgTable('trails', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -11,6 +20,7 @@ export const trails = pgTable('trails', {
     totalHours: integer('total_hours'),
     year: integer('year'),
     thumbColor: varchar('thumb_color', { length: 50 }).notNull(),
+    metadata: jsonb('metadata').$type<TrailMetadata>().notNull().default({}),
     status: varchar('status', { length: 15 }).notNull().default('rascunho'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),

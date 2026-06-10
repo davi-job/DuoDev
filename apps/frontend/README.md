@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# Frontend DuoDev
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicacao React do aluno. Consome a API principal e exibe home, trilhas, ranking, perfil, streak, missões e cosméticos.
 
-Currently, two official plugins are available:
+## O que tem
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Home institucional da plataforma
+- Lista de trilhas
+- Ranking semanal e histórico sazonal
+- Perfil com XP, level, streak, badges e cosméticos
+- Missões diárias e semanais
+- Feed de notificações da gamificação
 
-## React Compiler
+## Como rodar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+O frontend depende do backend principal, do banco e do seed da demo.
 
-## Expanding the ESLint configuration
+### Ambiente completo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Na raiz do projeto:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Popular a demo
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Na raiz do projeto:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run setup:demo
+```
+
+### Rodar isolado
+
+Se quiser rodar fora do Docker, configure o `.env` desta pasta:
+
+```bash
+VITE_API_URL=http://localhost:8010
+```
+
+Depois instale dependencias e inicie:
+
+```bash
+npm install
+npm run dev
+```
+
+## URLs locais
+
+- Frontend: `http://localhost:8020`
+- API principal: `http://localhost:8010`
+
+## Fluxo recomendado para demo
+
+1. Suba o ambiente com `npm run dev`
+2. Rode `npm run setup:demo`
+3. Acesse o frontend e faca login com uma conta da demo
+
+## Contas utiles
+
+- `Douglas Ratts` - `douglas.ratts@duodev.com` / `ratts123!`
+- `Camila Ferreira` - `vivo01@duodev.com` / `live123!`
+- `Mariana Costa` - `visitante1@duodev.com` / `demo123!`
+
+## Validação
+
+```bash
+npx tsc -p tsconfig.json --noEmit --incremental false
 ```

@@ -20,6 +20,9 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { UserTrailService } from '../user-trail/user-trail.service';
+import { StreakLogService } from '../streak-log/streak-log.service';
+import { GamificationService } from '../gamification/gamification.service';
 
 type PendingRegistration = {
     code: string;
@@ -27,9 +30,19 @@ type PendingRegistration = {
     data: Omit<RegisterUserDto, 'turnstileToken'>;
 };
 
+type PendingPasswordReset = {
+    code: string;
+    expiresAt: Date;
+    email: string;
+};
+
+
 // Armazena { code, expiresAt, registerData }
 const pendingRegistrations = new Map<string, PendingRegistration>();
 const pendingRegistrationsFile = path.join(os.tmpdir(), 'duodev-pending-registrations.json');
+
+const pendingResets = new Map<string, PendingPasswordReset>();
+const pendingResetsFile = path.join(os.tmpdir(), 'duodev-pending-resets.json');
 
 @Injectable()
 export class AuthService {
@@ -38,6 +51,9 @@ export class AuthService {
         private jwtService: JwtService,
         private mailerService: MailerService,
         private configService: ConfigService,
+        private userTrailService: UserTrailService,
+        private streakLogService: StreakLogService,
+        private gamificationService: GamificationService,
     ) {}
 
     private isProduction(): boolean {
@@ -51,7 +67,9 @@ export class AuthService {
 
         try {
             const raw = await fs.readFile(pendingRegistrationsFile, 'utf-8');
-            const entries = JSON.parse(raw) as Array<[string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]>;
+            const entries = JSON.parse(raw) as Array<
+                [string, Omit<PendingRegistration, 'expiresAt'> & { expiresAt: string }]
+            >;
 
             pendingRegistrations.clear();
             for (const [email, entry] of entries) {
@@ -66,6 +84,154 @@ export class AuthService {
             }
         }
     }
+
+    private async loadPendingResets(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        try {
+            const raw = await fs.readFile(pendingResetsFile, 'utf-8');
+            const entries = JSON.parse(raw) as Array<
+                [string, Omit<PendingPasswordReset, 'expiresAt'> & { expiresAt: string }]
+            >;
+
+            pendingResets.clear();
+            for (const [email, entry] of entries) {
+                pendingResets.set(email, {
+                    ...entry,
+                    expiresAt: new Date(entry.expiresAt),
+                });
+            }
+        } catch (error: any) {
+            if (error?.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+    }
+
+    private async savePendingResets(): Promise<void> {
+        if (this.isProduction()) {
+            return;
+        }
+
+        const entries = Array.from(pendingResets.entries()).map(([email, entry]) => [
+            email,
+            {
+                ...entry,
+                expiresAt: entry.expiresAt.toISOString(),
+            },
+        ]);
+
+        await fs.writeFile(pendingResetsFile, JSON.stringify(entries), 'utf-8');
+    }
+
+    async forgotPassword(email: string): Promise<{ message: string; devCode?: string }> {
+        await this.loadPendingResets();
+
+        // Verifica se o usuário existe
+        const user = await this.usersService.findOneByEmail(email);
+        if (!user) {
+            // Por segurança, não revelamos se o email existe ou não
+            return { message: 'Se o email estiver cadastrado, você receberá um código de recuperação' };
+        }
+
+        const code = crypto.randomInt(1000, 9999).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        pendingResets.set(email, {
+            code,
+            expiresAt,
+            email,
+        });
+        await this.savePendingResets();
+
+        const mailHost = this.configService.get<string>('MAIL_HOST');
+        const mailPort = this.configService.get<string>('MAIL_PORT');
+        const mailUser = this.configService.get<string>('MAIL_USER');
+        const mailPass = this.configService.get<string>('MAIL_PASS');
+        const hasMailerConfig = !!(mailHost && mailPort && mailUser && mailPass);
+
+        if (hasMailerConfig) {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: 'Código de recuperação de senha',
+                text: `Seu código de recuperação de senha é: ${code}. Ele expira em 10 minutos.`,
+            });
+
+            return { message: 'Código enviado para o e-mail' };
+        }
+
+        if (this.isProduction()) {
+            throw new InternalServerErrorException('SMTP não configurado para envio do código de recuperação.');
+        }
+
+        console.log(`[auth/forgot-password] Modo dev sem SMTP. Código para ${email}: ${code}`);
+        return {
+            message: 'Código gerado em modo de desenvolvimento',
+            devCode: code,
+        };
+    }
+
+    async verifyResetCode(email: string, code: string): Promise<{ message: string }> {
+        await this.loadPendingResets();
+
+        const pending = pendingResets.get(email);
+
+        if (!pending) {
+            throw new BadRequestException('Nenhuma solicitação de recuperação encontrada para esse e-mail');
+        }
+
+        if (new Date() > pending.expiresAt) {
+            pendingResets.delete(email);
+            await this.savePendingResets();
+            throw new BadRequestException('Código expirado. Solicite uma nova recuperação.');
+        }
+
+        if (pending.code !== code) {
+            throw new BadRequestException('Código inválido');
+        }
+
+        return { message: 'Código verificado com sucesso' };
+    }    
+
+    async resetPassword(email: string, token: string, newPassword: string): Promise<{ message: string }> {
+        await this.loadPendingResets();
+
+        const pending = pendingResets.get(email);
+
+        if (!pending) {
+            throw new BadRequestException('Nenhuma solicitação de recuperação encontrada para esse e-mail');
+        }
+
+        if (new Date() > pending.expiresAt) {
+            pendingResets.delete(email);
+            await this.savePendingResets();
+            throw new BadRequestException('Código expirado. Solicite uma nova recuperação.');
+        }
+
+        if (pending.code !== token) {
+            throw new BadRequestException('Código inválido');
+        }
+
+        // Usar o UsersService para atualizar a senha
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Primeiro encontra o usuário pelo email
+        const user = await this.usersService.findOneByEmail(email);
+        if (!user) {
+            throw new NotFoundException('Usuário não encontrado');
+        }
+
+        // Atualiza a senha usando o UsersService
+        await this.usersService.updatePassword(user.id, hashedPassword);
+
+        // Remove a solicitação pendente
+        pendingResets.delete(email);
+        await this.savePendingResets();
+
+        return { message: 'Senha redefinida com sucesso' };
+    }   
 
     private async savePendingRegistrations(): Promise<void> {
         if (this.isProduction()) {
@@ -197,11 +363,10 @@ export class AuthService {
         pendingRegistrations.delete(verifyCodeDto.email);
         await this.savePendingRegistrations();
 
-        const { password, ...result } = user;
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
-            user: result,
+            user: await this.getProfile(user.id),
         };
     }
 
@@ -225,7 +390,7 @@ export class AuthService {
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
-            user,
+            user: await this.getProfile(user.id),
         };
     }
 
@@ -238,16 +403,14 @@ export class AuthService {
 
         // Se estiver atualizando email, verifica se já existe
         if (updateProfileDto.email && updateProfileDto.email !== user.email) {
-            const emailExists = await this.usersService.findByEmail(updateProfileDto.email);
+            const emailExists = await this.usersService.findOneByEmail(updateProfileDto.email);
             if (emailExists) {
                 throw new ConflictException('Este email já está em uso');
             }
         }
 
-        // Atualiza e retorna o usuário sem a senha
-        const updatedUser = await this.usersService.update(userId, updateProfileDto);
-        const { password, ...result } = updatedUser;
-        return result;
+        await this.usersService.update(userId, updateProfileDto);
+        return this.getProfile(userId);
     }
 
     async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
@@ -276,5 +439,72 @@ export class AuthService {
         await this.usersService.updatePassword(userId, hashedPassword);
 
         return { message: 'Senha alterada com sucesso' };
+    }
+
+    async getProfile(userId: string) {
+        const user = await this.usersService.findById(userId);
+        const [trails, logs, liveStreak] = await Promise.all([
+            this.userTrailService.findByUsuario(userId),
+            this.streakLogService.findByUsuario(userId),
+            this.streakLogService.calcularStreaks(userId),
+        ]);
+
+        if (
+            user.streakCurrent !== liveStreak.sequenciaAtual ||
+            user.streakBest !== liveStreak.melhorSequencia
+        ) {
+            await this.usersService.syncStreak(userId, liveStreak);
+            user.streakCurrent = liveStreak.sequenciaAtual;
+            user.streakBest = Math.max(user.streakBest ?? 0, liveStreak.melhorSequencia);
+        }
+
+        const totalCorrect = trails.reduce((sum, trail) => sum + (trail.acertos ?? 0), 0);
+        const totalIncorrect = trails.reduce((sum, trail) => sum + (trail.erros ?? 0), 0);
+        const totalAnswers = totalCorrect + totalIncorrect;
+        const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+
+        const metrics = {
+            xp: user.xp ?? 0,
+            streakCurrent: user.streakCurrent ?? 0,
+            streakBest: user.streakBest ?? 0,
+            startedTrails: trails.length,
+            completedTrails: trails.filter((trail) => trail.progressoPct >= 100).length,
+            accuracy,
+            streakLogs: logs,
+            progressTrails: trails.map((trail) => ({
+                startedAt: trail.startedAt ? new Date(trail.startedAt) : undefined,
+                updatedAt: trail.updatedAt ? new Date(trail.updatedAt) : undefined,
+            })),
+        };
+
+        const [gamification, cosmeticsState, freezeState, notificationsState] = await Promise.all([
+            this.gamificationService.buildProfileSnapshot(metrics),
+            this.gamificationService.getUserCosmeticsState(userId, metrics),
+            this.gamificationService.getStreakFreezeState(userId),
+            this.gamificationService.getNotifications(userId, 5),
+        ]);
+        const missions = await this.gamificationService.getUserMissionState(userId, metrics);
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
+            language: user.language,
+            interests: user.interests,
+            onboardingCompleted: user.onboardingCompleted,
+            xp: user.xp ?? 0,
+            streakCurrent: user.streakCurrent ?? 0,
+            streakBest: user.streakBest ?? 0,
+            gamification: {
+                ...gamification,
+                missions,
+                unlockedCosmetics: cosmeticsState.inventory,
+                inventory: cosmeticsState.inventory,
+                equippedCosmetics: cosmeticsState.equippedCosmetics,
+                streakFreeze: freezeState,
+                notifications: notificationsState,
+            },
+        };
     }
 }

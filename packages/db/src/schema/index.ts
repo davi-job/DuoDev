@@ -10,4 +10,5 @@ export * from './challenges';
 export * from './user-trails';
 export * from './streak-logs';
 export * from './blog-posts';
+export * from './gamification';
 export * from './relations';

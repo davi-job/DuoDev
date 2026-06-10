@@ -1,4 +1,13 @@
-import type { LearningTrailContentResponse, LearningTrailSummary } from '../components/interfaces/interfaces'
+import type {
+  GamificationNotification,
+  LearningTrailContentResponse,
+  LearningTrailSummary,
+  UserProfile,
+  SeasonLeaderboardHistoryResponse,
+  RankingUserDetail,
+  WeeklyLeaderboardResponse,
+  WeeklyRewardHistoryEntry,
+} from '../components/interfaces/interfaces'
 
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8010'
 
@@ -115,7 +124,7 @@ export async function registrarStreakHoje() {
 }
 
 // ── Usuário / Perfil ──
-export async function fetchMeuPerfil() {
+export async function fetchMeuPerfil(): Promise<UserProfile> {
   const res = await fetch(`${API_URL}/auth/me`, { headers: headers() })
   if (!res.ok) throw new Error('Erro ao buscar perfil')
   return res.json()
@@ -161,6 +170,111 @@ export async function updateUserPreferences(data: {
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.message || 'Erro ao atualizar preferências do usuário')
+  }
+  return res.json()
+}
+
+export async function completeOnboarding() {
+  const res = await fetch(`${API_URL}/users/me/onboarding/complete`, {
+    method: 'POST',
+    headers: headers(),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Erro ao concluir onboarding')
+  }
+  return res.json()
+}
+
+export async function fetchWeeklyLeaderboard(): Promise<WeeklyLeaderboardResponse> {
+  const res = await fetch(`${API_URL}/users/leaderboard/weekly`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar ranking semanal')
+  return res.json()
+}
+
+export async function fetchWeeklyRewardHistory(): Promise<WeeklyRewardHistoryEntry[]> {
+  const res = await fetch(`${API_URL}/users/rewards/weekly`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar histórico de recompensas semanais')
+  return res.json()
+}
+
+export async function fetchSeasonLeaderboardHistory(): Promise<SeasonLeaderboardHistoryResponse> {
+  const res = await fetch(`${API_URL}/users/leaderboard/seasons`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar histórico sazonal do ranking')
+  return res.json()
+}
+
+export async function fetchRankingUserDetail(userId: string): Promise<RankingUserDetail> {
+  const res = await fetch(`${API_URL}/users/public/${userId}/gamification`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar detalhes do usuário')
+  return res.json()
+}
+
+export async function fetchNotifications(): Promise<{ unreadCount: number; items: GamificationNotification[] }> {
+  const res = await fetch(`${API_URL}/users/notifications`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar notificações')
+  return res.json()
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+  const res = await fetch(`${API_URL}/users/notifications/${notificationId}/read`, {
+    method: 'PATCH',
+    headers: headers(),
+  })
+  if (!res.ok) throw new Error('Erro ao marcar notificação como lida')
+  return res.json()
+}
+
+export async function fetchStreakFreezeState(): Promise<{
+  balance: number
+  config: { enabled: boolean; maxGapDays: number; initialCharges: number }
+  recent: Array<{ id: string; delta: number; source: string; reason: string | null; createdAt: string }>
+}> {
+  const res = await fetch(`${API_URL}/users/streak-freeze`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar proteções de streak')
+  return res.json()
+}
+
+export async function fetchMyCosmetics() {
+  const res = await fetch(`${API_URL}/users/cosmetics`, { headers: headers() })
+  if (!res.ok) throw new Error('Erro ao buscar inventário de cosméticos')
+  return res.json()
+}
+
+export async function equipCosmetic(cosmeticItemId: string) {
+  const res = await fetch(`${API_URL}/users/cosmetics/equip`, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify({ cosmeticItemId }),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Erro ao equipar cosmético')
+  }
+  return res.json()
+}
+
+export async function unequipCosmetic(cosmeticItemId: string) {
+  const res = await fetch(`${API_URL}/users/cosmetics/unequip`, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify({ cosmeticItemId }),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Erro ao desequipar cosmético')
+  }
+  return res.json()
+}
+
+export async function claimMission(missionId: string) {
+  const res = await fetch(`${API_URL}/users/missions/${missionId}/claim`, {
+    method: 'PATCH',
+    headers: headers(),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Erro ao resgatar missão')
   }
   return res.json()
 }

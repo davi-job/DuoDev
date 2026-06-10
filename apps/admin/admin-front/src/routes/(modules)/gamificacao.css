@@ -1,0 +1,195 @@
+.gamificacao-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.gamificacao-grid {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 1.5rem;
+}
+
+.gamificacao-nav,
+.gamificacao-panel,
+.gamificacao-editor {
+    background: #fff;
+    border: 1px solid #e7eaf1;
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+}
+
+.gamificacao-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-self: start;
+}
+
+.gamificacao-nav-item {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: left;
+    border: 1px solid #e7eaf1;
+    border-radius: 1rem;
+    background: #f8faf7;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+}
+
+.gamificacao-nav-item.is-active {
+    border-color: #9eea6c;
+    background: #f2fde8;
+}
+
+.gamificacao-nav-item strong {
+    display: block;
+    color: #121826;
+    font-size: 0.95rem;
+}
+
+.gamificacao-nav-item span {
+    display: block;
+    margin-top: 0.25rem;
+    color: #667085;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.gamificacao-nav-item em {
+    color: #244c4e;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.gamificacao-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    gap: 1.5rem;
+}
+
+.gamificacao-panel-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gamificacao-panel-header h3 {
+    margin: 0;
+    color: #121826;
+}
+
+.gamificacao-panel-header p,
+.gamificacao-panel-header span {
+    color: #667085;
+    font-size: 0.85rem;
+}
+
+.gamificacao-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.gamificacao-card {
+    border: 1px solid #edf1f7;
+    border-radius: 1rem;
+    padding: 1rem;
+    background: #f8faf7;
+}
+
+.gamificacao-card-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.gamificacao-card h4 {
+    margin: 0;
+    color: #121826;
+}
+
+.gamificacao-card p {
+    margin: 0.35rem 0 0;
+    color: #667085;
+    font-size: 0.82rem;
+}
+
+.gamificacao-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.gamificacao-card-actions button,
+.gamificacao-editor-actions button,
+.btn-sec {
+    border: 0;
+    border-radius: 0.85rem;
+    padding: 0.7rem 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.gamificacao-card-actions button,
+.btn-sec {
+    background: #edf1f7;
+    color: #344054;
+}
+
+.gamificacao-card-actions .danger {
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.gamificacao-card pre {
+    margin: 0;
+    padding: 0.8rem;
+    border-radius: 0.85rem;
+    background: #121826;
+    color: #d7e0ea;
+    font-size: 0.73rem;
+    line-height: 1.5;
+    overflow: auto;
+}
+
+.gamificacao-textarea {
+    width: 100%;
+    min-height: 540px;
+    border: 1px solid #dbe2ea;
+    border-radius: 1rem;
+    padding: 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.gamificacao-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.gamificacao-editor-actions button:last-child {
+    background: #244c4e;
+    color: #fff;
+}
+
+.gamificacao-empty {
+    color: #667085;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1200px) {
+    .gamificacao-grid,
+    .gamificacao-content {
+        grid-template-columns: 1fr;
+    }
+}

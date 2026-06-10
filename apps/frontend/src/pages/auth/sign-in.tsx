@@ -23,7 +23,6 @@ type SignInForm = z.infer<typeof signInForm>;
 export function SignIn() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [cfVerified, setCfVerified] = useState(false);
 
     const {
         register,
@@ -111,7 +110,7 @@ export function SignIn() {
                         Boas vindas a <span className="text-[#9EEA6C]">duodev</span>
                     </h1>
                     <p className="text-sm text-[#204749]">
-                        Entre na sua conta para continuar aprendendo programação de maneira simples e de forma barata.
+                        Entre na sua conta para continuar suas trilhas, manter sua streak e desbloquear novas conquistas.
                     </p>
                 </motion.div>
 
@@ -127,7 +126,7 @@ export function SignIn() {
                             <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                             <Input
                                 id="email"
-                                type="email"
+                                type="text"
                                 placeholder="email@aluno.unifapce.edu.br"
                                 className="pl-10 pr-4 bg-gray-100 border border-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-none"
                                 {...register('email')}
@@ -167,12 +166,16 @@ export function SignIn() {
                         {errors.password && <span className="text-xs text-red-500">{errors.password.message}</span>}
                     </motion.div>
 
+                    <a href="/esqueci-minha-senha" className="text-xs text-[#6ECC30] underline hover:text-[#244C4E] transition-colors">
+                        Esqueceu sua senha?
+                    </a>
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                     >
-                        <Button className="w-full" disabled={isSubmitting || !cfVerified}>
+                        <Button className="w-full" disabled={isSubmitting}>
                             Entrar agora
                         </Button>
                     </motion.div>
@@ -190,7 +193,7 @@ export function SignIn() {
                             Criar conta agora
                         </Link>
                     </motion.div>
-                    <CloudflareCheck onVerified={() => setCfVerified(true)} />
+                    <CloudflareCheck onVerified={() => undefined} />
                 </form>
             </div>
         </div>

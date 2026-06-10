@@ -7,10 +7,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { UserTrailModule } from '../user-trail/user-trail.module';
+import { StreakLogModule } from '../streak-log/streak-log.module';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
     imports: [
         UsersModule,
+        UserTrailModule,
+        StreakLogModule,
+        GamificationModule,
         PassportModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],

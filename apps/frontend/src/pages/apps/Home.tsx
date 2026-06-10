@@ -1,214 +1,193 @@
-import { useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
-import { jwtDecode } from 'jwt-decode'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import Sidebar from '../../components/home/Sidebar'
 import Topbar from '../../components/home/Topbar'
-import TrailCard from '../../components/home/TrailCard'
-import BlogCard from '../../components/home/BlogCard'
-import StreakWidget from '../../components/home/StreakWidget'
-import ProgressWidget from '../../components/home/ProgressWidget'
-import { fetchLearningTrails, fetchMeuProgresso, fetchBlog, fetchStreakStats, fetchStreakLogs } from '../../lib/api'
-import type { LearningTrailSummary } from '../../components/interfaces/interfaces'
+import { fetchMeuPerfil } from '../../lib/api'
+import type { UserProfile } from '../../components/interfaces/interfaces'
 
-/* ── Tipos JWT ── */
-interface JwtPayload {
-  sub: string
-  email: string
-  name?: string
-}
+const pillars = [
+  {
+    title: 'Trilhas práticas',
+    description: 'Conteúdo organizado por tema, nível e objetivo de aprendizado.',
+    badge: 'Catálogo vivo',
+  },
+  {
+    title: 'Progresso visível',
+    description: 'XP, streak, missões e recompensas mostram evolução real.',
+    badge: 'Evolução contínua',
+  },
+  {
+    title: 'Engajamento com propósito',
+    description: 'Gamificação para manter ritmo sem perder foco pedagógico.',
+    badge: 'Motivação saudável',
+  },
+]
 
-/* ── SVG icons ── */
-const iconMap: Record<string, ReactNode> = {
-  Java: (
-    <svg viewBox="0 0 128 128" fill="white" className="w-12 h-12">
-      <path d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zM44.629 84.455s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z"/>
-      <path d="M69.802 61.271c6.025 6.929-1.58 13.166-1.58 13.166s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 0-42.731 10.67-22.324 34.191z"/>
-      <path d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.81 49.821 8.076 90.817-3.637 77.896-9.463zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.678.72-2.678.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0 .001.359-.327.469-.617z"/>
-      <path d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z"/>
-      <path d="M52.214 126.021c22.476 1.437 57-.8 57.817-11.436 0 0-1.571 4.032-18.577 7.231-19.186 3.612-42.854 3.191-56.887.874 0 .001 2.875 2.381 17.647 3.331z"/>
-    </svg>
-  ),
-  Python: (
-    <svg viewBox="0 0 128 128" fill="white" className="w-12 h-12">
-      <path d="M49.33 62h29.159C86.606 62 93 55.522 93 47.33v-27.66C93 11.436 86.387 5.05 77.489 4.022 72.956 3.489 68.313 3 63.5 3c-4.695 0-9.449.516-14.035 1.022C40.453 5.03 35 11.424 35 19.67V32h28v4H23.348C14.057 36 5.95 41.964 3.55 51.225c-2.798 10.61-2.924 17.22 0 28.22C5.64 87.638 11.14 92 20.348 92H27v-13.44C27 68.168 34.603 62 43.33 62h6zm-1.838-39.5c-3.663 0-6.634-2.97-6.634-6.634s2.97-6.633 6.634-6.633 6.633 2.97 6.633 6.633-2.97 6.634-6.633 6.634z"/>
-      <path d="M78.67 66h-29.159C41.394 66 35 72.478 35 80.67v27.66C35 116.564 41.613 122.95 50.511 123.978c4.533.533 9.176 1.022 13.989 1.022 4.695 0 9.449-.516 14.035-1.022 9.001-1.008 14.453-7.402 14.453-15.648V104H77v-4h36.652C122.943 100 131.05 94.036 133.45 84.775c2.798-10.61 2.924-17.22 0-28.22C131.36 48.362 125.86 44 116.652 44H110v13.44c0 10.392-7.603 16.56-16.33 16.56H78.67zm1.838 39.5c3.663 0 6.634 2.97 6.634 6.634s-2.97 6.633-6.634 6.633-6.633-2.97-6.633-6.633 2.97-6.634 6.633-6.634z"/>
-    </svg>
-  ),
-  Docker: (
-    <svg viewBox="0 0 128 128" fill="white" className="w-12 h-12">
-      <path d="M124.8 52.1c-4.3-2.5-10-2.8-14.8-1.4-.6-5.2-4-9.7-8-12.9l-1.6-1.3-1.4 1.6c-2.7 3.1-3.5 8.3-3.1 12.3.3 2.9 1.2 5.9 3 8.3-1.4.8-2.9 2-4.3 2.5-2.8 1-5.9 2-8.9 2H3.9l-.3 1.6c-1 6.3-.8 16.4 5 23.9 4.5 5.8 11.2 8.7 20 8.7 19 0 33.1-8.8 39.7-24.7 2.6.1 5.2 0 7.5-.9 4.3-1.5 6.8-4.5 8.7-8.5h.6c3.9 0 12.4 0 16.7-8.3l.8-1.6-1.8-1.3z"/>
-      <path d="M10.1 55.5H21v10.1H10.1zm12.4 0h10.9v10.1H22.5zm12.4 0h10.9v10.1H34.9zm12.5 0h10.9v10.1H47.4zm-24.9-12h10.9v10.1H22.5zm12.4 0h10.9v10.1H34.9zm12.5 0h10.9v10.1H47.4zm12.4 0h10.9v10.1H59.8zm0 12h10.9v10.1H59.8z"/>
-    </svg>
-  ),
-}
-
-const blogThumbMap: Record<string, string> = {
-  Segurança: 'bg-gradient-to-br from-green-600 to-green-400',
-  'Back-end': 'bg-gradient-to-br from-green-500 to-emerald-400',
-  Mobile:    'bg-gradient-to-br from-emerald-500 to-green-300',
-}
-
-/* ── Tipos da API ── */
-interface UserTrailAPI {
-  trail: {
-    id: string
-    nome: string
-    nivel: string
-    duracao?: string
-    totalHoras: number
-    ano: number
-  }
-  progressoPct: number
-}
-
-interface BlogAPI {
-  id: string
-  tag: string
-  titulo: string
-  descricao: string
-  autor: { name: string }
-}
-
-interface StreakStats {
-  sequenciaAtual: number
-  melhorSequencia: number
-}
-
-interface StreakLog {
-  dataRegistro: string
-  concluido: boolean
-}
+const steps = [
+  'Escolha uma categoria e entre em uma trilha.',
+  'Conclua aulas, desafios e quizzes para acumular XP.',
+  'Mantenha sua streak, resgate missões e suba no ranking.',
+]
 
 export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
-  const [userName, setUserName]       = useState<string>('Usuário')
-  const [publishedTrails, setPublishedTrails] = useState<LearningTrailSummary[]>([])
-  const [progressTrails, setProgressTrails]   = useState<UserTrailAPI[]>([])
-  const [blogs, setBlogs]             = useState<BlogAPI[]>([])
-  const [streakStats, setStreakStats] = useState<StreakStats>({ sequenciaAtual: 0, melhorSequencia: 0 })
-  const [streakLogs, setStreakLogs]   = useState<StreakLog[]>([])
-  const [loading, setLoading]         = useState<boolean>(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Pega o nome do usuário do JWT
-    const token = localStorage.getItem('access_token')
-    if (token) {
+    async function load() {
       try {
-        const decoded = jwtDecode<JwtPayload>(token)
-        if (decoded.name) setUserName(decoded.name)
-      } catch {}
-    }
-
-    // Busca todos os dados da API
-    async function loadData() {
-      try {
-        const [learningTrails, progresso, blog, stats, logs] = await Promise.all([
-          fetchLearningTrails(),
-          fetchMeuProgresso(),
-          fetchBlog(),
-          fetchStreakStats(),
-          fetchStreakLogs(),
-        ])
-        setPublishedTrails(learningTrails)
-        setProgressTrails(progresso)
-        setBlogs(blog)
-        setStreakStats(stats)
-        setStreakLogs(logs)
-      } catch (err) {
-        console.error('Erro ao carregar dados da home:', err)
+        const data = await fetchMeuPerfil()
+        setProfile(data)
+      } catch (error) {
+        console.error('Erro ao carregar home:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    loadData()
+    void load()
   }, [])
 
+  const xp = profile?.gamification?.xp ?? profile?.xp ?? 0
+  const level = profile?.gamification?.level ?? 1
+  const title = profile?.gamification?.title ?? 'Aprendiz'
+  const streak = profile?.streakCurrent ?? 0
+  const equipped = profile?.gamification?.equippedCosmetics
+  const themeLabel = equipped?.theme?.label ?? null
+  const frameLabel = equipped?.frame?.label ?? null
+
   return (
-    <div className="min-h-screen bg-[#f5f5f0] font-dm">
+    <div
+      className="min-h-screen font-dm"
+      style={{
+        background:
+          themeLabel === 'Tema: Floresta Duo'
+            ? 'linear-gradient(180deg, #f4fbea 0%, #f5f5f0 36%, #fafcf7 100%)'
+            : '#f5f5f0',
+      }}
+    >
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex flex-col min-h-screen lg:ml-64">
         <Topbar onMenuToggle={() => setSidebarOpen(true)} />
 
         <main className="flex-1 p-5 lg:p-8 xl:p-10">
-          <div className="max-w-[1440px] mx-auto">
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-8">
+          <div className="mx-auto max-w-6xl space-y-8">
+            <section className="overflow-hidden rounded-[2rem] border border-gray-100 bg-[linear-gradient(135deg,#ffffff_0%,#f8fbf2_100%)] p-8 shadow-sm">
+              <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_360px] lg:items-center">
+                <div>
+                  <p className="mb-4 inline-flex rounded-full bg-green-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-green-600">
+                    Plataforma de aprendizado gamificada
+                  </p>
+                  <h1 className="font-syne text-4xl font-semibold leading-tight text-gray-900 lg:text-5xl">
+                    Aprenda por trilhas, evolua com constância e veja seu progresso acontecer.
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-base leading-relaxed text-gray-500">
+                    O DuoDev combina trilhas, quizzes, desafios, missões e ranking para transformar o estudo em
+                    uma jornada clara. A home mostra o que a plataforma faz. As trilhas ficam em categorias.
+                  </p>
 
-              {/* Coluna esquerda */}
-              <div className="flex flex-col gap-8">
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Link
+                      to="/trilhas"
+                      className="rounded-full bg-green-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-400"
+                    >
+                      Explorar trilhas
+                    </Link>
+                    <Link
+                      to="/ranking"
+                      className="rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+                    >
+                      Ver ranking
+                    </Link>
+                  </div>
+                </div>
 
-                <h1 className="font-syne text-3xl lg:text-4xl font-semibold text-gray-900">
-                  Olá {userName}, pronto para aprender? 👋
-                </h1>
-
-                {/* Trilhas */}
-                <section>
-                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">
-                    Trilhas disponíveis
-                  </h2>
-                  <p className="text-base text-gray-400 mb-5">Conteúdo publicado pelo admin e pronto para começar</p>
-                  {loading ? (
-                    <p className="text-base text-gray-400">Carregando trilhas...</p>
-                  ) : publishedTrails.length === 0 ? (
-                    <p className="text-base text-gray-400">Nenhuma trilha publicada ainda.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {publishedTrails.map((trail) => (
-                        <TrailCard
-                          key={trail.id}
-                          id={trail.id}
-                          name={trail.name}
-                          level={trail.level}
-                          duration={trail.duration ?? `Conclusão em ${trail.totalHours ?? 0}H`}
-                          meta={`${trail.contentCounts.lessons} aulas · ${trail.contentCounts.questions} questões · ${trail.contentCounts.challenges} desafios`}
-                          thumbColor={trail.thumbColor}
-                          icon={iconMap[trail.name] ?? null}
-                        />
-                      ))}
+                <div className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-gray-100">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Seu resumo</p>
+                  {(themeLabel || frameLabel) && (
+                    <div className="mt-3 rounded-2xl bg-[#f8fbf4] p-3 text-xs text-gray-600">
+                      {frameLabel && (
+                        <p>
+                          <span className="font-medium text-gray-800">Moldura:</span> {frameLabel}
+                        </p>
+                      )}
+                      {themeLabel && (
+                        <p className="mt-1">
+                          <span className="font-medium text-gray-800">Tema:</span> {themeLabel}
+                        </p>
+                      )}
                     </div>
                   )}
-                </section>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <StatCard label="XP" value={`${xp}`} />
+                    <StatCard label="Nível" value={`${level}`} />
+                    <StatCard label="Streak" value={`${streak} dias`} />
+                    <StatCard label="Título" value={title} />
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-gray-500">
+                    {loading
+                      ? 'Carregando seu resumo...'
+                      : 'Seu perfil já acompanha progresso, streak, recompensas e missões dentro da plataforma.'}
+                  </p>
+                </div>
+              </div>
+            </section>
 
-                {/* Blog */}
-                <section>
-                  <h2 className="font-syne text-2xl font-semibold text-green-400 mb-1">Blog</h2>
-                  <p className="text-base text-gray-400 mb-5">Dicas sobre programação, segurança e muito mais</p>
-                  {loading ? (
-                    <p className="text-base text-gray-400">Carregando posts...</p>
-                  ) : blogs.length === 0 ? (
-                    <p className="text-base text-gray-400">Nenhum post publicado ainda.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {blogs.map((b) => (
-                        <BlogCard
-                          key={b.id}
-                          tag={b.tag}
-                          title={b.titulo}
-                          description={b.descricao}
-                          author={`Por ${b.autor?.name ?? 'Autor desconhecido'}`}
-                          thumbClass={blogThumbMap[b.tag] ?? 'bg-gradient-to-br from-gray-500 to-gray-400'}
-                        />
-                      ))}
+            <section className="grid gap-4 md:grid-cols-3">
+              {pillars.map((pillar) => (
+                <article key={pillar.title} className="rounded-[1.75rem] border border-gray-100 bg-white p-6 shadow-sm">
+                  <p className="inline-flex rounded-full bg-[#f8f8f3] px-3 py-1 text-[11px] font-medium text-gray-500">
+                    {pillar.badge}
+                  </p>
+                  <h2 className="mt-4 font-syne text-2xl font-semibold text-gray-900">{pillar.title}</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-gray-500">{pillar.description}</p>
+                </article>
+              ))}
+            </section>
+
+            <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+              <article className="rounded-[1.75rem] border border-gray-100 bg-white p-6 shadow-sm">
+                <h2 className="font-syne text-2xl font-semibold text-gray-900">Como funciona</h2>
+                <div className="mt-5 grid gap-4">
+                  {steps.map((step, index) => (
+                    <div key={step} className="flex items-start gap-4 rounded-2xl bg-[#f8f8f3] p-4">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500 text-sm font-semibold text-white">
+                        {index + 1}
+                      </div>
+                      <p className="text-sm leading-relaxed text-gray-600">{step}</p>
                     </div>
-                  )}
-                </section>
-              </div>
+                  ))}
+                </div>
+              </article>
 
-              {/* Coluna direita */}
-              <div className="flex flex-col gap-4">
-                <StreakWidget
-                  sequenciaAtual={streakStats.sequenciaAtual}
-                  melhorSequencia={streakStats.melhorSequencia}
-                  logs={streakLogs}
-                />
-                <ProgressWidget trails={progressTrails} />
-              </div>
-
-            </div>
+              <article className="rounded-[1.75rem] border border-gray-100 bg-white p-6 shadow-sm">
+                <h2 className="font-syne text-2xl font-semibold text-gray-900">O que você encontra</h2>
+                <ul className="mt-5 space-y-3 text-sm leading-relaxed text-gray-600">
+                  <li>• Catálogo de trilhas por categoria e nível.</li>
+                  <li>• Aulas, desafios e quizzes integrados ao progresso.</li>
+                  <li>• Missões diárias e semanais com recompensa.</li>
+                  <li>• Ranking semanal e histórico de temporadas.</li>
+                  <li>• Streak, proteção de sequência e notificações internas.</li>
+                </ul>
+                <div className="mt-6 rounded-2xl bg-green-50 p-4 text-sm text-green-700">
+                  Use a área de categorias para escolher sua próxima trilha. A home existe para orientar.
+                </div>
+              </article>
+            </section>
           </div>
         </main>
       </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-[#f8f8f3] p-4">
+      <p className="text-xs uppercase tracking-[0.18em] text-gray-400">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-gray-900">{value}</p>
     </div>
   )
 }

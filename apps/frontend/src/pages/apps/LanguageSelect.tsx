@@ -68,6 +68,13 @@ export function LanguageSelect() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-3 font-sans">
       <div className="w-full max-w-2xl flex flex-col items-center">
+        <div className="mb-6 w-full rounded-3xl border border-[#E7F2E1] bg-[#F7FBF4] px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6ECC30]">Jornada inicial 1/3</p>
+          <p className="mt-2 text-sm text-[#3D5A5C]">
+            Primeiro passo: escolha o caminho que quer seguir para liberar sua primeira missão.
+          </p>
+        </div>
+
         <h1 className="text-2xl md:text-3xl font-medium text-[#3D5A5C] mb-8 md:mb-10 text-center">
           Quero aprender
         </h1>
