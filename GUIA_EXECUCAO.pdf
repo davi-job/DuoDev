@@ -1,0 +1,597 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 1878 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+(GUIA DE EXECUCAO DO DUODEV) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Este documento explica o processo completo para executar o DuoDev em ambiente local, preparar a) Tj
+0 -14 Td
+(base de demo e validar os principais fluxos da plataforma.) Tj
+0 -14 Td
+0 -14 Td
+(1. Visao geral) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(O DuoDev e um monorepo com:) Tj
+0 -14 Td
+0 -14 Td
+(? `apps/frontend`: aplicacao principal do aluno.) Tj
+0 -14 Td
+(? `apps/backend`: API principal do aluno.) Tj
+0 -14 Td
+(? `apps/admin/admin-front`: interface administrativa.) Tj
+0 -14 Td
+(? `apps/admin/admin-back`: API administrativa.) Tj
+0 -14 Td
+(? `packages/db`: schema compartilhado, cliente Drizzle e migracoes.) Tj
+0 -14 Td
+(? `docker-compose.yaml`: orquestracao dos servicos locais.) Tj
+0 -14 Td
+0 -14 Td
+(O fluxo normal de uso e:) Tj
+0 -14 Td
+0 -14 Td
+(1. instalar dependencias) Tj
+0 -14 Td
+(2. subir os containers) Tj
+0 -14 Td
+(3. aplicar seed da demo) Tj
+0 -14 Td
+(4. acessar os aplicativos) Tj
+0 -14 Td
+0 -14 Td
+(2. Requisitos) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Antes de rodar o projeto, tenha instalado:) Tj
+0 -14 Td
+0 -14 Td
+(? `Node.js` 20 ou superior) Tj
+0 -14 Td
+(? `npm`) Tj
+0 -14 Td
+(? `Docker`) Tj
+0 -14 Td
+(? `Docker Compose`) Tj
+0 -14 Td
+0 -14 Td
+(Se voce for trabalhar fora do Docker, tambem precisa de um banco PostgreSQL acessivel via) Tj
+0 -14 Td
+(`DATABASE_URL`.) Tj
+0 -14 Td
+0 -14 Td
+(3. Arquivos de ambiente) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(O projeto usa variaveis de ambiente na raiz e em alguns apps.) Tj
+0 -14 Td
+0 -14 Td
+(Raiz) Tj
+0 -14 Td
+0 -14 Td
+(O arquivo `.env` da raiz e lido pelos scripts de setup e pelos servicos em Docker.) Tj
+0 -14 Td
+0 -14 Td
+(Apps) Tj
+0 -14 Td
+0 -14 Td
+(? `apps/frontend/.env`) Tj
+0 -14 Td
+(? `apps/backend/.env`) Tj
+0 -14 Td
+(? `apps/admin/admin-back/.env`) Tj
+0 -14 Td
+(? `apps/admin/admin-front/.env` quando necessario) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 1421 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+0 -14 Td
+(Se algum deles nao existir, copie a estrutura esperada do projeto e ajuste as URLs locais.) Tj
+0 -14 Td
+0 -14 Td
+(Variaveis mais importantes:) Tj
+0 -14 Td
+0 -14 Td
+(? `DATABASE_URL`) Tj
+0 -14 Td
+(? `JWT_SECRET`) Tj
+0 -14 Td
+(? `FRONTEND_URL`) Tj
+0 -14 Td
+(? `ADMIN_BACK_URL`) Tj
+0 -14 Td
+(? `VITE_API_URL`) Tj
+0 -14 Td
+0 -14 Td
+(4. Instalar dependencias) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Na raiz do projeto:) Tj
+0 -14 Td
+0 -14 Td
+(npm install) Tj
+0 -14 Td
+0 -14 Td
+(Isso instala as dependencias de todos os workspaces.) Tj
+0 -14 Td
+0 -14 Td
+(5. Subir o ambiente) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Opcao recomendada) Tj
+0 -14 Td
+0 -14 Td
+(npm run dev) Tj
+0 -14 Td
+0 -14 Td
+(Esse comando sobe os containers definidos no `docker-compose.yaml`.) Tj
+0 -14 Td
+0 -14 Td
+(Alternativa com rebuild) Tj
+0 -14 Td
+0 -14 Td
+(Se voce alterou Dockerfile, dependencias ou quiser forcar rebuild:) Tj
+0 -14 Td
+0 -14 Td
+(npm run dev:build) Tj
+0 -14 Td
+0 -14 Td
+(Parar o ambiente) Tj
+0 -14 Td
+0 -14 Td
+(npm run dev:down) Tj
+0 -14 Td
+0 -14 Td
+(Se quiser remover volumes:) Tj
+0 -14 Td
+0 -14 Td
+(npm run dev:down:v) Tj
+0 -14 Td
+0 -14 Td
+(6. Preparar a demo) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Depois que os containers estiverem ativos, rode:) Tj
+0 -14 Td
+0 -14 Td
+(npm run setup:demo) Tj
+0 -14 Td
+0 -14 Td
+(Esse comando faz, nesta ordem:) Tj
+0 -14 Td
+0 -14 Td
+(1. sobe `postgres` e `admin-back`) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 1746 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+(2. executa o seed da demo no `admin-back`) Tj
+0 -14 Td
+(3. autentica no `admin-back`) Tj
+0 -14 Td
+(4. executa o bootstrap de gamificacao) Tj
+0 -14 Td
+(5. popula os loadouts cosméticos da demo) Tj
+0 -14 Td
+0 -14 Td
+(Esse passo e essencial para deixar o sistema pronto para apresentacao.) Tj
+0 -14 Td
+0 -14 Td
+(7. URLs locais) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Depois de subir o ambiente, acesse:) Tj
+0 -14 Td
+0 -14 Td
+(? Frontend do aluno: `http://localhost:8020`) Tj
+0 -14 Td
+(? Backend do aluno: `http://localhost:8010`) Tj
+0 -14 Td
+(? Admin front: `http://localhost:8021`) Tj
+0 -14 Td
+(? Admin back: `http://localhost:8011`) Tj
+0 -14 Td
+(? PostgreSQL: `localhost:8030`) Tj
+0 -14 Td
+0 -14 Td
+(8. Sequencia completa recomendada) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Se voce quiser subir tudo do zero, siga esta ordem:) Tj
+0 -14 Td
+0 -14 Td
+(npm install) Tj
+0 -14 Td
+(npm run dev) Tj
+0 -14 Td
+(npm run setup:demo) Tj
+0 -14 Td
+0 -14 Td
+(Depois:) Tj
+0 -14 Td
+0 -14 Td
+(1. abra o frontend em `http://localhost:8020`) Tj
+0 -14 Td
+(2. faca login com uma conta da demo) Tj
+0 -14 Td
+(3. valide trilhas, ranking, perfil e cosméticos) Tj
+0 -14 Td
+(4. abra o admin se quiser ajustar conteudo e gamificacao) Tj
+0 -14 Td
+0 -14 Td
+(9. Contas da demo) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Admin) Tj
+0 -14 Td
+0 -14 Td
+(? `Douglas Martins`) Tj
+0 -14 Td
+(  - email: `admin@duodev.com`) Tj
+0 -14 Td
+(  - senha: `admin123`) Tj
+0 -14 Td
+0 -14 Td
+(Usuario base) Tj
+0 -14 Td
+0 -14 Td
+(? `Lucas Almeida`) Tj
+0 -14 Td
+(  - email: `aluno@duodev.com`) Tj
+0 -14 Td
+(  - senha: `aluno123`) Tj
+0 -14 Td
+0 -14 Td
+(Usuario completo para demonstracao) Tj
+0 -14 Td
+0 -14 Td
+(? `Douglas Ratts`) Tj
+0 -14 Td
+(  - email: `douglas.ratts@duodev.com`) Tj
+0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 1840 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+(  - senha: `ratts123!`) Tj
+0 -14 Td
+0 -14 Td
+(Usuarios limpos) Tj
+0 -14 Td
+0 -14 Td
+(? `Mariana Costa`) Tj
+0 -14 Td
+(  - email: `visitante1@duodev.com`) Tj
+0 -14 Td
+(  - senha: `demo123!`) Tj
+0 -14 Td
+(? `Rafael Santos`) Tj
+0 -14 Td
+(  - email: `visitante2@duodev.com`) Tj
+0 -14 Td
+(  - senha: `demo123!`) Tj
+0 -14 Td
+(? `Juliana Lima`) Tj
+0 -14 Td
+(  - email: `visitante3@duodev.com`) Tj
+0 -14 Td
+(  - senha: `demo123!`) Tj
+0 -14 Td
+(? `Pedro Rocha`) Tj
+0 -14 Td
+(  - email: `visitante4@duodev.com`) Tj
+0 -14 Td
+(  - senha: `demo123!`) Tj
+0 -14 Td
+0 -14 Td
+(Usuarios ativos) Tj
+0 -14 Td
+0 -14 Td
+(? `Camila Ferreira`) Tj
+0 -14 Td
+(  - email: `vivo01@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Bruno Oliveira`) Tj
+0 -14 Td
+(  - email: `vivo02@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Fernanda Alves`) Tj
+0 -14 Td
+(  - email: `vivo03@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Thiago Pereira`) Tj
+0 -14 Td
+(  - email: `vivo04@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Aline Barbosa`) Tj
+0 -14 Td
+(  - email: `vivo05@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Gustavo Martins`) Tj
+0 -14 Td
+(  - email: `vivo06@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Patricia Gomes`) Tj
+0 -14 Td
+(  - email: `vivo07@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Marcos Vinicius`) Tj
+0 -14 Td
+(  - email: `vivo08@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Larissa Souza`) Tj
+0 -14 Td
+(  - email: `vivo09@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+(? `Daniel Moreira`) Tj
+0 -14 Td
+(  - email: `vivo10@duodev.com`) Tj
+0 -14 Td
+(  - senha: `live123!`) Tj
+0 -14 Td
+0 -14 Td
+(10. O que a demo inclui) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 1629 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+(Conteudo) Tj
+0 -14 Td
+0 -14 Td
+(? categorias) Tj
+0 -14 Td
+(? trilhas) Tj
+0 -14 Td
+(? aulas com texto e imagem) Tj
+0 -14 Td
+(? questoes com alternativas) Tj
+0 -14 Td
+(? desafios) Tj
+0 -14 Td
+(? blog) Tj
+0 -14 Td
+0 -14 Td
+(Gamificacao) Tj
+0 -14 Td
+0 -14 Td
+(? XP) Tj
+0 -14 Td
+(? nivel) Tj
+0 -14 Td
+(? streak) Tj
+0 -14 Td
+(? streak freeze) Tj
+0 -14 Td
+(? badges) Tj
+0 -14 Td
+(? cosméticos) Tj
+0 -14 Td
+(? missões diarias e semanais) Tj
+0 -14 Td
+(? ranking semanal) Tj
+0 -14 Td
+(? temporadas) Tj
+0 -14 Td
+(? historico de recompensas) Tj
+0 -14 Td
+(? notificacoes internas) Tj
+0 -14 Td
+0 -14 Td
+(Admin) Tj
+0 -14 Td
+0 -14 Td
+(? bootstrap de gamificacao) Tj
+0 -14 Td
+(? CRUD de configuracoes) Tj
+0 -14 Td
+(? CRUD de badges) Tj
+0 -14 Td
+(? CRUD de cosméticos) Tj
+0 -14 Td
+(? CRUD de missoes) Tj
+0 -14 Td
+(? temporadas de ranking) Tj
+0 -14 Td
+(? faixas de recompensa) Tj
+0 -14 Td
+(? regras adaptativas) Tj
+0 -14 Td
+0 -14 Td
+(11. Validação) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(Se quiser conferir se os tipos estao corretos, rode:) Tj
+0 -14 Td
+0 -14 Td
+(npx tsc -p apps/backend/tsconfig.json --noEmit --incremental false) Tj
+0 -14 Td
+(npx tsc -p apps/frontend/tsconfig.json --noEmit --incremental false) Tj
+0 -14 Td
+(npx tsc -p apps/admin/admin-back/tsconfig.json --noEmit --incremental false) Tj
+0 -14 Td
+0 -14 Td
+(12. Problemas comuns) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(O login nao funciona) Tj
+0 -14 Td
+0 -14 Td
+(Verifique se:) Tj
+0 -14 Td
+0 -14 Td
+(? `npm run dev` esta rodando) Tj
+0 -14 Td
+(? o `setup:demo` foi executado) Tj
+0 -14 Td
+(? as variaveis de ambiente apontam para os hosts corretos) Tj
+0 -14 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 1033 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 48 793.89 Tm
+(? o banco esta saudavel no Docker) Tj
+0 -14 Td
+0 -14 Td
+(O ranking ou as recompensas estao vazios) Tj
+0 -14 Td
+0 -14 Td
+(Rode novamente:) Tj
+0 -14 Td
+0 -14 Td
+(npm run setup:demo) Tj
+0 -14 Td
+0 -14 Td
+(O banco parece desatualizado) Tj
+0 -14 Td
+0 -14 Td
+(Suba apenas o PostgreSQL e refaça a demo:) Tj
+0 -14 Td
+0 -14 Td
+(docker compose up -d postgres) Tj
+0 -14 Td
+(npm run setup:demo) Tj
+0 -14 Td
+0 -14 Td
+(O build reclama de permissao) Tj
+0 -14 Td
+0 -14 Td
+(Rode o ambiente via Docker e valide com `tsc`. Em alguns ambientes o build completo pode falhar) Tj
+0 -14 Td
+(por permissao de escrita em `dist/`.) Tj
+0 -14 Td
+0 -14 Td
+(13. Ordem resumida para apresentar o sistema) Tj
+0 -14 Td
+0 -14 Td
+0 -14 Td
+(1. `npm install`) Tj
+0 -14 Td
+(2. `npm run dev`) Tj
+0 -14 Td
+(3. `npm run setup:demo`) Tj
+0 -14 Td
+(4. acessar `http://localhost:8020`) Tj
+0 -14 Td
+(5. logar com `douglas.ratts@duodev.com / ratts123!`) Tj
+0 -14 Td
+(6. mostrar home, trilhas, ranking, perfil e cosméticos) Tj
+0 -14 Td
+0 -14 Td
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000148 00000 n 
+0000000245 00000 n 
+0000002175 00000 n 
+0000002307 00000 n 
+0000003780 00000 n 
+0000003912 00000 n 
+0000005710 00000 n 
+0000005842 00000 n 
+0000007735 00000 n 
+0000007869 00000 n 
+0000009551 00000 n 
+0000009685 00000 n 
+0000010771 00000 n 
+trailer
+<< /Size 16 /Root 1 0 R >>
+startxref
+10905
+%%EOF
